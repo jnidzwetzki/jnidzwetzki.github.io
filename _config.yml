@@ -1,18 +1,17 @@
 # SITE CONFIGURATION
-baseurl: "/Type-on-Strap"
-url: "https://sylhare.github.io"
+baseurl: "/"
+url: "https://jnidzwetzki.github.io"
 
 # THEME-SPECIFIC CONFIGURATION
-title: Type on Strap                                    # site's title
-description: "A website with blog posts and pages"      # used by search engines
+title: Jan's big data blog                              # site's title
+description: "A website with the focus on big data and distributed systems"      # used by search engines
 avatar: assets/img/triangle.png                         # Empty for no avatar in navbar
 favicon: assets/favicon.ico                             # Icon displayed in the tab
 
 # Header and footer text
 header_text: Change <code>header_text</code> in <code>_config.yml</code>  # Change Blog header text
 header_feature_image: assets/img/pexels/triangular.jpeg
-footer_text: >
-  Powered by <a href="https://jekyllrb.com/">Jekyll</a> with <a href="https://github.com/sylhare/Type-on-Strap">Type on Strap</a>
+footer_text: 
 
 # Blog
 excerpt: true                                           # Or "truncate" (first 250 characters), "false" to disable
@@ -25,7 +24,7 @@ color_image: /assets/img/lineart.png                    # A bit transparent for 
 katex: true                                             # Enable if using math markup
 mermaid: true                                           # Enable mermaid-js for sequence and diagrams
 google_analytics:                                       # Tracking ID, e.g. "UA-000000-01"
-cookie_consent: false                                   # To respect the usage of cookies
+cookie_consent: true                                    # To respect the usage of cookies
 color_theme: auto                                       # auto, dark or light
 
 # Comments
