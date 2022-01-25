@@ -5,12 +5,12 @@ feed:
 
 # For the share button options at the bottom of the articles
 share:
-  email: true
+  email: false
   facebook: true
   linkedin: true
-  pinterest: true
+  pinterest: false
   pocket:
   reddit: true
-  tumblr: true
+  tumblr: false 
   twitter: true
   wordpress:
