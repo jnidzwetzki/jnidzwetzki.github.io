@@ -14,6 +14,12 @@ export PATH=$PATH:~/.gem/ruby/2.5.0/bin
 
 bundle exec jekyll serve
 bundle exec jekyll serve --host=0.0.0.0
+
+# Update remote
+git remote add template https://github.com/sylhare/Type-on-Strap
+git fetch --all
+git merge template/master
+
 ```
 
 
