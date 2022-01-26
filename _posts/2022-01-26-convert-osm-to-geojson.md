@@ -7,7 +7,7 @@ author: jan
 excerpt_separator: <!--more-->
 ---
 
-The [OpenStreepMap project](https://www.openstreetmap.org/) provides their database for download. This is called the _OSM planet_ [dataset](https://wiki.openstreetmap.org/wiki/Planet.osm). The dataset has a size of several gigabytes and contains the spatial data (e.g., roads, forests, buildings) of the whole world. The dataset is encoded in different data formats (e.g., _XML_ or _OpenStreetMap Protocolbuffer Binary Format_). To be able to import the dataset into systems that are capable of handling spatial data, the data needs to be converted into GeoJSON.
+The [OpenStreepMap project](https://www.openstreetmap.org/) provides their database for download. This is called the _OSM planet_ [dataset](https://wiki.openstreetmap.org/wiki/Planet.osm), which has a size of several gigabytes and contains the spatial data (e.g., roads, forests, buildings) of the whole world. The dataset is encoded in different data formats (e.g., _XML_ or _OpenStreetMap Protocolbuffer Binary Format_). To be able to import the dataset into systems that are capable of handling spatial data, the data needs to be converted into GeoJSON.
 
 <!--more-->
 
