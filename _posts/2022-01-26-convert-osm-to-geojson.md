@@ -7,7 +7,7 @@ author: jan
 excerpt_separator: <!--more-->
 ---
 
-The [OpenStreepMap project](https://www.openstreetmap.org/) provides their database for download. This is called the _OSM planet_ [dataset](https://wiki.openstreetmap.org/wiki/Planet.osm). The dataset has a size of several gigabytes and contains the spatial data (e.g., roads, forests, buildings) of the whole world. The dataset is encoded  in different data formats (e.g., _XML_ or _OpenStreetMap Protocolbuffer Binary Format_). To be able to import the dataset into systems that are capable of handling spatial data, the data needs to be converted into GeoJSON.
+The [OpenStreepMap project](https://www.openstreetmap.org/) provides their database for download. This is called the _OSM planet_ [dataset](https://wiki.openstreetmap.org/wiki/Planet.osm). The dataset has a size of several gigabytes and contains the spatial data (e.g., roads, forests, buildings) of the whole world. The dataset is encoded in different data formats (e.g., _XML_ or _OpenStreetMap Protocolbuffer Binary Format_). To be able to import the dataset into systems that are capable of handling spatial data, the data needs to be converted into GeoJSON.
 
 <!--more-->
 
@@ -23,7 +23,7 @@ The [OpenStreetMap PBF format](https://wiki.openstreetmap.org/wiki/PBF_Format) u
 
 ## GeoJSON
 
-In contrast to the `.osm.pdf` data format, GeoJSON elements consits of the complete geometry of the entity and additional properties. For example, a point (e.g., a tree) looks as follows in GeoJSON:
+In contrast to the `.osm.pdf` data format, GeoJSON elements consists of the complete geometry of the entity and additional properties. For example, a point (e.g., a tree) looks as follows in GeoJSON:
 
 ```json
 {
@@ -39,7 +39,7 @@ In contrast to the `.osm.pdf` data format, GeoJSON elements consits of the compl
 }
 ```
 
-A more complex object (e.g., a road) looks as follows in GeoJSON (the `[...]` value replaces some of the coodinates to shorten the example):
+A more complex object (e.g., a road) looks as follows in GeoJSON (the `[...]` value replaces some of the coordinates to shorten the example):
 
 ```json
 {
@@ -102,7 +102,7 @@ The data converter can be started by executing the command `./bin/osm_data_conve
 `-output`     | String | The name of the output folder. |
 `-workfolder` | String | The name of the folder where the node database will be created. Multiple node databases could be used by specifying multiple folders, separated by `:`.|
 
-Now, the dataset can be downloaded and converted
+Now, the dataset can be downloaded and converted.
 
 ```shell
 wget https://ftp5.gwdg.de/pub/misc/openstreetmap/planet.openstreetmap.org/pbf/planet-latest.osm.pbf -O ~/planet-latest.osm.pbf
