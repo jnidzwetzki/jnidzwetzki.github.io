@@ -21,11 +21,15 @@ E-Mail: jnidzwetzki@gmx.de
 
 Verantwortlich für den Inhalt nach § 55 Abs. 2 RStV:
 
+```
 Jan Kristof Nidzwetzki
 Erich-Weinert-Straße 135
 10409 Berlin
 
-Quelle: https://www.erecht24.de/impressum-generator.html
+Telefon: 030-25042821
+E-Mail: jnidzwetzki@gmx.de
+```
+Quelle: [https://www.erecht24.de/impressum-generator.html](https://www.erecht24.de/impressum-generator.html)
 
 
 
