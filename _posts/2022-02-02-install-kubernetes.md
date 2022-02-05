@@ -16,30 +16,32 @@ In this section, five virtual systems are installed using KVM. This is useful, f
 # Setup Virtual Servers by using KVM
 In this tutorial, five nodes are used. One node is used as the control-panel node and four nodes are used as worker nodes. The control-panel node executes all needed services to run the Kubernetes cluster. The worker nodes are used to run the workload. The number o nodes can be changed to any number. However, at least two nodes are required (1x control-panel and 1x worker).
 
-Before you begin with the installation of the systems, please setup appropriate DNS entries. In this example, the names `debian10-k8s-vm1.example.org` - `debian10-k8s-vm5.example.org` are used. 
+Before you begin with the installation of the systems, please setup appropriate DNS entries. In this example, the names `debian11-k8s-vm1.example.org` - `debian11-k8s-vm5.example.org` are used. 
 
 The first step is to create the images for the virtual servers. This can be done by using the `virt-builder` command. The command also stores an SSH key for the later passwordless login. Debian 10 is used in this example, any other distribution which is [supported](https://kubernetes.io/docs/tasks/tools/install-kubectl-linux/) by kubeadm can be used. This tutorial is based on Debian 10. For other distributions, some adjustments may be required.
 
 
 ```shell
 # Pepare the images
-$ virt-builder debian-10 --cache /var/lib/libvirt/images/cache --size=20G --format qcow2 -o /var/lib/libvirt/images/debian10-k8s-vm1.qcow2 --hostname debian10-k8s-vm1 --network --timezone Europe/Berlin --firstboot-command "dpkg-reconfigure openssh-server" --edit '/etc/network/interfaces: s/ens2/enp1s0/' --ssh-inject root:file:/home/jan/.ssh/id_jan.pub --root-password password:sOFIJ8lx97CuecM
-$ virt-builder debian-10 --cache /var/lib/libvirt/images/cache --size=20G --format qcow2 -o /var/lib/libvirt/images/debian10-k8s-vm2.qcow2 --hostname debian10-k8s-vm2 --network --timezone Europe/Berlin --firstboot-command "dpkg-reconfigure openssh-server" --edit '/etc/network/interfaces: s/ens2/enp1s0/' --ssh-inject root:file:/home/jan/.ssh/id_jan.pub --root-password password:sOFIJ8lx97CuecM
-$ virt-builder debian-10 --cache /var/lib/libvirt/images/cache --size=20G --format qcow2 -o /var/lib/libvirt/images/debian10-k8s-vm3.qcow2 --hostname debian10-k8s-vm3 --network --timezone Europe/Berlin --firstboot-command "dpkg-reconfigure openssh-server" --edit '/etc/network/interfaces: s/ens2/enp1s0/' --ssh-inject root:file:/home/jan/.ssh/id_jan.pub --root-password password:sOFIJ8lx97CuecM
-$ virt-builder debian-10 --cache /var/lib/libvirt/images/cache --size=20G --format qcow2 -o /var/lib/libvirt/images/debian10-k8s-vm4.qcow2 --hostname debian10-k8s-vm4 --network --timezone Europe/Berlin --firstboot-command "dpkg-reconfigure openssh-server" --edit '/etc/network/interfaces: s/ens2/enp1s0/' --ssh-inject root:file:/home/jan/.ssh/id_jan.pub --root-password password:sOFIJ8lx97CuecM
-$ virt-builder debian-10 --cache /var/lib/libvirt/images/cache --size=20G --format qcow2 -o /var/lib/libvirt/images/debian10-k8s-vm5.qcow2 --hostname debian10-k8s-vm5 --network --timezone Europe/Berlin --firstboot-command "dpkg-reconfigure openssh-server" --edit '/etc/network/interfaces: s/ens2/enp1s0/' --ssh-inject root:file:/home/jan/.ssh/id_jan.pub --root-password password:sOFIJ8lx97CuecM
+$ virt-builder debian-10 --cache /var/lib/libvirt/images/cache --size=20G --format qcow2 -o /var/lib/libvirt/images/debian11-k8s-vm1.qcow2 --hostname debian11-k8s-vm1 --network --timezone Europe/Berlin --firstboot-command "dpkg-reconfigure openssh-server" --edit '/etc/network/interfaces: s/ens2/enp1s0/' --ssh-inject root:file:/home/jan/.ssh/id_jan.pub --root-password password:sOFIJ8lx97CuecM
+$ virt-builder debian-10 --cache /var/lib/libvirt/images/cache --size=20G --format qcow2 -o /var/lib/libvirt/images/debian11-k8s-vm2.qcow2 --hostname debian11-k8s-vm2 --network --timezone Europe/Berlin --firstboot-command "dpkg-reconfigure openssh-server" --edit '/etc/network/interfaces: s/ens2/enp1s0/' --ssh-inject root:file:/home/jan/.ssh/id_jan.pub --root-password password:sOFIJ8lx97CuecM
+$ virt-builder debian-10 --cache /var/lib/libvirt/images/cache --size=20G --format qcow2 -o /var/lib/libvirt/images/debian11-k8s-vm3.qcow2 --hostname debian11-k8s-vm3 --network --timezone Europe/Berlin --firstboot-command "dpkg-reconfigure openssh-server" --edit '/etc/network/interfaces: s/ens2/enp1s0/' --ssh-inject root:file:/home/jan/.ssh/id_jan.pub --root-password password:sOFIJ8lx97CuecM
+$ virt-builder debian-10 --cache /var/lib/libvirt/images/cache --size=20G --format qcow2 -o /var/lib/libvirt/images/debian11-k8s-vm4.qcow2 --hostname debian11-k8s-vm4 --network --timezone Europe/Berlin --firstboot-command "dpkg-reconfigure openssh-server" --edit '/etc/network/interfaces: s/ens2/enp1s0/' --ssh-inject root:file:/home/jan/.ssh/id_jan.pub --root-password password:sOFIJ8lx97CuecM
+$ virt-builder debian-10 --cache /var/lib/libvirt/images/cache --size=20G --format qcow2 -o /var/lib/libvirt/images/debian11-k8s-vm5.qcow2 --hostname debian11-k8s-vm5 --network --timezone Europe/Berlin --firstboot-command "dpkg-reconfigure openssh-server" --edit '/etc/network/interfaces: s/ens2/enp1s0/' --ssh-inject root:file:/home/jan/.ssh/id_jan.pub --root-password password:sOFIJ8lx97CuecM
 ```
 
 After the images for the systems are created, they can be imported into the KVM hypervisor. To import the images, details about the available resources and network configuration are specified. This might be adjusted to your local setting. After the import of one image is done, the server is automatically started.
 
 ```shell
 # Setup virtual server
-$ virt-install --import --name debian10-k8s-vm1 --ram 2500 --vcpu 2 --disk path=/var/lib/libvirt/images/debian10-k8s-vm1.qcow2,format=qcow2 --os-variant debian10 --network=bridge=br0,model=virtio,mac=52:54:00:31:C8:91 --noautoconsole --graphics vnc,listen=0.0.0.0,password=i9VXEOVtmBX7S
-$ virt-install --import --name debian10-k8s-vm2 --ram 2500 --vcpu 2 --disk path=/var/lib/libvirt/images/debian10-k8s-vm2.qcow2,format=qcow2 --os-variant debian10 --network=bridge=br0,model=virtio,mac=52:54:00:31:C8:92 --noautoconsole --graphics vnc,listen=0.0.0.0,password=i9VXEOVtmBX7S
-$ virt-install --import --name debian10-k8s-vm3 --ram 2500 --vcpu 2 --disk path=/var/lib/libvirt/images/debian10-k8s-vm3.qcow2,format=qcow2 --os-variant debian10 --network=bridge=br0,model=virtio,mac=52:54:00:31:C8:93 --noautoconsole --graphics vnc,listen=0.0.0.0,password=i9VXEOVtmBX7S
-$ virt-install --import --name debian10-k8s-vm4 --ram 2500 --vcpu 2 --disk path=/var/lib/libvirt/images/debian10-k8s-vm4.qcow2,format=qcow2 --os-variant debian10 --network=bridge=br0,model=virtio,mac=52:54:00:31:C8:94 --noautoconsole --graphics vnc,listen=0.0.0.0,password=i9VXEOVtmBX7S
-$ virt-install --import --name debian10-k8s-vm5 --ram 2500 --vcpu 2 --disk path=/var/lib/libvirt/images/debian10-k8s-vm5.qcow2,format=qcow2 --os-variant debian10 --network=bridge=br0,model=virtio,mac=52:54:00:31:C8:95 --noautoconsole --graphics vnc,listen=0.0.0.0,password=i9VXEOVtmBX7S
+$ virt-install --import --name debian11-k8s-vm1 --ram 2500 --vcpu 2 --disk path=/var/lib/libvirt/images/debian11-k8s-vm1.qcow2,format=qcow2 --os-variant debian10 --network=bridge=br0,model=virtio,mac=52:54:00:31:C8:91 --noautoconsole --graphics vnc,listen=0.0.0.0,password=i9VXEOVtmBX7S
+$ virt-install --import --name debian11-k8s-vm2 --ram 2500 --vcpu 2 --disk path=/var/lib/libvirt/images/debian11-k8s-vm2.qcow2,format=qcow2 --os-variant debian10 --network=bridge=br0,model=virtio,mac=52:54:00:31:C8:92 --noautoconsole --graphics vnc,listen=0.0.0.0,password=i9VXEOVtmBX7S
+$ virt-install --import --name debian11-k8s-vm3 --ram 2500 --vcpu 2 --disk path=/var/lib/libvirt/images/debian11-k8s-vm3.qcow2,format=qcow2 --os-variant debian10 --network=bridge=br0,model=virtio,mac=52:54:00:31:C8:93 --noautoconsole --graphics vnc,listen=0.0.0.0,password=i9VXEOVtmBX7S
+$ virt-install --import --name debian11-k8s-vm4 --ram 2500 --vcpu 2 --disk path=/var/lib/libvirt/images/debian11-k8s-vm4.qcow2,format=qcow2 --os-variant debian10 --network=bridge=br0,model=virtio,mac=52:54:00:31:C8:94 --noautoconsole --graphics vnc,listen=0.0.0.0,password=i9VXEOVtmBX7S
+$ virt-install --import --name debian11-k8s-vm5 --ram 2500 --vcpu 2 --disk path=/var/lib/libvirt/images/debian11-k8s-vm5.qcow2,format=qcow2 --os-variant debian10 --network=bridge=br0,model=virtio,mac=52:54:00:31:C8:95 --noautoconsole --graphics vnc,listen=0.0.0.0,password=i9VXEOVtmBX7S
 ```
+
+_Note:_ The parameter `--os-variant debian10` is correct for debian 11 images. The direct support for the OS variant debian-11 is missing at the [moment](https://groups.google.com/g/linux.debian.user/c/QTY-7VlXRFA).
 
 # Setup Kubernetes
 After the basic infrastructure is installed and the systems are running, they can be prepared for the installation of Kubernetes. Kubernetes supports different [container runtimes](https://kubernetes.io/docs/setup/production-environment/container-runtimes/). In this tutorial, the `containerd` runtime is used. To prepare the systems (e.g., disable root logins with passwords, install tools like vim or the container runtime), `ansible` is used. I have created a playbook that can be used to perform all the needed tasks. The playbook can be downloaded by using the following commands:
@@ -61,11 +63,11 @@ Before the playbook can be executed, the infrastructure has to be declared. This
 $ cat hosts
 
 [k8shosts]
-debian10-k8s-vm1
-debian10-k8s-vm2
-debian10-k8s-vm3
-debian10-k8s-vm4
-debian10-k8s-vm5
+debian11-k8s-vm1
+debian11-k8s-vm2
+debian11-k8s-vm3
+debian11-k8s-vm4
+debian11-k8s-vm5
 ```
 
 Now, the playbook can be executed. This is done by executing the following command. This may take a while. 
@@ -128,12 +130,14 @@ After all worker nodes have joined the cluster, the `kubectl get nodes` command 
 $ kubectl get nodes
 
 NAME               STATUS   ROLES                  AGE     VERSION
-debian10-k8s-vm1   Ready    control-plane,master   6m54s   v1.23.3
-debian10-k8s-vm2   Ready    <none>                 2m49s   v1.23.3
-debian10-k8s-vm3   Ready    <none>                 2m32s   v1.23.3
-debian10-k8s-vm4   Ready    <none>                 2m17s   v1.23.3
-debian10-k8s-vm5   Ready    <none>                 2m5s    v1.23.3
+debian11-k8s-vm1   Ready    control-plane,master   6m54s   v1.23.3
+debian11-k8s-vm2   Ready    <none>                 2m49s   v1.23.3
+debian11-k8s-vm3   Ready    <none>                 2m32s   v1.23.3
+debian11-k8s-vm4   Ready    <none>                 2m17s   v1.23.3
+debian11-k8s-vm5   Ready    <none>                 2m5s    v1.23.3
 ```
 
 As you can see, all nodes are available, and the cluster is ready to be used by your workloads.
 
+
+_Update 05-02-2022_: The article was upgraded to Debian 11
