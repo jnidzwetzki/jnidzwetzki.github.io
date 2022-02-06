@@ -80,7 +80,7 @@ $ ansible-playbook playbooks/kubernetes-containerd.yml  -i hosts
 Now it is time to install the [control-plane node](https://kubernetes.io/docs/concepts/overview/components/). This is done by executing the `kubeadm init` command. The command performs a few preflight checks (e.g., testing that the distribution is supported by Kubernetes and that a container runtime is installed properly). After the command finishes, two important pieces of information are shown: (1) the commands that have to be executed to connect with the `kubectl` command to the control-plane, and (2) the command that is required to join the Kubernetes cluster as a worker node. 
 
 ```shell
-$ kubeadm init
+$ kubeadm init --pod-network-cidr=10.244.0.0/16
 [...]
 Your Kubernetes control-plane has initialized successfully!
 
