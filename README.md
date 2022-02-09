@@ -1,6 +1,5 @@
 # My website based on Type on Strap 🎨
 
-
 ```
 apt-get install ruby-dev
 
