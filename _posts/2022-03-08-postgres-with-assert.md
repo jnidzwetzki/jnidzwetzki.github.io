@@ -25,7 +25,7 @@ These Assert macros are defined in the file `/usr/include/postgresql/12/server/c
 To check whether the current PostgreSQL installation uses extensions or not, the following command can be executed:
 
 ```bash
-rgrep USE_ASSERT_CHECKING /usr/include/postgresql/12/server/pg_config.h
+grep USE_ASSERT_CHECKING /usr/include/postgresql/12/server/pg_config.h
 ```
 
 If this returns a value of `1`, the assertions are active. In addition, all extensions that are complied against this server are also evaluate the Assert statements.
@@ -103,5 +103,5 @@ dpkg -i *.deb
 Afterward, a PostgreSQL server with active Assert macros is installed. This can be verified by executing:
 
 ```bash
-rgrep USE_ASSERT_CHECKING /usr/include/postgresql/12/server/pg_config.h
+grep USE_ASSERT_CHECKING /usr/include/postgresql/12/server/pg_config.h
 ```
