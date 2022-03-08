@@ -20,7 +20,7 @@ Assert(state->number_of_rows >= 0);
 
 The Assert statements are implemented as C Macros. If the condition is fulfilled, nothing happens. If the condition is not met, the software is interrupted and an error message is logged.
 
-These Assert macros are defined in the file `/usr/include/postgresql/12/server/c.h`. 
+These Assert macros are defined in the file `/usr/include/postgresql/12/server/c.h`:
 
 ```c
 #ifndef USE_ASSERT_CHECKING
@@ -36,7 +36,7 @@ These Assert macros are defined in the file `/usr/include/postgresql/12/server/c
 #endif
 ```
 
-As can be seen in the listing, the Assert macro are only active if the `USE_ASSERT_CHECKING` option is set (or `FRONTEND` code is compiled). Otherwise, it is replaced by `true` statements in the code at compile time, which disables them. 
+As can be seen in the listing, the Assert macro are only active if the `USE_ASSERT_CHECKING` option is set (or `FRONTEND` code is compiled). Otherwise, the Assert macro is replaced by `true` statements at compile time, which disables the evaluation of the Assert conditions. 
 
 To check whether the current PostgreSQL installation evaluates Assert statements or not, the following command can be executed:
 
