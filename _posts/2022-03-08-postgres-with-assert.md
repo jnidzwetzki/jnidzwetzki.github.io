@@ -22,7 +22,7 @@ The Assert statements are implemented as C Macros. If the condition is fulfilled
 
 These Assert macros are defined in the file `/usr/include/postgresql/12/server/c.h`. 
 
-```C
+```c
 #ifndef USE_ASSERT_CHECKING
 #define Assert(condition)       ((void)true)
 [...]
