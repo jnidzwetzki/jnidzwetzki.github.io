@@ -114,7 +114,6 @@ OvI0JdYkpEl3YP4J2+kOElnla7feF3fKhb+fBRh2r1quFXYVK6gz3sgkTqWl/Eg=
 -----END PGP PUBLIC KEY BLOCK-----
 ```
 
-# Misc
 ```
                            .-----.
                           ( Slurp )
