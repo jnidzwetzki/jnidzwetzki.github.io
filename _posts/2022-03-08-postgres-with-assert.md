@@ -7,7 +7,7 @@ author: jan
 excerpt_separator: <!--more-->
 ---
 
-The [PostgreSQL](https://www.postgresql.org/) database server contains many `Assert` statements in its code. These statements are additional checks that are run to ensure that the state of the server is as expected. However, evaluating of these statements takes some CPU time. Therefore, they are disabled in most production environments. 
+The [PostgreSQL](https://www.postgresql.org/) database server contains many `Assert` statements in its code. These statements are additional checks that can be evaluated to ensure that the performed operations are executeed as expecteed. However, evaluating of these statements takes some CPU time. Therefore, they are disabled in most production environments. 
 
 <!--more-->
 PostgreSQL is a very extensible and pluggable software. The PostgreSQL server can be extended by extensions. These [PostgreSQL Extensions](https://www.postgresql.org/docs/13/sql-createextension.html) can use Asserts statements in the code. 
