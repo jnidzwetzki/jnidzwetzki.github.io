@@ -42,6 +42,7 @@ In 2012 I graduated as a Bachelor of Science in Computer Science, in 2014 I grad
 
 # Selected Publications
 
+* BBoxDB Streams: Scalable Processing of Multi-Dimensional Data Streams - [Distributed and Parallel Databases 2022](https://doi.org/10.1007/s10619-022-07408-8)
 * BBoxDB Streams: Scalable Processing of Multi-Dimensional Data Streams - [Technical Report 2021](https://ub-deposit.fernuni-hagen.de/receive/mir_mods_00001727)
 * Distributed Arrays: an algebra for generic distributed query processing - [Distributed and Parallel Databases 2021](https://link.springer.com/article/10.1007/s10619-021-07325-2) (co-author)
 * BBoxDB Streams: Distributed Processing of Real-World Streams of Position Data - [EDBT 2021](https://edbt2021proceedings.github.io/docs/p170.pdf) / [Slides](/assets/downloads/bboxdb_streams_edbt2021_slides.pdf)
