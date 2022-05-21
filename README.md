@@ -22,4 +22,3 @@ git merge template/master
 ```
 
 
-
