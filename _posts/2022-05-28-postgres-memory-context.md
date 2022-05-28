@@ -29,7 +29,7 @@ Memory allocations in PostgreSQL are performed by calling the function `palloc(S
 
 The current memory context can be changed by calling `MemoryContextSwitchTo(new_context)`, which returns the current memory context and sets the given memory context as the new current memory context. So in PostgreSQL often, the following pattern is used to perform a few operations in another memory context:
 
-```C
+```c
 /* Switch to new memory context */
 MemoryContext old_context = MemoryContextSwitchTo(new_context);
 
@@ -42,7 +42,7 @@ MemoryContextSwitchTo(old_context)
 
 To create a new memory context, the function `AllocSetContextCreate` can be used. The parameter needs (1) the parent of the new memory context, (2) the name of the new context, and (3) the amount of memory that should be allocated. The macro `ALLOCSET_DEFAULT_SIZES` can be used to use the default sizes.
 
-```C
+```c
 MemoryContext new_context = AllocSetContextCreate(CurrentMemoryContext, "MyContext", ALLOCSET_DEFAULT_SIZES);
 ```
 
@@ -50,13 +50,13 @@ MemoryContext new_context = AllocSetContextCreate(CurrentMemoryContext, "MyConte
 
 To clear the allocations of the memory context, it can be reset or deleted. When the context is reset, all memory allocations that are part of the conext are deleted. To reset a memory context, the function `MemoryContextReset` has to be invoked on the memory context that should be reset.
 
-```C
+```c
 MemoryContextReset(MemoryContext context);
 ```
 
 The deletion of a memory context can be performed in a similar way. To delete a memory context, the function `MemoryContextDelete` has to be called and the memory context that should be deleted has to be passed as a parameter.
 
-```C
+```c
 MemoryContextDelete(MemoryContext context);
 ```
 
@@ -70,7 +70,7 @@ Sometimes it could be useful to perform tasks when a memory context is deleted o
 
 For example, to execute the function `my_callback_func` with the pointer `my_data` as a parameter as soon as the memory context `my_ctx` is reset or deleted, the following code can be used:
 
-```C
+```c
 MemoryContextCallback callback = (MemoryContextCallback *) MemoryContextAllocZero(my_ctx, sizeof(MemoryContextCallback));
 callback->func = my_callback_func;
 callback->arg = (void *) my_data;
