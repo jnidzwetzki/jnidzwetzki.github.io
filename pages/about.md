@@ -29,7 +29,7 @@ I am Jan, a software developer and computer scientist with a focus on distribute
 
 In the years 2002 - 2005, I did an apprenticeship as IT specialist for system integration. From 2006 - 2009, parallel to my job, I attended a course for technical computer science at the DAA technical college. I successfully completed this course in 2009 as Staatlich geprüfter Informatiker (Certified Computer Scientist). 
 
-Between 2009 - 2022 I was enrolled at the FernUniversität in Hagen. In 2012 I graduated with a Bachelor of Science in Computer Science. In 2014 I graduated with a Master of Science in Computer Science with a focus on Operating Systems, Distributed, and Cooperative Systems. In 2022 I received a Dr. rer. nat. (PhD equivalent) in computer science. 
+Between 2009 - 2022 I was enrolled as a part-time student at the FernUniversität in Hagen. In 2012 I graduated with a Bachelor of Science in Computer Science. In 2014 I graduated with a Master of Science in Computer Science with a focus on Operating Systems, Distributed, and Cooperative Systems. In 2022 I received a Dr. rer. nat. (PhD equivalent) in computer science with a thesis on distributed databases. 
 
 In the years 2012 - 2014, I was also a student assistant (part-time) at the chair of Cooperative Systems for the courses Operating Systems, Distributed Systems, and Computational Geometry. In the years 2020 - 2022, I was a research assistant (part-time) at the chair of Databases for New Applications and maintained the SECONDO database kernel.
 
