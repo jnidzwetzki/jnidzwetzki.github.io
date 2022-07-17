@@ -9,7 +9,7 @@ order: 1
 
 ### Hi there 👋
 
-I am Jan, a software developer and computer scientist with a focus on distributed databases and distributed systems. I am 37 years old, live in Berlin (Germany), and work for around 18 years in IT. I worked as a system administrator, network administrator, software developer, and CTO. At the moment, I am finishing my PhD (computer science / distributed databases) at the University of Hagen.
+I am Jan, a software developer and computer scientist with a focus on distributed databases and distributed systems. I am 37 years old, live in Berlin (Germany), and work since around 20 years in IT. I worked as a system administrator, network administrator, software developer, and CTO. At the moment, I am working as a aenior software developer on a PostgreSQL extension for time-series data.
 
 - 🔭 I’m currently working on [BBoxDB](https://bboxdb.org) a distributed key-bounding-box-value database. BBoxDB is a NoSQL database for multi-dimensional data implemented from scratch (see [full paper](https://link.springer.com/article/10.1007/s10619-019-07275-w). With BBoxDB Streams, the software can also process multi-dimensional data streams and execute continuous queries (e.g., continuous range queries and continuous spatial joins, see the [technical report](https://ub-deposit.fernuni-hagen.de/receive/mir_mods_00001727)).
 
@@ -25,13 +25,13 @@ I am Jan, a software developer and computer scientist with a focus on distribute
 
 - ⚡ Fun fact: My first installed Linux Distribution was a SuSE 6.1 (Kernel 2.2.6) in 1999, and my first computer was a Pentium 1 with 100 MHz and 16 MB RAM running Windows 95.
 
-## Short CV
+## Short Curriculum Vitae
 
-In the period from 2002 - 2005 I completed an apprenticeship as IT specialist for system integration. From 2006 - 2009 I took part in the DAA technical school, parallel to my job, in a training course for technical informatics. I successfully completed this course in 2009 as Staatlich geprüfter Informatiker (State-Certified Computer Scientist). Between 2009 and 2014 I was already enrolled at the FernUniversität in Hagen. There I studied computer science as an academy, bachelor and master student.
+In the years 2002 - 2005, I did an apprenticeship as IT specialist for system integration. From 2006 - 2009 I took part in the DAA technical school, parallel to my job, in a training course for technical informatics. I successfully completed this course in 2009 as Staatlich geprüfter Informatiker (Certified Computer Scientist). Between 2009 - 2022 I was enrolled at the FernUniversität in Hagen. I studied computer science as an academy, bachelor's, master's, and PhD student.
 
-In 2012 I graduated as a Bachelor of Science in Computer Science, in 2014 I graduated as a Master of Science in Computer Science with the focus on: Operating Systems, Distributed and Cooperative Systems. In the years 2012 - 2014 I was also a student assistant at the Chair of Cooperative Systems for the courses Operating Systems, Distributed Systems and Computational Geometry.
+In 2012 I graduated with a Bachelor of Science in Computer Science. In 2014 I graduated with a Master of Science in Computer Science with a focus on Operating Systems, Distributed, and Cooperative Systems. In 2022 I received a Dr. rer. nat. (PhD equivalent) in computer science. In the years 2012 - 2014, I was also a student assistant (part-time) at the chair of Cooperative Systems for the courses Operating Systems, Distributed Systems, and Computational Geometry. In the years 2020 - 2022, I was a research assistant (part-time) at the chair of Databases for New Applications and maintained the SECONDO database kernel.
 
-# My interests
+# My Interests
 
 * Database systems
 * Operating systems
