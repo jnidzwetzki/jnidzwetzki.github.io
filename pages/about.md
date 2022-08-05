@@ -33,6 +33,8 @@ Between 2009 - 2022, I was enrolled as a part-time student at the FernUniversit√
 
 From 2012 - 2014, I was also a student assistant (part-time) at the chair of Cooperative Systems for the courses Operating Systems, Distributed Systems, and Computational Geometry. In the years 2020 - 2022, I was a research assistant (part-time) at the chair of Databases for New Applications and maintained the SECONDO database kernel.
 
+For more information, see my profile at [LinkedIn](https://www.linkedin.com/in/jnidzwetzki).
+
 # My Interests
 
 * Database systems
