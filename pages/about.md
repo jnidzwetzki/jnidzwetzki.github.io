@@ -44,6 +44,7 @@ From 2012 - 2014, I was also a student assistant (part-time) at the chair of Coo
 
 # Selected Publications
 
+* BBoxDB: A Distributed Key-Bounding-Box-Value Store - [My PhD Thesis](https://ub-deposit.fernuni-hagen.de/receive/mir_mods_00001836)
 * BBoxDB Streams: Scalable Processing of Multi-Dimensional Data Streams - [Distributed and Parallel Databases 2022](https://doi.org/10.1007/s10619-022-07408-8)
 * BBoxDB Streams: Scalable Processing of Multi-Dimensional Data Streams - [Technical Report 2021](https://ub-deposit.fernuni-hagen.de/receive/mir_mods_00001727)
 * Distributed Arrays: an algebra for generic distributed query processing - [Distributed and Parallel Databases 2021](https://link.springer.com/article/10.1007/s10619-021-07325-2) (co-author)
