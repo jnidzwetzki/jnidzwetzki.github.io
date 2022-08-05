@@ -9,9 +9,9 @@ order: 1
 
 ### Hi there 👋
 
-I am Jan, a software developer and computer scientist with a focus on distributed databases and distributed systems. I am 37 years old, live in Berlin (Germany), and work for around 20 years in IT. I worked as a system administrator, network administrator, software developer, and CTO. At the moment, I am working as a senior software developer on a PostgreSQL extension for time-series data.
+I am Jan, a software developer and computer scientist (Dr. rer. nat.) with a focus on distributed databases and distributed systems. I am 37 years old, live in Berlin (Germany), and have been working in IT for about 20 years. I worked as a system administrator, network administrator, software developer, and CTO. At the moment, I am working as a senior software developer on a PostgreSQL extension for time-series data.
 
-- 🔭 I’m currently working on [BBoxDB](https://bboxdb.org) a distributed key-bounding-box-value database. BBoxDB is a NoSQL database for multi-dimensional data implemented from scratch (see [full paper](https://link.springer.com/article/10.1007/s10619-019-07275-w)). With BBoxDB Streams, the software can also process multi-dimensional data streams and execute continuous queries (e.g., continuous range queries and continuous spatial joins, see the [full paper](https://link.springer.com/article/10.1007/s10619-022-07408-8)).
+- 🔭 My PhD project is [BBoxDB](https://bboxdb.org), a distributed key-bounding-box-value database. BBoxDB is a NoSQL database for multi-dimensional data implemented from scratch (see [full paper](https://link.springer.com/article/10.1007/s10619-019-07275-w)). With BBoxDB Streams, the software can also process multi-dimensional data streams and execute continuous queries (e.g., continuous range queries and continuous spatial joins, see the [full paper](https://link.springer.com/article/10.1007/s10619-022-07408-8)).
 
 - 🌱 I’m also maintaining the [SECONDO](https://secondo-database.github.io) database. This is an extensible database management system developed at the university at Hagen. The database can be extended by _Algebra Modules_ that implement custom data models and operators. The software focuses on the handling of spatial and spatio-temporal data. I also developed [Distributed SECONDO](https://secondo-database.github.io/DSecondo/DSECONDO-Website/index.html), a [distributed version](https://link.springer.com/chapter/10.1007/978-3-319-22363-6_28) of SECONDO.
 
@@ -40,7 +40,7 @@ From 2012 - 2014, I was also a student assistant (part-time) at the chair of Coo
 * Distributed, scalable and fault-tolerant systems
 * Computer networks
 * Transactions and parallelism
-* Economics, financial markets and algorithmic trading systems
+* Economics, financial markets, and algorithmic trading systems
 
 # Selected Publications
 
@@ -57,7 +57,7 @@ From 2012 - 2014, I was also a student assistant (part-time) at the chair of Coo
 * Distributed SECONDO: A Highly Available and Scalable System for Spatial Data Processing [SSTD 2015](https://link.springer.com/chapter/10.1007%2F978-3-319-22363-6_28) / [Poster](/assets/downloads/sstd2015_poster.pdf)
 * Distributed SECONDO - A Distributed DBMS based on SECONDO and Apache Cassandata - [My Master Thesis](https://www.springer.com/de/book/9783658124434)
 * Optimierte Speicherzuteilung an Operatoren in Datenbanksystemen (_Optimized Memory Allocation to Operators in Database Systems_) - [Informatiktage 2013](https://dl.gi.de/handle/20.500.12116/4635) / [Poster](/assets/downloads/gi2013_poster.pdf)
-* Operator Cost Models for Progress-Esimation and Optimization in Database Systems - My Bachelor Thesis
+* Operator Cost Models for Progress esimation and Optimization in Database Systems - My Bachelor Thesis
 
 # GPG Key
 * Jan Nidzwetzki <jnidzwetzki@gmx.de>
@@ -119,7 +119,7 @@ OvI0JdYkpEl3YP4J2+kOElnla7feF3fKhb+fBRh2r1quFXYVK6gz3sgkTqWl/Eg=
 
 ```
                            .-----.
-                          ( Slurp )
+                          ( Hello )
                           /`-----'
        _.---._    /\\    /
     ./'       "--`\//   /
