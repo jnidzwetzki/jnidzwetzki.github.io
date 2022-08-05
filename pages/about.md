@@ -57,7 +57,7 @@ From 2012 - 2014, I was also a student assistant (part-time) at the chair of Coo
 * Distributed SECONDO: A Highly Available and Scalable System for Spatial Data Processing [SSTD 2015](https://link.springer.com/chapter/10.1007%2F978-3-319-22363-6_28) / [Poster](/assets/downloads/sstd2015_poster.pdf)
 * Distributed SECONDO - A Distributed DBMS based on SECONDO and Apache Cassandata - [My Master Thesis](https://www.springer.com/de/book/9783658124434)
 * Optimierte Speicherzuteilung an Operatoren in Datenbanksystemen (_Optimized Memory Allocation to Operators in Database Systems_) - [Informatiktage 2013](https://dl.gi.de/handle/20.500.12116/4635) / [Poster](/assets/downloads/gi2013_poster.pdf)
-* Operator Cost Models for Progress esimation and Optimization in Database Systems - My Bachelor Thesis
+* Operator Cost Models for Progress Estimation and Optimization in Database Systems - My Bachelor Thesis
 
 # GPG Key
 * Jan Nidzwetzki <jnidzwetzki@gmx.de>
