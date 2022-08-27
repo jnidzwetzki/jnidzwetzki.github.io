@@ -37,7 +37,7 @@ Because most Container Images do not support HTTPs connections out-of-the-box, t
 
 To use Traefik, the offered Container Image has to be downloaded and started. This can be done by using the following lines in a Docker compose file. It also applies a basic configuration to Traefik. The software listens to all requests on ports 80/TCP and 443/TCP. In addition, these ports of the Docker Hosts are forwarded to this container.
 
-"`yaml
+```yaml
 traefik:
     image: "traefik:v2.2"
     container_name: "traefik"
@@ -66,7 +66,7 @@ In addition, the [Docker Socket](https://docs.docker.com/engine/security/protect
 
 Before the `myresolver` certresolver can be used, it has to be defined and configured. This can be done by adding the following options to the start of the Traefik binary.
 
-"`yaml
+```yaml
 # Use a TLS challenge to request new certificates
 - "--certificatesresolvers.myresolver.acme.tlschallenge=true"
 
@@ -82,7 +82,7 @@ To store the requested certifcates permanent and let the certifcate survive cona
 __Notice:__ Some [rate limits](https://letsencrypt.org/docs/rate-limits/) apply, when certificates are requested from Let's encrypt. When these rate limits are reached, no new certificates are provided for a few days. During the setup of a system, it can be useful to use the sandbox CA of let's encrypt. This CA does not generate valid certificates, but the local settings can be checked. 
 To test the configuration using the Let's encrypt sandbox CA, the following setting can be used:
 
-"`yaml
+```yaml
  - "--certificatesresolvers.myresolver.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory"
 ```
 
@@ -94,7 +94,7 @@ To improve the strength of the HTTPs connections and get a good rating in tests 
 
 This configuration can be done by a separate configuration file, which can be mounted as a volume into the Traefik container. So, the following file can be stored as `/root/traefik/dynamic.yml` on the Docker system and mounted into the Traefik container in the Docker compose file via `volume: /root/traefik/dynamic.yml:/dynamic.yml:ro` and loaded by passing the `--providers.file.filename=/dynamic.yml` to the Traefik binary.
 
-"`yaml
+```yaml
 tls:
  options:
    default:
@@ -119,7 +119,7 @@ tls:
 
 Traefik ships with a [dashboard](https://doc.traefik.io/traefik/operations/dashboard/) that allows exploring the active configuration. To enable the dashboard, a hostname has to be chosen and the following labels have to be applied to the Traefik container. The hostname `console.example.com` is used in this example and has to be replaced by the real hostname and the password for the user also has to be set.
 
-"`yaml
+```yaml
 # Process HTTPs traffic for the dashboard
 - "traefik.http.routers.dashboard.entrypoints=websecure"
 
@@ -162,7 +162,7 @@ Like in Kubernetes, the configuration for the Containers is done based on labels
 
 The labels above ensure that the traffic to the HTTPs port is handled properly. Unencrypted HTTP traffic for the domain is not handled so far. Therefore, an error message is shown in the browser if a user opens the domain via a regular HTTP connection. So, it might be useful to redirect all HTTP requests automatically to HTTPs. This can be done by using the following labels.
 
-"`yaml
+```yaml
 # Handle the incoming HTTP traffic for the host "myservice.example.com" and perform an automatic redirect to HTTPs
 - "traefik.http.routers.develop-platform-plain.entrypoints=web"
 - "traefik.http.routers.develop-platform-plain.rule=Host(`myservice.example.com`)"
@@ -173,7 +173,7 @@ The labels above ensure that the traffic to the HTTPs port is handled properly. 
 
 In this subsection, the complete configuration is shown. It starts one container with a web interface (called `develop-platform` in this example) and it starts the Traefik proxy that terminates the HTTP and HTTPs connections on the Docker host. The complete stack can be deployed by invoking `docker-compose up -d'. 
 
-"`yaml
+```yaml
 version: "3.4"
 
 services:
