@@ -27,7 +27,7 @@ mermaid: default                                        # Enable mermaid-js for 
 google_analytics: G-26VMDS60L9                          # Tracking ID, e.g. "UA-000000-01"
 cookie_consent: true                                    # To respect the usage of cookies
 color_theme: auto                                       # auto, dark or light
-
+google_site_verification: psdO7-zEuyNNhb23zYwzoOSsr4xC3_E6bhA8fAGpBXw
 # Comments
 comments:
   disqus_shortname:                                     # Your discus shortname for comments
