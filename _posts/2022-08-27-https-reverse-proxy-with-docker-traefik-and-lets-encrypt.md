@@ -7,11 +7,13 @@ author: jan
 excerpt_separator: <!--more-->
 ---
 
-Docker is one of the most popular runtimes for Containers these days. Often the services in the containers offer a web interface. To ensure that this service can be accessed securely (via HTTPs) on the standard port 443/tcp, reverse proxies are commonly used. The reverse proxy receives the incoming requests on port 443, provides the appropriate TLS certificate and distributes the traffic depending on the URL to the respective containers. For a long time, Nginx was the quasi-standard for this. However, [Traefik](https://traefik.io/traefik/) has also been used for some time. This reverse proxy is presented in this article.
+Docker is one of the most popular runtimes for Containers these days. Often the services in the containers offer a web interface. To ensure that this service can be accessed securely (via HTTPs) on the standard port 443/tcp, reverse proxies are usually used. The reverse proxy receives the incoming requests on port 443, provides the appropriate TLS certificate and distributes the traffic depending on the URL to the respective containers. For a long time, Nginx was the quasi-standard for this task. However, [Traefik](https://traefik.io/traefik/) has also been used for some time. This reverse proxy is discussed in this article.
 
 <!--more-->
 
-[Nginx](https://nginx.org/) is a stable and widely used webserver, which can also be used as a reverse proxy. However, the drawback of using Nginx as a reverse proxy is, that an additional configuration file has to be maintained and additional tools for obtaining SSL-Certificates from Let's encrypt have to be configured. Complex Docker deployments can be deployed using [Docker Compose](https://docs.docker.com/compose/). By using Traefik, the complete reverse proxy can be configured using tags and deployed by including an additional Docker image.
+[Nginx](https://nginx.org/) is a widely used webserver that can also be used as a reverse proxy. However, the disadvantage of using Nginx as a reverse proxy is that an additional configuration file has to be maintained and additional tools for obtaining SSL-Certificates from Let's encrypt have to be configured. 
+
+Complex Docker deployments are often maintained by using [Docker Compose](https://docs.docker.com/compose/). Traefik integrates seamlessly into such a deployment. The complete reverse proxy can be configured using tags and deployed by including an additional Docker image.
 
 # Docker and Reverse Proxies
 
@@ -31,11 +33,11 @@ flowchart LR
     end
 </div>
 
-Because most Container Images do not support HTTPs connections out-of-the-box, the incoming HTTP traffic is forwarded unencrypted as regular HTTPs requests to the container. However, the traffic is only forwarded on the local system via the loopback interface and can not be intercepted by an attacker.
+Because most container images do not support HTTPs connections out-of-the-box, the incoming HTTP traffic is forwarded unencrypted as regular HTTPs traffic to the containers. However, the traffic is only forwarded on the local system via the loopback interface and can not be intercepted by an attacker.
 
-## Starting Traefik
+## Installing and Configuring Traefik
 
-To use Traefik, the offered Container Image has to be downloaded and started. This can be done by using the following lines in a Docker compose file. It also applies a basic configuration to Traefik. The software listens to all requests on ports 80/tcp and 443/tcp. In addition, these ports of the Docker Hosts are forwarded to this container.
+To use Traefik, the provided container image has to be downloaded and started. This can be done by using the following lines in a Docker compose file. The compose file also applies a basic configuration to Traefik. The software listens to all requests on ports 80/tcp and 443/tcp. In addition, these ports of the Docker Hosts are forwarded to this container.
 
 ```yaml
 traefik:
@@ -58,13 +60,13 @@ traefik:
     - "/var/run/docker.sock:/var/run/docker.sock:ro"
 ```
 
-In addition, the [Docker Socket](https://docs.docker.com/engine/security/protect-access/) (the file `/var/run/docker.sock`) is exposed to the Traefik container via a volume mount. This is needed to notify Traefik automatically on configuration changes (e.g., a new container is started) and to let Traefik determine the labels that are applied to the containers to build the needed configuration at runtime.
+In addition, the [Docker Socket](https://docs.docker.com/engine/security/protect-access/) (the file `/var/run/docker.sock`) is made accessible to the Traefik container via a volume mount. This is needed to notify Traefik automatically on configuration changes (e.g., a new container is started) and to let Traefik determine the labels that are applied to the containers to build the needed configuration at runtime.
 
 ### Let's Encrypt Certificates
 
-[Let's Encrypt](https://letsencrypt.org/) is a certificate authority that provides free certificates. Traefik can automatically request and use these certificates. To use this feature, the label `traefik.http.routers.<container name>.tls.certresolver=myresolver` has to be applied to the container (see the complete configuration example below).
+[Let's Encrypt](https://letsencrypt.org/) is a certificate authority that provides free certificates. These certificates needs to be requested and renewed every 90 days. Traefik can automatically handle the certificate management and no addional tools (e.g., `cert-bot`) are needed. To use this feature, the label `traefik.http.routers.<container name>.tls.certresolver=myresolver` has to be applied to the container (see the complete configuration example below).
 
-Before the `myresolver` certresolver can be used, it has to be defined and configured. This can be done by adding the following options to the start of the Traefik binary.
+Before the `myresolver` [certresolver](https://doc.traefik.io/traefik/routing/routers/#certresolver_1) can be used, it has to be defined and configured. This can be done by adding the following options to the start of the Traefik binary.
 
 ```yaml
 # Use a TLS challenge to request new certificates
@@ -77,22 +79,21 @@ Before the `myresolver` certresolver can be used, it has to be defined and confi
 - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
 ```
 
-To store the requested certifcates permanent and let the certifcate survive conatiner restarts, the directory `/letsencrypt` of the Traefik container should be mapped as a volume to the host system. This can be done by the directive `volume: /root/traefik/letsencrypt:/letsencrypt` in the Docker compose file.
+In order to store the requested certificates permanently and let the certificates survive traefik conatiner restarts, the directory `/letsencrypt` of the Traefik container should be mapped as a volume to the host system. This can be done by the directive `volume: /root/traefik/letsencrypt:/letsencrypt` in the Docker compose file.
 
-__Notice:__ Some [rate limits](https://letsencrypt.org/docs/rate-limits/) apply, when certificates are requested from Let's encrypt. When these rate limits are reached, no new certificates are provided for a few days. During the setup of a system, it can be useful to use the sandbox CA of let's encrypt. This CA does not generate valid certificates, but the local settings can be checked. 
-To test the configuration using the Let's encrypt sandbox CA, the following setting can be used:
+__Notice:__ The Let's encrypt service has some [rate limits](https://letsencrypt.org/docs/rate-limits/). When these rate limits are reached, no new certificates are provided for a few days. During the setup of a system, it can be useful to use the sandbox CA of let's encrypt. This CA does not generate valid certificates, but the local settings can be checked. To test the configuration using the Let's encrypt sandbox CA, the following setting can be used:
 
 ```yaml
  - "--certificatesresolvers.myresolver.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory"
 ```
 
-When everything works as expected, the setting can be removed and the directory `/root/traefik/letsencrypt` can be deleted. When Traefik is restarted, the certificates are requested from the official Let's encrypt CA.
+If everything works as expected, the setting can be removed and the directory `/root/traefik/letsencrypt` can be deleted. When Traefik is restarted, the certificates are requested from the official Let's encrypt CA.
 
 ## Tuning HTTPs Options
 
-To improve the strength of the HTTPs connections and get a good rating in tests (like the [SSL server test of SSL labs](https://www.ssllabs.com/ssltest/)), the encryption settings have to be adjusted. For example, the provided ciphers have to be restricted and the TLS protocol versions have to be limited. 
+To improve the strength of the HTTPs connections and get a good rating in tests (like the [SSL server test of SSL labs](https://www.ssllabs.com/ssltest/)), the encryption settings have to be adjusted. For example, the available ciphers must be restricted and the TLS protocol versions have to be limited. 
 
-This configuration can be done by a separate configuration file, which can be mounted as a volume into the Traefik container. So, the following file can be stored as `/root/traefik/dynamic.yml` on the Docker system and mounted into the Traefik container in the Docker compose file via `volume: /root/traefik/dynamic.yml:/dynamic.yml:ro` and loaded by passing the `--providers.file.filename=/dynamic.yml` to the Traefik binary.
+This configuration can be done using a separate configuration file that can be mounted as a volume into the Traefik container. So, the following file can be stored as `/root/traefik/dynamic.yml` on the Docker system and mounted into the Traefik container in the Docker compose file via `volume: /root/traefik/dynamic.yml:/dynamic.yml:ro` and loaded by passing the `--providers.file.filename=/dynamic.yml` to the Traefik binary.
 
 ```yaml
 tls:
