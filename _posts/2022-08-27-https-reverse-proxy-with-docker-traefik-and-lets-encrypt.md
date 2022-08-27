@@ -7,7 +7,7 @@ author: jan
 excerpt_separator: <!--more-->
 ---
 
-Docker is one of the most popular runtimes for Containers these days. Often the services in the containers offer a web interface. To ensure that this service can be accessed securely (via HTTPs) on the standard port 443/TCP, reverse proxies are commonly used. The reverse proxy receives the incoming requests on port 443, provides the appropriate TLS certificate and distributes the traffic depending on the URL to the respective containers. For a long time, Nginx was the quasi-standard for this. However, [Traefik](https://traefik.io/traefik/) has also been used for some time. This reverse proxy is presented in this article.
+Docker is one of the most popular runtimes for Containers these days. Often the services in the containers offer a web interface. To ensure that this service can be accessed securely (via HTTPs) on the standard port 443/tcp, reverse proxies are commonly used. The reverse proxy receives the incoming requests on port 443, provides the appropriate TLS certificate and distributes the traffic depending on the URL to the respective containers. For a long time, Nginx was the quasi-standard for this. However, [Traefik](https://traefik.io/traefik/) has also been used for some time. This reverse proxy is presented in this article.
 
 <!--more-->
 
@@ -23,11 +23,11 @@ Using Container images, the reverse proxy also fulfills a further task. Wenn mul
 
 <div class="mermaid">
 flowchart LR
-    A["HTTPs-Request\n(<i>443/TCP</i>)"] --> C{Traefik}
+    A["HTTPs-Request\n(<i>443/tcp</i>)"] --> C{Traefik}
     subgraph Docker Host
-    C -->|domain1.example.com| D["Container A\n(<i>10000/TCP</i>)"]
-    C -->|domain2.example.com/path1| E["Container B\n(<i>10001/TCP</i>)"]
-    C -->|domain3.example.com/path/2/| F["Container C\n(<i>10002/TCP</i>)"]
+    C -->|domain1.example.com| D["Container A\n(<i>10000/tcp</i>)"]
+    C -->|domain2.example.com/path1| E["Container B\n(<i>10001/tcp</i>)"]
+    C -->|domain3.example.com/path/2/| F["Container C\n(<i>10002/tcp</i>)"]
     end
 </div>
 
@@ -35,7 +35,7 @@ Because most Container Images do not support HTTPs connections out-of-the-box, t
 
 ## Starting Traefik
 
-To use Traefik, the offered Container Image has to be downloaded and started. This can be done by using the following lines in a Docker compose file. It also applies a basic configuration to Traefik. The software listens to all requests on ports 80/TCP and 443/TCP. In addition, these ports of the Docker Hosts are forwarded to this container.
+To use Traefik, the offered Container Image has to be downloaded and started. This can be done by using the following lines in a Docker compose file. It also applies a basic configuration to Traefik. The software listens to all requests on ports 80/tcp and 443/tcp. In addition, these ports of the Docker Hosts are forwarded to this container.
 
 ```yaml
 traefik:
