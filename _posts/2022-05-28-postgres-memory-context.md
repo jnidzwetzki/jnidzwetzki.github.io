@@ -107,3 +107,5 @@ TopMemoryContext: 68720 total in 5 blocks; 14624 free (15 chunks); 54096 used
     index info: 2048 total in 2 blocks; 616 free (1 chunks); 1432 used: pg_class_relname_nsp_index
 [...]
 ```
+
+__Note:__ As an alternative to the debugger you can also call the function `pg_log_backend_memory_contexts(PID)` in PostgreSQL (e.g., `SELECT * FROM pg_log_backend_memory_contexts(1234);`). The function also dumps the statistics about the memory context of the process into the logfile.
