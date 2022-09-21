@@ -176,7 +176,7 @@ When this template is stored in the same directory as the statistics files with 
 
 ![GP3 EBS volume](/assets/misc/ioping/gp3.svg "EBS GP3 volume attachted to a t3a.small EC2 instance")
 
-The average execution I/O latency is roughly the same as shown in the initial commands (an average latency of 377 us for the gp2 volume type and 527 us for the gp3 volume type). The suspicion that the gp3 volumes have a higher latency could be proven by this execution. In addition, the standard deviation of the requests is higher (140 for the `gp2` volume type and 229 for the `gp3` volume type)
+The average execution I/O latency is roughly the same as shown in the initial commands (an average latency of 377 us for the `gp2` volume type and 527 us for the `gp3` volume type). The suspicion that the `gp3` volumes have a higher latency could be proven by this execution. In addition, the standard deviation of the requests is higher (140 for the `gp2` volume type and 229 for the `gp3` volume type)
 
 ## Summary
 `ioping` is a tool to measure the I/O latency of a volume. `gnuplot` is a tool that can be used to plot and visualize data. It can be used to plot the raw statistics of `iopoing`.
