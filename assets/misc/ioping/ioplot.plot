@@ -28,6 +28,14 @@ plot min_y with filledcurves y1=mean_y lt 1 lc rgb "#bbbbdd" title "< Average", 
      mean_y lt 1 title "Average"
 
 reset
+
+set autoscale
+set grid x y
+
+set ylabel "I/O latency (us)"
+set xlabel "I/O request number"
+set term svg
+
 set output "/dev/null"
 set title "EBS GP3 volume attachted to a t3a.small EC2 instance" 
 plot 'gp3.out' using (column(0)):($6/1000)
