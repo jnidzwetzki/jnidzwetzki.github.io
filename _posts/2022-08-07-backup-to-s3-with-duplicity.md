@@ -97,7 +97,7 @@ COMPRESSION=""
 
 INCLUDES="--include /home --include /root"
 
-duplicity remove-older-than 2M ${DEST}
+duplicity remove-older-than 2M ${DEST} --force
 duplicity ${VERBOSE} ${COMPRESSION} --s3-use-ia --encrypt-key ${GPG_KEY} --full-if-older-than 1M ${INCLUDES} --exclude '**' / ${DEST}
 ```
 
