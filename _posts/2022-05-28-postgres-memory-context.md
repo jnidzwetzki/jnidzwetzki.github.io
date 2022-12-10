@@ -71,7 +71,7 @@ Sometimes it could be useful to perform tasks when a memory context is deleted o
 For example, to execute the function `my_callback_func` with the pointer `my_data` as a parameter as soon as the memory context `my_ctx` is reset or deleted, the following code can be used:
 
 ```c
-MemoryContextCallback callback = (MemoryContextCallback *) MemoryContextAllocZero(my_ctx, sizeof(MemoryContextCallback));
+MemoryContextCallback *callback = (MemoryContextCallback *) MemoryContextAllocZero(my_ctx, sizeof(MemoryContextCallback));
 callback->func = my_callback_func;
 callback->arg = (void *) my_data;
 MemoryContextRegisterResetCallback(my_ctx, callback);
