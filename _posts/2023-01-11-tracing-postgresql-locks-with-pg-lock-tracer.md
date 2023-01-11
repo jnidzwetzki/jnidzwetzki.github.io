@@ -7,7 +7,7 @@ author: jan
 excerpt_separator: <!--more-->
 ---
 
-The DBMS PostgreSQL uses locks to synchronize access to resources like tables. To get more information about the locks, the [table](https://www.postgresql.org/docs/15/view-pg-locks.html) `pg_locks` shows which relation is currently locked by which process. However, this relation shows only the current state of the locks. To show the locking activity in real-time, the new lock tracing tool `pg_lock_tracer` can be used. `pg_lock_tracer` is an open-source tool that can be downloaded from the [website](https://github.com/jnidzwetzki/pg-lock-tracer) of the project.
+The DBMS PostgreSQL uses locks to synchronize access to resources like tables. To get more information about the locks, the [table](https://www.postgresql.org/docs/15/view-pg-locks.html) `pg_locks` shows which relation is currently locked by which process. However, this relation shows only the current state of the locks. To show the locking activity in real-time, the new lock tracing tool `pg_lock_tracer` can be used. `pg_lock_tracer` is an open-source tool that I have just recently created. It can be downloaded from the [website](https://github.com/jnidzwetzki/pg-lock-tracer) of the project.
 
 <!--more-->
 
@@ -221,4 +221,4 @@ pg_lock_tracer -x /home/jan/postgresql-sandbox/bin/REL_15_1_DEBUG/bin/postgres -
 ```
 
 ## Summary
-`pg_lock_tracer` is a new open-source tracing tool for PostgreSQL lock activity. It uses the Berkeley Packet Filter (BPF) to trace a running PostgreSQL process and shows the lock activity in real-time. The tool can be downloaded from the [website](https://github.com/jnidzwetzki/pg-lock-tracer) of the project. 
+`pg_lock_tracer` is my new open-source tracing tool for PostgreSQL lock activity. It uses the Berkeley Packet Filter (BPF) to trace a running PostgreSQL process and shows the lock activity in real-time. The tool can be downloaded from the [website](https://github.com/jnidzwetzki/pg-lock-tracer) of the project. 
