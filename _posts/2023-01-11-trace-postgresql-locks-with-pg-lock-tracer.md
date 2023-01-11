@@ -1,7 +1,7 @@
 ---
 layout: post
 title: >
-    Tracing PostgreSQL locks with pg_lock_tracer
+    Trace PostgreSQL locks with pg_lock_tracer
 tags: [PostgreSQL, Tracing]
 author: jan
 excerpt_separator: <!--more-->
