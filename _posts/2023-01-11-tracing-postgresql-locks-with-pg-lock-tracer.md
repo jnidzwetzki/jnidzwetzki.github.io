@@ -7,7 +7,7 @@ author: jan
 excerpt_separator: <!--more-->
 ---
 
-The DBMS PostgreSQL uses locks to synchronize access to resources like tables. To get more information about the locks, the [table](https://www.postgresql.org/docs/15/view-pg-locks.html) `pg_locks` shows which relation is currently locked by which process. However, this relation shows only the current state of the locks. To show the locking activity in real-time, the new lock tracing tool `pg_lock_tracer` can be used. `pg_lock_tracer` is an open-source tool that can be downloaded from the[website](https://github.com/jnidzwetzki/pg-lock-tracer) of the project.
+The DBMS PostgreSQL uses locks to synchronize access to resources like tables. To get more information about the locks, the [table](https://www.postgresql.org/docs/15/view-pg-locks.html) `pg_locks` shows which relation is currently locked by which process. However, this relation shows only the current state of the locks. To show the locking activity in real-time, the new lock tracing tool `pg_lock_tracer` can be used. `pg_lock_tracer` is an open-source tool that can be downloaded from the [website](https://github.com/jnidzwetzki/pg-lock-tracer) of the project.
 
 <!--more-->
 
@@ -34,7 +34,9 @@ apt install python3-bpfcc
 
 ### Execute the Tracer
 
-In this section, a simple query is traced. After the tracer is installed, it can be executed. The following command uses the PostgreSQL binary `/home/jan/postgresql-sandbox/bin/REL_14_2_DEBUG/bin/postgres` and observes the process with the ID `327578`. To resolve the used _Object identifiers_ (OIDs) in the lock call, `pg_lock_tracer` can connect to the catalog of the database and get the real names of the tables. For example, the OID 3081 is translated into `pg_catalog.pg_extension_name_index`. Because every database has its own catalog with OIDs, the OID resolver has to be specified per traced process. By using the `--statistics` parameter, statistics about the locks are shown before the tool is terminated.
+In this section, a simple query is traced. After the tracer is installed, it can be executed. The following command uses the PostgreSQL binary `/home/jan/postgresql-sandbox/bin/REL_14_2_DEBUG/bin/postgres` and observes the process with the ID `327578` (the SQL query `SELECT * from pg_backend_pid();` can be used to determine the PID of the PostgreSQL backend process). 
+
+To resolve the used _Object identifiers_ (OIDs) in the lock call, `pg_lock_tracer` can connect to the catalog of the database and get the real names of the tables. For example, the OID 3081 is translated into `pg_catalog.pg_extension_name_index`. Because every database has its own catalog with OIDs, the OID resolver has to be specified per traced process. By using the `--statistics` parameter, statistics about the locks are shown before the tool is terminated.
 
 ```
 pg_lock_tracer -x /home/jan/postgresql-sandbox/bin/REL_14_2_DEBUG/bin/postgres -p 327578 -r 327578:sql://jan@localhost/test2 --statistics
@@ -121,8 +123,46 @@ Lock types
 +---------------------+---------------------------+
 ```
 
-## Full Help Output of the Tracer
-The lock tracer provides a lot of additional options. For example, the types of the events can be restricted or stack traces can be generated for every locking event. More information about all the options can be found in the help output:
+## More Options of the Tracker.
+The lock tracer provides a lot of additional options. For example, the types of the events can be restricted or stack traces can be generated for every locking event. To trace only locking events (`-t LOCK`) and generate stack traces for every lock event (`-s LOCK`), the tracer can be invoked as follows:
+
+```
+pg_lock_tracer -x /home/jan/postgresql-sandbox/bin/REL_14_2_DEBUG/bin/postgres -p 1051967 -r 1051967:sql://jan@localhost/test2 -s LOCK -t LOCK
+```
+
+The output of the tracer looks as follows:
+
+```
+[...]
+1990162746005798 [Pid 1051967] Lock object 3079 (pg_catalog.pg_extension) AccessShareLock
+	LockRelationOid+0x0 [postgres]
+	table_open+0x1d [postgres]
+	parse_analyze+0xed [postgres]
+	pg_analyze_and_rewrite+0x49 [postgres]
+	exec_simple_query+0x2db [postgres]
+	PostgresMain+0x833 [postgres]
+	ExitPostmaster+0x0 [postgres]
+	BackendStartup+0x1b1 [postgres]
+	ServerLoop+0x2d9 [postgres]
+	PostmasterMain+0x1286 [postgres]
+	startup_hacks+0x0 [postgres]
+	__libc_start_main+0xea [libc-2.31.so]
+	[unknown]
+[...]
+```
+
+To resolve one of these addresses to a line in the source code, the debugger `gdb` can be used. For example, to resolve `exec_simple_query+0x2db` to a line, the following command has to be executed:
+
+```
+gdb /home/jan/postgresql-sandbox/bin/REL_14_2_DEBUG/bin/postgres
+[...]
+(gdb) info line *(exec_simple_query+0x2db)
+Line 1130 of "postgres.c" starts at address 0x5d4758 <exec_simple_query+696> and ends at 0x5d477f <exec_simple_query+735>.
+```
+
+It can be seen that the address `exec_simple_query+0x2db` resolves to line 1130 of the file `postgres.c`.
+
+More information about all the options of `pg_lock_tracer` can be found in the help output:
 
 ```
 usage: pg_lock_tracer [-h] [-v] [-j] -p PID [PID ...] -x PATH [-r [OIDResolver ...]]
