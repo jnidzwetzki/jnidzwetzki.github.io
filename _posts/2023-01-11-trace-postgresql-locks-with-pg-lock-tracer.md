@@ -23,7 +23,7 @@ The output of the tool is intended to be readable by a human. However, by using 
 To install the lock tracker, the Python package installer `pip` can be used:
 
 ```
-pip install git+https://github.com/jnidzwetzki/pg-lock-tracer
+pip install pg-lock-tracer
 ```
 
 This command installs the lock tracker with most needed dependencies. However, the BPF Python binding needs to be installed via the package manager of the used Linux distribution; they are currently not available via pip. To install them on a Ubuntu or Debian based system, the following command can be used:
