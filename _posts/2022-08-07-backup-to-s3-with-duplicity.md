@@ -4,6 +4,7 @@ title: >
     Backup your Data encrypted to AWS S3 using Duplicity
 tags: [Howto, Backup, Duplicity]
 author: jan
+categories: Devops
 excerpt_separator: <!--more-->
 ---
 

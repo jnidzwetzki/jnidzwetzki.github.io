@@ -4,6 +4,7 @@ title: >
     Trace PostgreSQL locks with pg_lock_tracer
 tags: [PostgreSQL, Tracing]
 author: jan
+categories: Development
 excerpt_separator: <!--more-->
 ---
 

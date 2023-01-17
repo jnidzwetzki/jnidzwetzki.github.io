@@ -4,6 +4,7 @@ title: >
     A HTTPs reverse proxy for Docker with Traefik and Let's encrypt
 tags: [Howto, Docker, Traefik]
 author: jan
+categories: Devops
 excerpt_separator: <!--more-->
 ---
 

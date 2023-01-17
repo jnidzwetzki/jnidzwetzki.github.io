@@ -4,6 +4,7 @@ title: >
     Processing Intervals and Hyperrectangles in Java with BBoxDB Commons
 tags: [Howto, Java]
 author: jan
+categories: Development
 excerpt_separator: <!--more-->
 ---
 
