@@ -124,7 +124,7 @@ Lock types
 +---------------------+---------------------------+
 ```
 
-## More Options of the tracer.
+## More Options of the Tracer
 The lock tracer provides a lot of additional options. For example, the types of the events can be restricted or stack traces can be generated for every locking event. To trace only locking events (`-t LOCK`) and generate stack traces for every lock event (`-s LOCK`), the tracer can be invoked as follows:
 
 ```
