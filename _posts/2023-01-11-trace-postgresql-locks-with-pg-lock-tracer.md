@@ -21,13 +21,13 @@ The output of the tool is intended to be readable by a human. However, by using 
 
 ## Download and Usage
 
-To install the lock tracker, the Python package installer `pip` can be used:
+To install the lock tracer, the Python package installer `pip` can be used:
 
 ```
 pip install pg-lock-tracer
 ```
 
-This command installs the lock tracker with most needed dependencies. However, the BPF Python binding needs to be installed via the package manager of the used Linux distribution; they are currently not available via pip. To install them on a Ubuntu or Debian based system, the following command can be used:
+This command installs the lock tracer with most needed dependencies. However, the BPF Python binding needs to be installed via the package manager of the used Linux distribution; they are currently not available via pip. To install them on a Ubuntu or Debian based system, the following command can be used:
 
 ```
 apt install python3-bpfcc
@@ -124,7 +124,7 @@ Lock types
 +---------------------+---------------------------+
 ```
 
-## More Options of the Tracker.
+## More Options of the tracer.
 The lock tracer provides a lot of additional options. For example, the types of the events can be restricted or stack traces can be generated for every locking event. To trace only locking events (`-t LOCK`) and generate stack traces for every lock event (`-s LOCK`), the tracer can be invoked as follows:
 
 ```
