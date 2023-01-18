@@ -4,7 +4,6 @@ title: >
     Install Kubernetes using Ansible / Kubeadm
 tags: [Howto, Kubernetes]
 author: jan
-categories: Devops
 excerpt_separator: <!--more-->
 ---
 

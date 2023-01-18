@@ -4,7 +4,6 @@ title: >
     Measuring and visualizing I/O latency with ioping and gnuplot
 tags: [Benchmark]
 author: jan
-categories: Development
 excerpt_separator: <!--more-->
 ---
 

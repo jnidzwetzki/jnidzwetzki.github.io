@@ -4,7 +4,6 @@ title: >
     Memory Contexts in PostgreSQL
 tags: [Howto, PostgreSQL]
 author: jan
-categories: Development
 excerpt_separator: <!--more-->
 ---
 

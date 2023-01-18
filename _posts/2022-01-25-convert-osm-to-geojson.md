@@ -4,7 +4,6 @@ title: >
     Convert OpenStreetMap data to GeoJSON 
 tags: [GeoJSON, Spatial Data]
 author: jan
-categories: Development
 excerpt_separator: <!--more-->
 ---
 
