@@ -12,7 +12,7 @@ The DBMS PostgreSQL uses locks to synchronize access to resources like tables. T
 <!--more-->
 
 ## Goal of the Tool
-The tool employs a _Berkeley Packet Filter_ ([BPF](https://en.wikipedia.org/wiki/Berkeley_Packet_Filter)) program to get the locking activity of a PostgreSQL process in real-time with very low overhead. In addition, statistics about the taken locks (e.g., number of locks, lock types, delay) are measured by the tool. After the tool is running, the taken locks of the process are shown in real-time.
+The tool employs a _Berkeley Packet Filter_ ([BPF](https://en.wikipedia.org/wiki/Berkeley_Packet_Filter)) program to trace the locking activity of a PostgreSQL process in real-time with very low overhead. In addition, statistics about the taken locks (e.g., number of locks, lock types, delay) are measured by the tool. After the tool is running, the taken locks of the process are shown in real-time.
 
 The tracer is intended for developers or system administrators to get additional information about the internals of PostgreSQL. In addition to the [lock types](https://www.postgresql.org/docs/current/explicit-locking.html#LOCKING-TABLES), table open and close activity, transactions, deadlocks, errors, and the way the lock is grated is shown ([fast-path locking](https://www.postgresql.org/message-id/E1QifmZ-0002KR-Ph@gemulon.postgresql.org) or [local locks](https://github.com/postgres/postgres/blob/master/src/backend/storage/lmgr/README#L78)).
 
