@@ -26,9 +26,10 @@ To check if a PostgreSQL binary was compiled with active trace points, the progr
 sudo bpftrace -l "usdt:/home/jan/postgresql-sandbox/bin/REL_15_1_DEBUG/bin/postgres:*"
 ```
 
-When it returns a output like this, the PostgreSQL binary was compiled with enables trace points:
+When it returns a output as follows, the PostgreSQL binary was compiled with enabled trace points:
 
 ```
+[...]
 usdt:/home/jan/postgresql-sandbox/bin/REL_15_1_DEBUG/bin/postgres:postgresql:clog__checkpoint__start
 usdt:/home/jan/postgresql-sandbox/bin/REL_15_1_DEBUG/bin/postgres:postgresql:clog__checkpoint__done
 usdt:/home/jan/postgresql-sandbox/bin/REL_15_1_DEBUG/bin/postgres:postgresql:multixact__checkpoint__start
@@ -37,7 +38,10 @@ usdt:/home/jan/postgresql-sandbox/bin/REL_15_1_DEBUG/bin/postgres:postgresql:sub
 usdt:/home/jan/postgresql-sandbox/bin/REL_15_1_DEBUG/bin/postgres:postgresql:subtrans__checkpoint__done
 usdt:/home/jan/postgresql-sandbox/bin/REL_15_1_DEBUG/bin/postgres:postgresql:twophase__checkpoint__start
 usdt:/home/jan/postgresql-sandbox/bin/REL_15_1_DEBUG/bin/postgres:postgresql:twophase__checkpoint__done
+[...]
 ```
+
+If it returns an empty output, no trace points are defined in the binary and PostgreSQL needs to be re-compiled with `--enable-dtrace` to use `pg_lw_lock_tracer`.
 
 ## Download and Usage
 
