@@ -9,7 +9,7 @@ order: 1
 
 ### Hi there 👋
 
-I am Jan, a software developer and computer scientist ([Dr. rer. nat.](https://www.fernuni-hagen.de/universitaet/stimmen/nidzwetzki.shtml)) with a focus on distributed databases and distributed systems. I am 37 years old, live in Berlin (Germany), and have been working in IT for about 20 years. I worked as a system administrator, network administrator, software developer, and CTO. At the moment, I am working as a senior software developer on a PostgreSQL extension for time-series data.
+I am Jan, a software developer and computer scientist ([Dr. rer. nat.](https://www.fernuni-hagen.de/universitaet/stimmen/nidzwetzki.shtml)) with a focus on distributed databases and distributed systems. I live in Berlin (Germany) and have been working in IT for about 20 years. I worked as a system administrator, network administrator, software developer, and CTO. At the moment, I am working as a senior software developer on a PostgreSQL extension for time-series data.
 
 - 🔭 My PhD project is [BBoxDB](https://bboxdb.org), a distributed key-bounding-box-value database. BBoxDB is a NoSQL database for multi-dimensional data implemented from scratch (see [full paper](https://link.springer.com/article/10.1007/s10619-019-07275-w)). With BBoxDB Streams, the software can also process multi-dimensional data streams and execute continuous queries (e.g., continuous range queries and continuous spatial joins, see the [full paper](https://link.springer.com/article/10.1007/s10619-022-07408-8)).
 
