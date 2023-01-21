@@ -7,7 +7,7 @@ author: jan
 excerpt_separator: <!--more-->
 ---
 
-The Database Management System PostgreSQL uses lightweight locks ([LWLocks](https://github.com/postgres/postgres/blob/c8e1ba736b2b9e8c98d37a5b77c4ed31baf94147/src/backend/storage/lmgr/lwlock.c)) to control access to shared memory data structures. In this article, the tool `pg_lw_lock_trace` is presented that allows tracing these kinds of locks. 
+The Database Management System PostgreSQL uses lightweight locks ([LWLocks](https://github.com/postgres/postgres/blob/c8e1ba736b2b9e8c98d37a5b77c4ed31baf94147/src/backend/storage/lmgr/lwlock.c)) to control access to shared memory data structures. In this article, the tool `pg_lw_lock_trace` is presented that allows tracing these kinds of locks. The tool can be downloaded from the [website](https://github.com/jnidzwetzki/pg-lock-tracer) of the project.
 
 This is the second article that deals with tracing PostgreSQL locks. The first article deals with the tracing of heavyweight locks and can be found [here](/2023/01/11/trace-postgresql-locks-with-pg-lock-tracer.html).
 
