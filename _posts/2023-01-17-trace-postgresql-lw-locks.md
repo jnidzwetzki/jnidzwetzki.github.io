@@ -127,4 +127,6 @@ Locks per type
 ```
 
 ## Summary
-`pg_lw_lock_trace` is a tracer for PostgreSQL lightweight locks. The tool is available [on GitHub](https://github.com/jnidzwetzki/pg-lock-tracer/) for download. It uses _Userland Statically Defined Tracing_ to trace the LWLock activity in real-time. A description of a lock tracer for heavyweight locks can be found in the [first part](/2023/01/11/trace-postgresql-locks-with-pg-lock-tracer.html) of this article series about locks.
+`pg_lw_lock_trace` is a tracer for PostgreSQL lightweight locks. The tool is available [on GitHub](https://github.com/jnidzwetzki/pg-lock-tracer/) for download. It uses _Userland Statically Defined Tracing_ to trace the LWLock activity in real-time. Statistics about wait times of the LWLocks are also collected. This makes the tool very useful for performance analysis.
+
+A description of a lock tracer for heavyweight locks can be found in the [first part](/2023/01/11/trace-postgresql-locks-with-pg-lock-tracer.html) of this article series about locks.
