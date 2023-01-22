@@ -14,11 +14,11 @@ This is the second article that deals with tracing PostgreSQL locks. The first a
 <!--more-->
 
 ## Goal of the Tool
-`pg_lw_lock_trace` is a tracer for lightweight locks. It allows attaching to a running PostgreSQL process and trace (see the lock and unlock) events of lightweight locks. A LWLock can [be taken](https://github.com/postgres/postgres/blob/c9f7f926484d69e2806e35343af7e472fadfede7/src/include/storage/lwlock.h#L113) as a shared `LW_SHARED` or as an exclusive `LW_EXCLUSIVE` lock. In addition, a special `LW_WAIT_UNTIL_FREE` mode is implemented in PostgreSQL to wait until a LWLock [becomes free](https://github.com/postgres/postgres/blob/c8e1ba736b2b9e8c98d37a5b77c4ed31baf94147/src/backend/storage/lmgr/lwlock.c#L1593).
+`pg_lw_lock_trace` is a tracer for lightweight locks. It allows attaching to a running PostgreSQL process and trace (see the lock and unlock) events of lightweight locks. A LWLock can [be taken](https://github.com/postgres/postgres/blob/c9f7f926484d69e2806e35343af7e472fadfede7/src/include/storage/lwlock.h#L113) as a shared `LW_SHARED` or as an exclusive `LW_EXCLUSIVE` lock. In addition, a special `LW_WAIT_UNTIL_FREE` mode is implemented in PostgreSQL to wait until a LWLock [becomes free](https://github.com/postgres/postgres/blob/c8e1ba736b2b9e8c98d37a5b77c4ed31baf94147/src/backend/storage/lmgr/lwlock.c#L1593). In addition, statistics about the acquired locks and wait times are gathered by `pg_lw_lock_trace`.
 
 ## Trace Points
 
-All of these lock events are traced by `pg_lw_lock_trace` and shown in real-time. The tool uses _Userland Statically Defined Tracing_ (USDT) to trace these events. These are [static trace point](https://www.postgresql.org/docs/current/dynamic-trace.html) that are [defined](https://github.com/postgres/postgres/blob/c8e1ba736b2b9e8c98d37a5b77c4ed31baf94147/src/backend/storage/lmgr/lwlock.c#L762) in the [source code of PostgreSQL](https://github.com/postgres/postgres/blob/c8e1ba736b2b9e8c98d37a5b77c4ed31baf94147/src/backend/storage/lmgr/lwlock.c#L1685). To enable this functionality, PostgreSQL has to be compiled with `--enable-dtrace`.
+The LWLock events are traced by `pg_lw_lock_trace` in real-time. The tool uses _Userland Statically Defined Tracing_ (USDT) to trace these events. These are [static trace point](https://www.postgresql.org/docs/current/dynamic-trace.html) that are defined in the [source code of PostgreSQL](https://github.com/postgres/postgres/blob/c8e1ba736b2b9e8c98d37a5b77c4ed31baf94147/src/backend/storage/lmgr/lwlock.c#L1685). To enable this functionality, PostgreSQL has to be compiled with `--enable-dtrace`.
 
 To check if a PostgreSQL binary was compiled with active trace points, the program `bpftrace` can be used. It allows to list all in a binary defined USDT trace points. For example, the following command can be used to list all trace points of the binary `/home/jan/postgresql-sandbox/bin/REL_15_1_DEBUG/bin/postgres`.
 
@@ -95,7 +95,7 @@ A sample output looks as follows:
 [...]
 ```
 
-When the option `--statistics` is used, statistics about the traced locks are shown during the termination of the tool. A [tranche](https://github.com/postgres/postgres/blob/c8e1ba736b2b9e8c98d37a5b77c4ed31baf94147/src/backend/storage/lmgr/lwlock.c#L115) is the identifier of the resource that is protected by the lock.
+When the option `--statistics` is used, statistics about the traced locks are shown during the termination of the tool. A [tranche](https://github.com/postgres/postgres/blob/c8e1ba736b2b9e8c98d37a5b77c4ed31baf94147/src/backend/storage/lmgr/lwlock.c#L115) is the [identifier](https://github.com/postgres/postgres/blob/c8e1ba736b2b9e8c98d37a5b77c4ed31baf94147/src/backend/storage/lmgr/lwlock.c#L762) of the resource that is protected by the lock.
 
 ```
 Lock statistics:
