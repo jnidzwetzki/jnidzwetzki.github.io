@@ -70,58 +70,72 @@ pg_lw_lock_tracer -p 1234 -v --statistics
 A sample output looks as follows:
 
 ```
-2900159444029895 [Pid 1704367] Lock LockFastPath / mode LW_EXCLUSIVE
-2900159444076368 [Pid 1704367] Unlock LockFastPath
-2900159444236977 [Pid 1704367] Lock ProcArray / mode LW_SHARED
-2900159444257840 [Pid 1704367] Unlock ProcArray
-2900159444320435 [Pid 1704367] Lock LockFastPath / mode LW_EXCLUSIVE
-2900159444338597 [Pid 1704367] Unlock LockFastPath
-2900159444548179 [Pid 1704367] Lock ProcArray / mode LW_SHARED
-2900159444566912 [Pid 1704367] Unlock ProcArray
-2900159444681139 [Pid 1704367] Lock XidGen / mode LW_EXCLUSIVE
-2900159444702045 [Pid 1704367] Unlock XidGen
-2900159444725929 [Pid 1704367] Lock LockManager / mode LW_EXCLUSIVE
-2900159444753300 [Pid 1704367] Unlock LockManager
-2900159444793436 [Pid 1704367] Lock BufferMapping / mode LW_SHARED
-2900159444817102 [Pid 1704367] Unlock BufferMapping
-2900159444838499 [Pid 1704367] Lock BufferContent / mode LW_EXCLUSIVE
-2900159444874512 [Pid 1704367] Lock WALInsert / mode LW_EXCLUSIVE
-2900159444898304 [Pid 1704367] Unlock WALInsert
-2900159444917408 [Pid 1704367] Unlock BufferContent
-2900159445004220 [Pid 1704367] Lock WALInsert / mode LW_EXCLUSIVE
-2900159445025137 [Pid 1704367] Unlock WALInsert
-2900159445051455 [Pid 1704367] Wait for WALWrite
-2900161928603586 [Pid 1704367] Lock for WALWrite was acquired in 2483552131 ns
+===> Ready to trace
+2904552881615298 [Pid 1704367] Acquired lock LockFastPath (mode LW_EXCLUSIVE) / LWLockAcquire()
+2904552881673849 [Pid 1704367] Unlock LockFastPath
+2904552881782910 [Pid 1704367] Acquired lock ProcArray (mode LW_SHARED) / LWLockAcquire()
+2904552881803614 [Pid 1704367] Unlock ProcArray
+2904552881865272 [Pid 1704367] Acquired lock LockFastPath (mode LW_EXCLUSIVE) / LWLockAcquire()
+2904552881883641 [Pid 1704367] Unlock LockFastPath
+2904552882095131 [Pid 1704367] Acquired lock ProcArray (mode LW_SHARED) / LWLockAcquire()
+2904552882114171 [Pid 1704367] Unlock ProcArray
+2904552882225372 [Pid 1704367] Acquired lock XidGen (mode LW_EXCLUSIVE) / LWLockAcquire()
+2904552882246673 [Pid 1704367] Unlock XidGen
+2904552882270279 [Pid 1704367] Acquired lock LockManager (mode LW_EXCLUSIVE) / LWLockAcquire()
+2904552882296782 [Pid 1704367] Unlock LockManager
+2904552882335466 [Pid 1704367] Acquired lock BufferMapping (mode LW_SHARED) / LWLockAcquire()
+2904552882358198 [Pid 1704367] Unlock BufferMapping
+2904552882379951 [Pid 1704367] Acquired lock BufferContent (mode LW_EXCLUSIVE) / LWLockAcquire()
+2904552882415333 [Pid 1704367] Acquired lock WALInsert (mode LW_EXCLUSIVE) / LWLockAcquire()
+2904552882485459 [Pid 1704367] Unlock WALInsert
+2904552882506167 [Pid 1704367] Unlock BufferContent
+2904552882590752 [Pid 1704367] Acquired lock WALInsert (mode LW_EXCLUSIVE) / LWLockAcquire()
+2904552882611656 [Pid 1704367] Unlock WALInsert
+2904552882638194 [Pid 1704367] Wait for WALWrite
+2904554401202251 [Pid 1704367] Wait for WALWrite lock took 1518564057 ns
 [...]
 ```
 
-When the option `--statistics` is used, statistics about the traced locks are shown during the termination of the tool. A [tranche](https://github.com/postgres/postgres/blob/c8e1ba736b2b9e8c98d37a5b77c4ed31baf94147/src/backend/storage/lmgr/lwlock.c#L115) is the [identifier](https://github.com/postgres/postgres/blob/c8e1ba736b2b9e8c98d37a5b77c4ed31baf94147/src/backend/storage/lmgr/lwlock.c#L762) of the resource that is protected by the lock.
+When the option `--statistics` is used, statistics about the traced locks can be collected. The statistics are shown during the termination of the tool (after hitting CTRL+c). 
+
+A [tranche](https://github.com/postgres/postgres/blob/c8e1ba736b2b9e8c98d37a5b77c4ed31baf94147/src/backend/storage/lmgr/lwlock.c#L115) is the [identifier](https://github.com/postgres/postgres/blob/c8e1ba736b2b9e8c98d37a5b77c4ed31baf94147/src/backend/storage/lmgr/lwlock.c#L762) of the resource that is protected by the lock. LWLocks can be acquired using different functions in PostgreSQL:
+
+* The function `LWLockAcquire(...)` ([link](https://github.com/postgres/postgres/blob/c8e1ba736b2b9e8c98d37a5b77c4ed31baf94147/src/backend/storage/lmgr/lwlock.c#L1191)) is the most commonly used function to acquire LWLocks. If the lock can be granted, it is granted and the function returns. Otherwise, the function waits until the lock is available, squires it, and returns.
+
+* The function `LWLockConditionalAcquire(...)` ([link](https://github.com/postgres/postgres/blob/c8e1ba736b2b9e8c98d37a5b77c4ed31baf94147/src/backend/storage/lmgr/lwlock.c#L1362)) also tries to acquire the lock. If it is not directly available, it just returns false.
+
+* The function `LWLockAcquireOrWait(...)` ([link](https://github.com/postgres/postgres/blob/c8e1ba736b2b9e8c98d37a5b77c4ed31baf94147/src/backend/storage/lmgr/lwlock.c#L1419)) tries to acquire the lock. If it is not directly available, it waits until the lock is available but does __not__ acquire the lock.
+
+From the PostgreSQL source code ([link](https://github.com/postgres/postgres/blob/c8e1ba736b2b9e8c98d37a5b77c4ed31baf94147/src/backend/storage/lmgr/lwlock.c#L1419)):
+> The semantics of this function are a bit funky.  If the lock is currently free, it is acquired in the given mode, and the function returns true.  If the lock isn't immediately free, the function waits until it is released and returns false, but does not acquire the lock.
+
+Depending on the function used to acquire the LWLock, different counters are increased in the statistics.
 
 ```
 Lock statistics:
 ================
 
 Locks per tranche
-+---------------+--------------+--------------------------+----------------+-------------------+-------+----------------+
-|  Tranche Name | Direct Grant | Grant or wait until free | With condition | Failed conditions | Waits | Wait time (ns) |
-+---------------+--------------+--------------------------+----------------+-------------------+-------+----------------+
-| BufferContent |      1       |            0             |       0        |         0         |   0   |       0        |
-| BufferMapping |      1       |            0             |       0        |         0         |   0   |       0        |
-|  LockFastPath |      4       |            0             |       0        |         0         |   0   |       0        |
-|  LockManager  |      2       |            0             |       0        |         0         |   0   |       0        |
-|  PgStatsData  |      0       |            0             |       4        |         0         |   0   |       0        |
-|   ProcArray   |      2       |            0             |       1        |         0         |   0   |       0        |
-|   WALInsert   |      2       |            0             |       0        |         0         |   0   |       0        |
-|    WALWrite   |      0       |            1             |       0        |         0         |   1   |   2483552131   |
-|    XactSLRU   |      0       |            0             |       1        |         0         |   0   |       0        |
-|     XidGen    |      1       |            0             |       0        |         0         |   0   |       0        |
-+---------------+--------------+--------------------------+----------------+-------------------+-------+----------------+
++---------------+----------+--------------------------+------------------------+-------------------------------+-----------------------------+-------+----------------+
+|    Tranche    | Acquired | AcquireOrWait (Acquired) | AcquireOrWait (Waited) | ConditionalAcquire (Acquired) | ConditionalAcquire (Failed) | Waits | Wait time (ns) |
++---------------+----------+--------------------------+------------------------+-------------------------------+-----------------------------+-------+----------------+
+| BufferContent |    1     |            0             |           0            |               0               |              0              |   0   |       0        |
+| BufferMapping |    1     |            0             |           0            |               0               |              0              |   0   |       0        |
+|  LockFastPath |    4     |            0             |           0            |               0               |              0              |   0   |       0        |
+|  LockManager  |    2     |            0             |           0            |               0               |              0              |   0   |       0        |
+|  PgStatsData  |    0     |            0             |           0            |               4               |              0              |   0   |       0        |
+|   ProcArray   |    2     |            0             |           0            |               1               |              0              |   0   |       0        |
+|   WALInsert   |    2     |            0             |           0            |               0               |              0              |   0   |       0        |
+|    WALWrite   |    0     |            1             |           1            |               0               |              0              |   1   |   1518564057   |
+|    XactSLRU   |    0     |            0             |           0            |               1               |              0              |   0   |       0        |
+|     XidGen    |    1     |            0             |           0            |               0               |              0              |   0   |       0        |
++---------------+----------+--------------------------+------------------------+-------------------------------+-----------------------------+-------+----------------+
 
 Locks per type
 +--------------+----------+
 |  Lock type   | Requests |
 +--------------+----------+
-| LW_EXCLUSIVE |    17    |
+| LW_EXCLUSIVE |    18    |
 |  LW_SHARED   |    3     |
 +--------------+----------+
 ```
