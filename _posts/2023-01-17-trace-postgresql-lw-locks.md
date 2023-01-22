@@ -106,7 +106,7 @@ A [tranche](https://github.com/postgres/postgres/blob/c8e1ba736b2b9e8c98d37a5b77
 
 * The function `LWLockAcquireOrWait(...)` ([link](https://github.com/postgres/postgres/blob/c8e1ba736b2b9e8c98d37a5b77c4ed31baf94147/src/backend/storage/lmgr/lwlock.c#L1419)) tries to acquire the lock. If it is not directly available, it waits until the lock is available but does __not__ acquire the lock.
 
-From the PostgreSQL source code ([link](https://github.com/postgres/postgres/blob/c8e1ba736b2b9e8c98d37a5b77c4ed31baf94147/src/backend/storage/lmgr/lwlock.c#L1419)):
+From the PostgreSQL source code ([link](https://github.com/postgres/postgres/blob/c8e1ba736b2b9e8c98d37a5b77c4ed31baf94147/src/backend/storage/lmgr/lwlock.c#L1404)):
 > The semantics of this function are a bit funky.  If the lock is currently free, it is acquired in the given mode, and the function returns true.  If the lock isn't immediately free, the function waits until it is released and returns false, but does not acquire the lock.
 
 Depending on the function used to acquire the LWLock, different counters are increased in the statistics.
