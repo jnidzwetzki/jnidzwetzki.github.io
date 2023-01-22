@@ -18,7 +18,7 @@ This is the second article that deals with tracing PostgreSQL locks. The first a
 
 ## Trace Points
 
-All of these lock events are traced by `pg_lw_lock_trace` and shown in real-time. The tool uses _Userland Statically Defined Tracing_ (USDT) to trace these events. These are [static trace point](https://www.postgresql.org/docs/current/dynamic-trace.html) that are defined in the [source code of PostgreSQL](https://github.com/postgres/postgres/blob/c8e1ba736b2b9e8c98d37a5b77c4ed31baf94147/src/backend/storage/lmgr/lwlock.c#L1685). To enable this functionality, PostgreSQL has to be compiled with `--enable-dtrace`.
+All of these lock events are traced by `pg_lw_lock_trace` and shown in real-time. The tool uses _Userland Statically Defined Tracing_ (USDT) to trace these events. These are [static trace point](https://www.postgresql.org/docs/current/dynamic-trace.html) that are [defined](https://github.com/postgres/postgres/blob/c8e1ba736b2b9e8c98d37a5b77c4ed31baf94147/src/backend/storage/lmgr/lwlock.c#L762) in the [source code of PostgreSQL](https://github.com/postgres/postgres/blob/c8e1ba736b2b9e8c98d37a5b77c4ed31baf94147/src/backend/storage/lmgr/lwlock.c#L1685). To enable this functionality, PostgreSQL has to be compiled with `--enable-dtrace`.
 
 To check if a PostgreSQL binary was compiled with active trace points, the program `bpftrace` can be used. It allows to list all in a binary defined USDT trace points. For example, the following command can be used to list all trace points of the binary `/home/jan/postgresql-sandbox/bin/REL_15_1_DEBUG/bin/postgres`.
 
@@ -70,18 +70,29 @@ pg_lw_lock_tracer -p 1234 -v --statistics
 A sample output looks as follows:
 
 ```
-[2057969] Locking 23077 / mode LW_EXCLUSIVE
-[2057969] Unlocking 23077
-[2057969] Locking 24302 / mode LW_SHARED
-[2057969] Unlocking 24302
-[2057969] Locking 23077 / mode LW_EXCLUSIVE
-[2057969] Unlocking 23077
-[2057969] Locking 24302 / mode LW_SHARED
-[2057969] Unlocking 24302
-[2057969] Locking 24295 / mode LW_EXCLUSIVE
-[2057969] Unlocking 24295
-[2057969] Locking 23104 / mode LW_EXCLUSIVE
-[2057969] Unlocking 23104
+[1698108] Locking LockFastPath / mode LW_EXCLUSIVE
+[1698108] Unlocking LockFastPath
+[1698108] Locking ProcArray / mode LW_SHARED
+[1698108] Unlocking ProcArray
+[1698108] Locking LockFastPath / mode LW_EXCLUSIVE
+[1698108] Unlocking LockFastPath
+[1698108] Locking ProcArray / mode LW_SHARED
+[1698108] Unlocking ProcArray
+[1698108] Locking XidGen / mode LW_EXCLUSIVE
+[1698108] Unlocking XidGen
+[1698108] Locking LockManager / mode LW_EXCLUSIVE
+[1698108] Unlocking LockManager
+[1698108] Locking BufferMapping / mode LW_SHARED
+[1698108] Unlocking BufferMapping
+[1698108] Locking BufferContent / mode LW_EXCLUSIVE
+[1698108] Locking WALInsert / mode LW_EXCLUSIVE
+[1698108] Unlocking WALInsert
+[1698108] Locking WALInsert / mode LW_EXCLUSIVE
+[1698108] Unlocking WALInsert
+[1698108] Unlocking BufferContent
+[1698108] Locking WALInsert / mode LW_EXCLUSIVE
+[1698108] Unlocking WALInsert
+[1698108] Unlocking WALWrite
 ```
 
 When the option `--statistics` is used, statistics about the traced locks are shown during the termination of the tool. A [tranche](https://github.com/postgres/postgres/blob/c8e1ba736b2b9e8c98d37a5b77c4ed31baf94147/src/backend/storage/lmgr/lwlock.c#L115) is the identifier of the resource that is protected by the lock.
@@ -91,23 +102,23 @@ Lock statistics:
 ================
 
 Locks per tranche
-+--------------+----------+
-| Tranche Name | Requests |
-+--------------+----------+
-|    43492     |    2     |
-|    43502     |    1     |
-|    43557     |    4     |
-|    43570     |    1     |
-|    43584     |    2     |
-|    44775     |    1     |
-|    44782     |    2     |
-+--------------+----------+
++---------------+----------+
+|  Tranche Name | Requests |
++---------------+----------+
+| BufferContent |    1     |
+| BufferMapping |    1     |
+|  LockFastPath |    4     |
+|  LockManager  |    2     |
+|   ProcArray   |    2     |
+|   WALInsert   |    3     |
+|     XidGen    |    1     |
++---------------+----------+
 
 Locks per type
 +--------------+----------+
 |  Lock type   | Requests |
 +--------------+----------+
-| LW_EXCLUSIVE |    10    |
+| LW_EXCLUSIVE |    11    |
 |  LW_SHARED   |    3     |
 +--------------+----------+
 ```
