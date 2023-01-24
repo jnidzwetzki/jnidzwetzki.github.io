@@ -19,7 +19,7 @@ I am Jan, a software developer and computer scientist ([Dr. rer. nat.](https://w
 
 - 💬 I also talked at international conferences ([SSTD](http://sstd2015.org/), [IEEE BigData](http://cse.ucdenver.edu/~BSD2019/), [CIKM](https://www.cikm2018.units.it/), [EDBT](https://edbticdt2021.cs.ucy.ac.cy/), ...) about databases and published some peer-reviewed  scientific papers. Have a look at my [Demo Paper](https://ieeexplore.ieee.org/document/9005999), which won the IEEE best demo- and short paper award at the [BSD2019](http://cse.ucdenver.edu/~BSD2019/). See also my recent EDBT [Paper](https://edbt2021proceedings.github.io/docs/p170.pdf), available as open access publication.
 
-- 🤔 I’m looking for help on my [MySQL highly-available cloud container orchestrator](https://github.com/jnidzwetzki/mysql-ha-cloud).
+- 🤔 I’m looking for help on my [PostgreSQL Lock Tracer](https://github.com/jnidzwetzki/pg-lock-tracer) project. A collection of tools to gain deep insights into PostgreSQL's locking activities and troubleshoot performance-related issues.
 
 - 📫 How to reach me: jnidzwetzki@gmx.de 
 
