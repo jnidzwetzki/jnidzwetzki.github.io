@@ -37,7 +37,7 @@ MemoryContext old_context = MemoryContextSwitchTo(new_context);
 [...]
 
 /* Switch back to old memory context */
-MemoryContextSwitchTo(old_context)
+MemoryContextSwitchTo(old_context);
 ```
 
 To create a new memory context, the function `AllocSetContextCreate` can be used. The parameter needs (1) the parent of the new memory context, (2) the name of the new context, and (3) the amount of memory that should be allocated. The macro `ALLOCSET_DEFAULT_SIZES` can be used to use the default sizes.
