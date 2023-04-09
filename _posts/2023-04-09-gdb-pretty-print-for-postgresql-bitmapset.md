@@ -14,9 +14,16 @@ To store sets of integer values efficiently, PostgreSQL uses internally a data s
 This data structure is widely used in PostgreSQL code. Internally, so-called `words` of bits are used and store the information on which element is part of the set. For instance, this data structure supports efficient tests if an integer is part of the set (using the `bms_is_member` function), to add new values (using the `bms_add_member`, `bms_add_members`, or `bms_add_range` functions), or to iterate over the values (using the `bms_next_member` and `bms_prev_member` functions). 
 
 ## Dumping the Content of the Bitmapset
- However, the content of this data structure is difficult to debug. The debugger does not show the stored content due to the lack of knowledge about the semantics of the bits. A lot of internal PostgreSQL data structures can be dumped using the `pprint` [function](https://github.com/postgres/postgres/blob/c8e1ba736b2b9e8c98d37a5b77c4ed31baf94147/src/backend/nodes/print.c#L54). Unfortunately, the `pprint` function is unable to print the content of the Bitmapset. On the PostgreSQL developer mailing list was a [patch](https://postgrespro.com/list/thread-id/1900731) proposed to introduce a function called `bms_to_char` to dump the content of the Bitmapset. Unfortunately, this patch was not accepted.
+ However, the content of this data structure is difficult to debug. The debugger does not show the stored content due to the lack of knowledge about the semantics of the bits. A lot of internal PostgreSQL data structures can be dumped using the `pprint` [function](https://github.com/postgres/postgres/blob/c8e1ba736b2b9e8c98d37a5b77c4ed31baf94147/src/backend/nodes/print.c#L54). Unfortunately, the `pprint` function is unable to print the content of the Bitmapset. 
  
- Because this data structure is used heavily inside of PostgreSQL and the database server has no native way to print the content during debugging, I have developed a GDB extension to solve this problem. This article presents a GDB extension, which provides a remedy and makes the content displayable in the debugger.
+ On the PostgreSQL developer mailing list was a [patch](https://postgrespro.com/list/thread-id/1900731) discussed to introduce a function called `bmsToString`. This function can also be used to display the content of a Bitmapset. However, this function can be only called when PostgreSQL is running. When a core dump of a crashed PostgreSQL process is examined with GDB, the function cannot be used.
+
+```
+ (gdb) call bmsToString(chunk_state->unused_batch_states)
+$6 = 0x5588689a8818 "(b 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15)"
+```
+
+ Because the Bitmapset data structure is used heavily inside of PostgreSQL and the database server has no reliable way to print the content during debugging, I have developed a GDB extension to solve this problem. This article presents a GDB extension, which provides a remedy and makes the content displayable in the debugger.
 
 For instance, when the GDB should print the content of the set, it looks as follows:
 ```
@@ -102,7 +109,7 @@ When the content of the variable `unused_batch_states` is now printed in GDB, it
 $3 = PGBitmapset ([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15])
 ```
 
-The output now clearly shows which integer values are part of the bitmap set.
+The output now clearly shows which integer values are part of the bitmap set. This is similar to the output of the `bmsToString` function shown above. The main difference is that the GDB extension also works when coredump files are analyzed and PostgreSQL is not running.
 
 The pretty printer has to be loaded via the `source` command every time GDB is restarted. This is cumbersome. To ease the work with this extension, the command can be added to the `~/.gdbinit` file. The commands of this file are automatically executed every time GDB is invoked.
 
