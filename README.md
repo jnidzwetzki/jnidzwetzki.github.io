@@ -21,4 +21,6 @@ git merge template/master
 
 ```
 
-
+# Ideas
+* PostgreSQL Sandbox
+* PostgreSQL and Custom Nodes - From Path to Plan

@@ -19,7 +19,7 @@ This data structure is widely used in PostgreSQL code. Internally, so-called `wo
  On the PostgreSQL developer mailing list was a [patch](https://postgrespro.com/list/thread-id/1900731) discussed to introduce a function called `bmsToString`. This function can also be used to display the content of a Bitmapset. However, this function can be only called when PostgreSQL is running. When a core dump of a crashed PostgreSQL process is examined with GDB, the function cannot be used.
 
 ```
- (gdb) call bmsToString(chunk_state->unused_batch_states)
+(gdb) call bmsToString(chunk_state->unused_batch_states)
 $6 = 0x5588689a8818 "(b 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15)"
 ```
 
