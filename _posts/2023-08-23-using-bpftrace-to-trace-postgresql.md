@@ -160,7 +160,7 @@ uprobe:/home/jan/postgresql-sandbox/bin/REL_14_2_DEBUG/bin/postgres:vacuum_rel
 uretprobe:/home/jan/postgresql-sandbox/bin/REL_14_2_DEBUG/bin/postgres:vacuum_rel
 /@start[tid]/
 {
-        printf("vacuum call took %d ns\n", nsecs - @start[tid]);
+        printf("Vacuum call took %d ns\n", nsecs - @start[tid]);
         delete(@start[tid]);
 }
 '
@@ -171,13 +171,13 @@ After running this bpftrace call and executing `VACUUM FULL` in a second session
 ```
 Attaching 2 probes...
 Performing vacuum
-vacuum call took 37486735 ns
+Vacuum call took 37486735 ns
 Performing vacuum
-vacuum call took 16491130 ns
+Vacuum call took 16491130 ns
 Performing vacuum
-vacuum call took 32443568 ns
+Vacuum call took 32443568 ns
 Performing vacuum
-vacuum call took 17959933 ns
+Vacuum call took 17959933 ns
 [...]
 ```
 
@@ -209,29 +209,29 @@ uprobe:/home/jan/postgresql-sandbox/bin/REL_14_2_DEBUG/bin/postgres:vacuum_rel
 uretprobe:/home/jan/postgresql-sandbox/bin/REL_14_2_DEBUG/bin/postgres:vacuum_rel
 /@start[tid]/
 {
-        printf("vacuum call took %d ns\n", nsecs - @start[tid]);
+        printf("Vacuum call took %d ns\n", nsecs - @start[tid]);
         delete(@start[tid]);
 }
 '
 ```
 
-When the `VACCUM FULL` operation is executed again in a second terminal, the output looks as follows:
+When the `VACUUM FULL` operation is executed again in a second terminal, the output looks as follows:
 
 ```
 Attaching 2 probes...
 [...]
 Performing vacuum of OID 1153888
-vacuum call took 37486734 ns
+Vacuum call took 37486734 ns
 Performing vacuum of OID 1153891
-vacuum call took 49535256 ns
+Vacuum call took 49535256 ns
 Performing vacuum of OID 2619
-vacuum call took 39575635 ns
+Vacuum call took 39575635 ns
 Performing vacuum of OID 2840
-vacuum call took 40683526 ns
+Vacuum call took 40683526 ns
 Performing vacuum of OID 1247
-vacuum call took 14683600 ns
+Vacuum call took 14683600 ns
 Performing vacuum of OID 4171
-vacuum call took 20587503 ns
+Vacuum call took 20587503 ns
 ```
 
 To determine which Oid belongs to which relation, the following SQL statement can be executed: 
@@ -285,7 +285,7 @@ uprobe:/home/jan/postgresql-sandbox/bin/REL_14_2_DEBUG/bin/postgres:vacuum_rel
 uretprobe:/home/jan/postgresql-sandbox/bin/REL_14_2_DEBUG/bin/postgres:vacuum_rel
 /@start[tid]/
 {
-        printf("[PID %d] vacuum call took %d ns\n", pid, nsecs - @start[tid]);
+        printf("[PID %d] Vacuum call took %d ns\n", pid, nsecs - @start[tid]);
         delete(@start[tid]);
 }
 '
@@ -305,9 +305,9 @@ The bpftrace program shows the following output:
 ```
 Attaching 2 probes...
 [PID 616516] Performing vacuum of OID 1153888 (public.testtable1)
-[PID 616516] vacuum call took 23683600 ns
+[PID 616516] Vacuum call took 23683600 ns
 [PID 616516] Performing vacuum of OID 1153891 (public.testtable2)
-[PID 616516] vacuum call took 24240837 ns
+[PID 616516] Vacuum call took 24240837 ns
 ```
 
 The table names are extracted from the `RangeVar` data structure and shown in the output. However, this data structure is not always populated by PostgreSQL. The data structure might be empty when running `VACUUM FULL` without specifying a table name. Therefore, we use two single invocations with explicit table names to force PostgreSQL to populate this data structure.
@@ -316,7 +316,7 @@ The table names are extracted from the `RangeVar` data structure and shown in th
 
 The bpftrace programs we have developed so far use one or more `printf` statements directly. A `printf` call is slow and reduces the throughput the bpftrace program can monitor. 
 
-This can be optimized by storing the data in a map that is printed when bpftrace is stopped. To do this, we introduce three new maps `@start`, `@oid`, and `@vaccum`. The first two maps are populated in the uprobe event of the `vacuum_rel` function. The map `@start` contains the time when the probe is triggered, and the map `@oid` contains the oid of the parameter function.
+This can be optimized by storing the data in a map that is printed when bpftrace is stopped. To do this, we introduce three new maps `@start`, `@oid`, and `@vacuum`. The first two maps are populated in the uprobe event of the `vacuum_rel` function. The map `@start` contains the time when the probe is triggered, and the map `@oid` contains the oid of the parameter function.
 
 When the function is left and the `uretprobe` is activated, the `@vacuum`  map is populated. The key is the Oid and the value are the needed time to perform the vacuum operation. In addition, the keys of the first two maps are removed.
 
@@ -345,12 +345,12 @@ uretprobe:/home/jan/postgresql-sandbox/bin/REL_14_2_DEBUG/bin/postgres:vacuum_re
 
 BEGIN
 {
-        printf("VACCUM calles are traced, press CTRL+C to stop tracing\n");
+        printf("VACUUM calles are traced, press CTRL+C to stop tracing\n");
 }
 
 END 
 {
-        printf("\n\nNeeded time in ns to perform VACCUM FULL per Oid\n");
+        printf("\n\nNeeded time in ns to perform VACUUM FULL per Oid\n");
 }
 '
 ```
@@ -358,10 +358,10 @@ END
 After bpftrace is started, the first message is printed. After the program is stopped, the second message is printed. In addition, the content of the `@vacuum` map is printed. For each Oid, the needed time for the vacuum operations is shown.
 
 ```
-VACCUM calles are traced, press CTRL+C to stop tracing
+VACUUM calles are traced, press CTRL+C to stop tracing
 ^C
 
-Needed time in ns to perform VACCUM FULL per Oid
+Needed time in ns to perform VACUUM FULL per Oid
 
 @vacuum[1153888]: 7526823
 @vacuum[1153891]: 8462672
