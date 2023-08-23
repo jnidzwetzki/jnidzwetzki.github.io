@@ -270,10 +270,10 @@ To process the struct, the following bpftrace program can be used. Please note, 
 $ sudo bpftrace -e '
 struct RangeVar
 {
-	int	       type;
-	char	   *catalogname;
-	char	   *schemaname;
-	char	   *relname;
+	int type;
+	char *catalogname;
+	char *schemaname;
+	char *relname;
 };
 
 uprobe:/home/jan/postgresql-sandbox/bin/REL_14_2_DEBUG/bin/postgres:vacuum_rel
