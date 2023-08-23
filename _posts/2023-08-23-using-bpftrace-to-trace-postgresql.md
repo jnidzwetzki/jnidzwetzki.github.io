@@ -112,25 +112,25 @@ Let's start with a very simple bpftrace program that prints a line once the `vac
 }
 ```
 
-The syntax to define a uprobe on a userland binary is: `uprobe:library_name:function_name[+offset]`. For instance, to define an uprobe on the function invocation of `vacuum_rel` in the binary `/home/jan/postgresql-sandbox/bin/REL_14_2_DEBUG/bin/postgres` and print the line `vacuum started`, the following bpftrace call can be used:
+The syntax to define a uprobe on a userland binary is: `uprobe:library_name:function_name[+offset]`. For instance, to define an uprobe on the function invocation of `vacuum_rel` in the binary `/home/jan/postgresql-sandbox/bin/REL_14_2_DEBUG/bin/postgres` and print the line `Vacuum started`, the following bpftrace call can be used:
 
 ```c
 $ sudo bpftrace -e '
 uprobe:/home/jan/postgresql-sandbox/bin/REL_14_2_DEBUG/bin/postgres:vacuum_rel {
-    printf("vacuum started\n");
+    printf("Vacuum started\n");
 }
 '
 
 Attaching 1 probe...
-vacuum started
-vacuum started
-vacuum started
-vacuum started
-vacuum started
-vacuum started
-vacuum started
-vacuum started
-vacuum started
+Vacuum started
+Vacuum started
+Vacuum started
+Vacuum started
+Vacuum started
+Vacuum started
+Vacuum started
+Vacuum started
+Vacuum started
 [...]
 ```
 
