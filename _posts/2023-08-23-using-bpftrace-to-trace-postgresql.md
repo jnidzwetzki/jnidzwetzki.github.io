@@ -291,7 +291,7 @@ uretprobe:/home/jan/postgresql-sandbox/bin/REL_14_2_DEBUG/bin/postgres:vacuum_re
 '
 ```
 
-After the struct is defined, the struct can be accessed as in a regular C program using `((struct RangeVar*) arg1)->schemaname`. In addition, we also print the process id (PID) of the program that has triggered the uprobe. This allows it to identify the process that has performed the vacuum operation.
+After the struct is defined, the members of the struct can be accessed as in a regular C program. For example: `((struct RangeVar*) arg1)->schemaname`. In addition, we also print the process id (PID) of the program that has triggered the uprobe. This allows it to identify the process that has performed the vacuum operation.
 
 When running the following SQL statements in a second terminal:
 
