@@ -278,7 +278,7 @@ struct RangeVar
 
 uprobe:/home/jan/postgresql-sandbox/bin/REL_14_2_DEBUG/bin/postgres:vacuum_rel
 {
-        printf("[PID %d] Performing vacuum of OID %d (%s.%s)\n", pid, arg0, str(((struct RangeVar*)arg1)->schemaname), str(((struct RangeVar*)arg1)->relname));
+        printf("[PID %d] Performing vacuum of OID %d (%s.%s)\n", pid, arg0, str(((struct RangeVar*) arg1)->schemaname), str(((struct RangeVar*) arg1)->relname));
         @start[tid] = nsecs;
 }
 
@@ -291,7 +291,7 @@ uretprobe:/home/jan/postgresql-sandbox/bin/REL_14_2_DEBUG/bin/postgres:vacuum_re
 '
 ```
 
-In addition, we also print the process id (PID) of the program that has triggered the uprobe. This allows it to identify the process that has performed the vacuum operation.
+After the struct is defined, the struct can be accessed as in a regular C program using `((struct RangeVar*) arg1)->schemaname`. In addition, we also print the process id (PID) of the program that has triggered the uprobe. This allows it to identify the process that has performed the vacuum operation.
 
 When running the following SQL statements in a second terminal:
 
