@@ -48,7 +48,7 @@ Afterward, a eBPF program is loaded into the Linux kernel, a uprobe is defined o
 
 To execute some vacuum operations, we perform the following SQL statement in a second session:
 
-```SQL
+```sql
 database=# VACUUM FULL;
 VACUUM FULL
 ```
@@ -149,7 +149,7 @@ In the uretprobe we take the current time and subtract the time of the function 
 
 __Note:__ Is it not guaranteed that the eBPF events are delivered and processed in-order by bpftrace. Especially when a function call is short and we have a lot of function invocations, the events could be processed out-of-order (e.g., we see two function enter events followed by two function return events). In this case, function latency observations with bpftrace become imprecise. To avoid this, we use `VACUUM FULL` calls instead of `vacuum` calls. These calls are [much more expensive](https://www.postgresql.org/docs/current/sql-vacuum.html) since they rewrite the table. Therefore, they take longer and can be reliably observed by bpftrace.
 
-```
+```c
 $ sudo bpftrace -e '
 uprobe:/home/jan/postgresql-sandbox/bin/REL_14_2_DEBUG/bin/postgres:vacuum_rel
 {
@@ -187,7 +187,7 @@ For each call of the `vacuum_rel` in PostgreSQL, we measure the time the vacuum 
 
 The function `vacuum_rel` has the following signature in PostgreSQL 14. The first parameter is the `Oid` (an [unsigned int](https://github.com/postgres/postgres/blob/1951d21b29939ddcb0e30a018cf413b949e40d97/src/include/postgres_ext.h#L31)) of the processed relation. The second parameter is a `RageVar` struct, which _could_ contain the name of the relation. The third parameter is a `VacuumParams` struct, which contains additional parameters for the vacuum operation and the last parameter is a `BufferAccessStrategy`, which defines the access strategy of the used buffer.
 
-```
+```c
 static bool vacuum_rel(Oid relid,
         RangeVar *relation,
         VacuumParams *params,
@@ -197,7 +197,7 @@ static bool vacuum_rel(Oid relid,
 
 Bpftrace allows it to access the function parameter using the keywords `arg0`, `arg1`, ..., `argN`. To include the Oid in the output our logging, we need only to print the first parameter of the function.
 
-```
+```c
 $ sudo bpftrace -e '
 
 uprobe:/home/jan/postgresql-sandbox/bin/REL_14_2_DEBUG/bin/postgres:vacuum_rel
@@ -236,7 +236,7 @@ vacuum call took 20587503 ns
 
 To determine which Oid belongs to which relation, the following SQL statement can be executed: 
 
-```SQL
+```sql
 blog=# SELECT oid, relname FROM pg_class WHERE oid IN (1153888, 1153891);
    oid   |  relname   
 ---------+------------
@@ -253,7 +253,7 @@ So far, we have processed simple parameters with `bpftrace` (like Oids, which ar
 
 The second parameter of the `vacuum_rel` function is a RangeVar struct. This struct is [defined in PostgreSQL 14](https://github.com/postgres/postgres/blob/2a8b40e3681921943a2989fd4ec6cdbf8766566c/src/include/nodes/primnodes.h#L63) as follows:
 
-```
+```c
 typedef struct RangeVar
 {
 	NodeTag	type;
@@ -266,7 +266,7 @@ typedef struct RangeVar
 
 To process the struct, the following bpftrace program can be used. Please note, that the internal `NodeTag` data type of PostgreSQL is replaced by a simple int. The `NodeTag` data type is an `enum`. Enums are backed by the integer data type in C. To handle this enum correctly, we could (1) also copy the enum definition into the eBPF program, or (2) we could replace it with a data type of the same length. To keep the bpftrace program simple, the second option is used here. The next three struct members are char pointer which contains the catalogname, the schema, and the name of the relation. The `schemaname` and the `relname` are the fields we are interested in. The struct contains more members, but these members are ignored to keep the example clear.
 
-```
+```c
 $ sudo bpftrace -e '
 struct RangeVar
 {
@@ -295,7 +295,7 @@ In addition, we also print the process id (PID) of the program that has triggere
 
 When running the following SQL statements in a second terminal:
 
-```SQL
+```sql
 VACUUM FULL public.testtable1;
 VACUUM FULL public.testtable2;
 ```
@@ -324,7 +324,7 @@ When bpftrace exits (i.e., by pressing CRTL+C), all populated maps are printed a
 
 In addition, in the following program, we use the two functions `BEGIN` and `END` that are called by bpftrace when the observation begins and ends.
 
-```
+```c
 $ sudo sudo bpftrace -e '
 
 uprobe:/home/jan/postgresql-sandbox/bin/REL_14_2_DEBUG/bin/postgres:vacuum_rel
