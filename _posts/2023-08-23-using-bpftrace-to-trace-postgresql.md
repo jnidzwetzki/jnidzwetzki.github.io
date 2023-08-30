@@ -320,7 +320,7 @@ This can be optimized by storing the data in a map that is printed when bpftrace
 
 When the function is left and the `uretprobe` is activated, the `@vacuum`  map is populated. The key is the Oid and the value are the needed time to perform the vacuum operation. In addition, the keys of the first two maps are removed.
 
-When bpftrace exits (i.e., by pressing CRTL+C), all populated maps are printed automatically. By using these tree maps, we have separated the actual monitoring from the output; the expensive printf function is called after the monitoring is done. 
+When bpftrace exits (i.e., by pressing CRTL+C), all populated maps are printed automatically. By using these three maps, we have separated the actual monitoring from the output; the expensive printf function is called after the monitoring is done. 
 
 In addition, in the following program, we use the two functions `BEGIN` and `END` that are called by bpftrace when the observation begins and ends.
 
