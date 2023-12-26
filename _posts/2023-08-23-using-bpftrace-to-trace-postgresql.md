@@ -11,6 +11,8 @@ The [eBPF technology](https://ebpf.io/) of the Linux kernel allows it to monitor
 
 <!--more-->
 
+> ⚠️ An updated and slightly revised version of this post is available in the [Timescale company blog](https://www.timescale.com/blog/using-bpftrace-to-trace-postgresql-vacuum-operations/).
+
 ## Used Environment
 
 PostgreSQL is a database management system that uses [vacuum operations](https://www.postgresql.org/docs/current/sql-vacuum.html) to reclaim space from dead (e.g., updated or deleted) tuples. 
