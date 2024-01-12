@@ -16,11 +16,11 @@ The [Elixir Cross Referencer](https://github.com/bootlin/elixir) is a source cod
 To my surprise, this is easier than expected. Elixir can be installed using Docker, and custom images for new projects can be created easily. For instance, to create a new Docker image which contains a copy of the PostgreSQL source code, the following commands have to be executed:
 
 ```
-git clone https://github.com/bootlin/elixir.git
+$ git clone https://github.com/bootlin/elixir.git
 
-cd elixir
+$ cd elixir
 
-docker build -t elixir:postgresql-11-01-2024 --build-arg GIT_REPO_URL=https://github.com/postgres/postgres.git --build-arg PROJECT=postgresql . -f docker/debian/Dockerfile
+$ docker build -t elixir:postgresql-11-01-2024 --build-arg GIT_REPO_URL=https://github.com/postgres/postgres.git --build-arg PROJECT=postgresql . -f docker/debian/Dockerfile
 ```
 
 The last command builds a new Docker image called `elixir:postgresql-11-01-2024`. This command takes some time to complete. The two `build-arg` parameters are enough to clone and index the PostgreSQL repository. After the image is created, it should be shown as an available image of the local Docker installation.
@@ -35,7 +35,7 @@ elixir                                                           postgresql-11-0
 Afterward, a new container with the image can be started. I use the parameter `-p 8081:80` to make port 80 of the container available as port 8081 of my local system.
 
 ```
-docker run elixir:postgresql-11-01-2024 -d -p 8081:80
+$ docker run elixir:postgresql-11-01-2024 -d -p 8081:80
 ```
 
 After the container is started, the PostgreSQL source code an be accessed by opening the URL `http://172.17.0.2:8081/postgresql/latest/source`. 
