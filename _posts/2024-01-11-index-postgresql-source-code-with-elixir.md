@@ -40,7 +40,7 @@ $ docker run elixir:postgresql-11-01-2024 -d -p 8081:80
 
 After the container is started, the PostgreSQL source code an be accessed by opening the URL `http://172.17.0.2:8081/postgresql/latest/source`. 
 
-{% include aligner.html images="elixir-postgresql.jpg, elixir-postgresql2.jpg" %}
+{% include aligner.html images="elixir-postgresql.jpg,elixir-postgresql2.jpg" %}
 
 If you want to modify the header of the Elixir installation, you can modify the file `templates/header.html` before building the Docker image. More information about customizing the image can be found in [the documentation](https://github.com/bootlin/elixir#building-docker-images) of the project.
 
