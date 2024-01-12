@@ -42,5 +42,7 @@ After the container is started, the PostgreSQL source code an be accessed by ope
 
 {% include aligner.html images="elixir-postgresql.jpg" %}
 
+![PostgreSQL with Elixir]("/assets/img/elixir-postgresql.jpg")
+
 If you want to modify the header of the Elixir installation, you can modify the file `templates/header.html` before building the Docker image. More information about customizing the image can be found in [the documentation](https://github.com/bootlin/elixir#building-docker-images) of the project.
 

@@ -24,3 +24,5 @@ git merge template/master
 # Ideas
 * PostgreSQL Sandbox
 * PostgreSQL and Custom Nodes - From Path to Plan
+* https://elixir.bootlin.com/linux/latest/source/
+* pg_row_lock tracer
