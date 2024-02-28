@@ -45,7 +45,7 @@ If it returns an empty output, no trace points are defined in the binary and Pos
 
 ## Download and Usage
 
-The lock tracker can be installed via the Python package installer `pip`:
+The lock tracer can be installed via the Python package installer `pip`:
 
 ```shell
 pip install pg-lock-tracer
