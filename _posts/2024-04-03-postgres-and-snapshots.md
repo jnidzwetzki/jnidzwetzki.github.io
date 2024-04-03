@@ -109,9 +109,7 @@ static inline TableScanDesc table_beginscan(Relation rel, Snapshot snapshot, int
 ```
 
 ### Internal Data Structures
-Usually, the [transaction snapshot](https://github.com/postgres/postgres/blob/06c418e163e913966e17cb2d3fb1c5f8a8d58308/src/backend/utils/time/snapmgr.c#L216) is used as a parameter for this function.  
-
-The structure [SnapshotData](https://github.com/postgres/postgres/blob/06c418e163e913966e17cb2d3fb1c5f8a8d58308/src/include/utils/snapshot.h#L142) contains all the information that are part of a snapshot. In this blog post, we will focus on the following attributes:
+Usually, the [transaction snapshot](https://github.com/postgres/postgres/blob/06c418e163e913966e17cb2d3fb1c5f8a8d58308/src/backend/utils/time/snapmgr.c#L216) is used as a parameter for this function. The structure [SnapshotData](https://github.com/postgres/postgres/blob/06c418e163e913966e17cb2d3fb1c5f8a8d58308/src/include/utils/snapshot.h#L142) contains all the information that are part of a snapshot. In this blog post, we will focus on the following attributes:
 
 ```c
 typedef struct SnapshotData
@@ -141,7 +139,7 @@ typedef struct SnapshotData
 
 The field `xmin` defines the oldest active transaction in the system. All transactions with a txid lower than this value have already been committed. So, all tuples which have a lower txid should be visible in this snapshot. xmax contains the most recent transaction ID known by the snapshot. All tuples with a txid > xmax are invisible by the current snapshot. 
 
-For what reason are the fields `xip` and `xcnt` needed? For the transaction IDs of the range `[xmin, xmax]`, it needs to be determined if the transaction was committed or in progress when the snapshot was created.
+For what reason are the fields `xip` and `xcnt` needed? For the transaction IDs between `xmin` and `xmax`, it needs to be determined if the transaction was committed or in progress when the snapshot was created.
 
 A DBMS processes the queries of multiple users. They can start transactions at any time. The start time and the commit time of these transactions are not ordered. This means that there might be transactions with a transaction ID larger than `xmin` that are already committed when the snapshot is created. However, some other transactions in the range `[xmin, xmax]` have still not been committed. Since the data of the committed and uncommitted transactions needs to be handled properly, an array of transaction IDs `xip` of the length `xcnt` is defined. It contains all transactions that are larger than `xmin` and lower than `xmax`, which were in progress when the snapshot was taken.
 
