@@ -104,7 +104,7 @@ The output shows that the first tuple of page 0 (the `ctid`  of `(0,1)` in the o
 ## Snapshots
 When PostgreSQL scans a table, a snapshot has to be specified. See the `table_beginscan` function, which takes the snapshot data as the second parameter:
 
-```C
+```c
 static inline TableScanDesc table_beginscan(Relation rel, Snapshot snapshot, int nkeys, struct ScanKeyData *key)
 ```
 
@@ -113,7 +113,7 @@ Usually, the [transaction snapshot](https://github.com/postgres/postgres/blob/06
 
 The structure [SnapshotData](https://github.com/postgres/postgres/blob/06c418e163e913966e17cb2d3fb1c5f8a8d58308/src/include/utils/snapshot.h#L142) contains all the information that are part of a snapshot. In this blog post, we will focus on the following attributes:
 
-```C
+```c
 typedef struct SnapshotData
 {
   [...]
