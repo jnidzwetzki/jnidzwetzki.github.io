@@ -1,7 +1,7 @@
 ---
 layout: post
 title: >
-    Introduction into snapshots and tuple visibility in PostgreSQL
+    Introduction to Snapshots and Tuple Visibility in PostgreSQL
 tags: [PostgreSQL, Snapshots, MVCC]
 author: jan
 excerpt_separator: <!--more-->

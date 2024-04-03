@@ -1,7 +1,7 @@
 ---
 layout: post
 title: >
-    Index the PostgreSQL source code with Elixir
+    Index the PostgreSQL Source Code with Elixir
 tags: [PostgreSQL, Development]
 author: jan
 excerpt_separator: <!--more-->
