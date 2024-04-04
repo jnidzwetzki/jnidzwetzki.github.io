@@ -115,6 +115,7 @@ Usually, the [transaction snapshot](https://github.com/postgres/postgres/blob/06
 typedef struct SnapshotData
 {
   [...]
+    /*
 	 * An MVCC snapshot can never see the effects of XIDs >= xmax. It can see
 	 * the effects of all older XIDs except those listed in the snapshot. xmin
 	 * is stored as an optimization to avoid needing to search the XID arrays
