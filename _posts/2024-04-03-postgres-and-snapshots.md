@@ -105,7 +105,8 @@ The output shows that the first tuple of page 0 (the `ctid`  of `(0,1)` in the o
 When PostgreSQL scans a table, a snapshot has to be specified. See the `table_beginscan` function, which takes the snapshot data as the second parameter:
 
 ```c
-static inline TableScanDesc table_beginscan(Relation rel, Snapshot snapshot, int nkeys, struct ScanKeyData *key)
+static inline TableScanDesc table_beginscan(Relation rel,
+    Snapshot snapshot, int nkeys, struct ScanKeyData *key)
 ```
 
 ### Internal Data Structures
@@ -115,7 +116,7 @@ Usually, the [transaction snapshot](https://github.com/postgres/postgres/blob/06
 typedef struct SnapshotData
 {
   [...]
-    /*
+	/*
 	 * An MVCC snapshot can never see the effects of XIDs >= xmax. It can see
 	 * the effects of all older XIDs except those listed in the snapshot. xmin
 	 * is stored as an optimization to avoid needing to search the XID arrays
