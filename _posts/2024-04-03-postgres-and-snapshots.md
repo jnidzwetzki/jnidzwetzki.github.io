@@ -7,9 +7,9 @@ author: jan
 excerpt_separator: <!--more-->
 ---
 
-Like many relational DBMSs, PostgreSQL uses multi-version concurrency control (MVCC) to support parallel running transactions and coordinate parallel access to tuples. Snapshots are used to determine which version of a tuple is visible in which transaction. Each transaction that modifies data, has a transaction ID (`txid`). Tuples are stored together with two attributes (`xmin`, `xmax`) that determine in which snapshots (and in which transactions) they are visible.
+Like many relational DBMSs, PostgreSQL uses multi-version concurrency control (MVCC) to support parallel transactions and coordinate concurrent access to tuples. Snapshots are used to determine which version of a tuple is visible in a given transaction. Each transaction that modifies data has a transaction ID (`txid`). Tuples are stored with two attributes (`xmin`, `xmax`) that determine in which snapshots (and transactions) they are visible.
 
-This blog post discusses some of the implementation details of snapshots.
+This blog post discusses some implementation details of snapshots.
 
 <!--more-->
 
@@ -24,7 +24,7 @@ CREATE TABLE temperature (
 );
 ```
 
-So, let's insert the first record in this table. This is done by creating a new transaction, getting the current transaction ID if available, inserting a new tuple, getting the transaction ID again, and committing the transaction.
+Let's insert the first record into this table. This is done by creating a new transaction, checking the current transaction ID (if assigned), inserting a new tuple, checking the transaction ID again, and committing the transaction.
 
 ```sql
 BEGIN;
@@ -46,9 +46,9 @@ SELECT * FROM txid_current_if_assigned();
 COMMIT;
 ```
 
-An important thing that can be seen in this example is that PostgreSQL only assigns a transaction ID to the transaction as soon as data is modified. This is done to prevent unneeded work and to prevent transaction IDs from exhaustion. Even if the transaction ID is a 32-bit integer, the value is exhausted at some point. PostgreSQL can deal with this overflow (i.e., tuples can be frozen to handle [transaction ID wrap-arounds](https://www.postgresql.org/docs/current/routine-vacuuming.html#VACUUM-FOR-WRAPAROUND) properly).
+An important observation in this example is that PostgreSQL only assigns a transaction ID to a transaction when data is modified. This optimization prevents unnecessary work and avoids transaction ID exhaustion. Even though the transaction ID is a 32-bit integer, it can eventually be exhausted. PostgreSQL handles this overflow by freezing tuples to manage [transaction ID wraparounds](https://www.postgresql.org/docs/current/routine-vacuuming.html#VACUUM-FOR-WRAPAROUND) properly.
 
-The [system attributes](https://www.postgresql.org/docs/16/ddl-system-columns.html) `xmin` and `xmax` determine the first transaction and the last transaction that are able to see a particular tuple. In addition, the `ctid` attribute shows the number of the tuple on the corresponding page. The values for these attributes are shown when they are mentioned explicitly in a `SELECT` statement:
+The [system attributes](https://www.postgresql.org/docs/16/ddl-system-columns.html) `xmin` and `xmax` determine the first and last transactions that can see a particular tuple. Additionally, the `ctid` attribute indicates the tuple's position on the corresponding page. These attributes are displayed when explicitly mentioned in a `SELECT` statement:
 
 ```sql
 SELECT xmin, xmax, ctid, * FROM temperature;
@@ -58,7 +58,7 @@ SELECT xmin, xmax, ctid, * FROM temperature;
 (1 row)
 ```
 
-The output means that all transactions that have a transaction ID `>= 5062286` see this tuple. When the tuple is deleted, the `xmax` value is populated with the largest transaction ID that can see this tuple. The `ctid` of 0,1 means that the tuple is the first tuple on page 0. Now we delete the tuple:
+The output indicates that all transactions with a transaction ID `>= 5062286` can see this tuple. When the tuple is deleted, the `xmax` value is updated with the transaction ID of the deleting transaction. The `ctid` value `(0,1)` means the tuple is the first on page 0. Now, let's delete the tuple:
 
 ```sql
 BEGIN;
@@ -74,7 +74,7 @@ SELECT * FROM txid_current_if_assigned();
 COMMIT;
 ```
 
-However, when a `SELECT` statement is performed, nothing is returned, instead of a tuple with a populated `xmin` and `xmax` value.
+However, when a `SELECT` statement is executed, no rows are returned, even though the tuple has `xmin` and `xmax` values.
 
 ```sql
 SELECT xmin, xmax, ctid, * FROM temperature;
@@ -83,9 +83,9 @@ SELECT xmin, xmax, ctid, * FROM temperature;
 (0 rows)
 ```
 
-The reason for this behavior is the internal scanner. If a tuple is not visible by the current transaction snapshot. To get these values from the tuple, we need to use more low-level tools instead of a simple `SELECT`. 
+This behavior is due to the internal scanner. If a tuple is not visible in the current transaction snapshot, it is skipped. To retrieve these values, we need to use lower-level tools instead of a simple `SELECT`.
 
-The [pageinspect](https://www.postgresql.org/docs/current/pageinspect.html) extension for PostgreSQL allows us to get all tuples that are stored on a page and also decode the internal flags and attributes. The extension needs to be loaded and afterward, the pages of a relation can be examined.
+The [pageinspect](https://www.postgresql.org/docs/current/pageinspect.html) extension for PostgreSQL allows us to examine all tuples stored on a page and decode their internal flags and attributes. After loading the extension, we can inspect the pages of a relation.
 
 ```sql
 -- Load the extension
@@ -99,10 +99,11 @@ SELECT lp, t_xmin, t_xmax FROM heap_page_items(get_raw_page('temperature', 0));
   1 | 5062286 | 5062291
 ```
 
-The output shows that the first tuple of page 0 (the `ctid`  of `(0,1)` in the output above) has a `t_max` value of `5062291`, which is identical to the transaction ID, which has deleted the tuple. So, every transaction with a transaction ID larger than `5062291` does not see this tuple.
+The output shows that the first tuple on page 0 (with `ctid` `(0,1)`) has a `t_xmax` value of `5062291`, which matches the transaction ID that deleted the tuple. Thus, any transaction with a transaction ID greater than `5062291` will not see this tuple.
 
 ## Snapshots
-When PostgreSQL scans a table, a snapshot has to be specified. See the `table_beginscan` function, which takes the snapshot data as the second parameter:
+
+When PostgreSQL scans a table, a snapshot must be specified. The `table_beginscan` function takes the snapshot data as its second parameter:
 
 ```c
 static inline TableScanDesc table_beginscan(Relation rel,
@@ -110,7 +111,8 @@ static inline TableScanDesc table_beginscan(Relation rel,
 ```
 
 ### Internal Data Structures
-Usually, the [transaction snapshot](https://github.com/postgres/postgres/blob/06c418e163e913966e17cb2d3fb1c5f8a8d58308/src/backend/utils/time/snapmgr.c#L216) is used as a parameter for this function. The structure [SnapshotData](https://github.com/postgres/postgres/blob/06c418e163e913966e17cb2d3fb1c5f8a8d58308/src/include/utils/snapshot.h#L142) contains all the information that are part of a snapshot. In this blog post, we will focus on the following attributes:
+
+Typically, the [transaction snapshot](https://github.com/postgres/postgres/blob/06c418e163e913966e17cb2d3fb1c5f8a8d58308/src/backend/utils/time/snapmgr.c#L216) is used as a parameter for this function. The structure [SnapshotData](https://github.com/postgres/postgres/blob/06c418e163e913966e17cb2d3fb1c5f8a8d58308/src/include/utils/snapshot.h#L142) contains all the information that is part of a snapshot. In this blog post, we focus on the following attributes:
 
 ```c
 typedef struct SnapshotData
@@ -139,15 +141,15 @@ typedef struct SnapshotData
 }
 ```
 
-The field `xmin` defines the oldest active transaction in the system. All transactions with a txid lower than this value have already been committed. So, all tuples which have a lower txid should be visible in this snapshot. xmax contains the most recent transaction ID known by the snapshot. All tuples with a txid > xmax are invisible by the current snapshot. 
+The `xmin` field defines the oldest active transaction in the system. All transactions with a transaction ID lower than this value have already been committed. Thus, all tuples with a lower transaction ID should be visible in this snapshot. The `xmax` field contains the most recent transaction ID known to the snapshot. All tuples with a transaction ID greater than `xmax` are invisible in the current snapshot.
 
-For what reason are the fields `xip` and `xcnt` needed? For the transaction IDs between `xmin` and `xmax`, it needs to be determined if the transaction was committed or in progress when the snapshot was created.
+Why are the `xip` and `xcnt` fields needed? For transaction IDs between `xmin` and `xmax`, it must be determined whether the transaction was committed or in progress when the snapshot was created.
 
-A DBMS processes the queries of multiple users. They can start transactions at any time. The start time and the commit time of these transactions are not ordered. This means that there might be transactions with a transaction ID larger than `xmin` that are already committed when the snapshot is created. However, some other transactions in the range `[xmin, xmax]` have still not been committed. Since the data of the committed and uncommitted transactions needs to be handled properly, an array of transaction IDs `xip` of the length `xcnt` is defined. It contains all transactions that are larger than `xmin` and lower than `xmax`, which were in progress when the snapshot was taken.
+A DBMS processes queries from multiple users, who can start transactions at any time. The start and commit times of these transactions are not ordered. This means there might be transactions with a transaction ID larger than `xmin` that were already committed when the snapshot was created. However, some other transactions in the range `[xmin, xmax]` might still be uncommitted. Since the data of committed and uncommitted transactions must be handled properly, an array of transaction IDs `xip` of length `xcnt` is defined. It contains all transactions larger than `xmin` and lower than `xmax` that were in progress when the snapshot was taken.
 
 ### Example
 
-To illustrate the behavior, let's perform a practical example using three transactions. 
+To illustrate this behavior, let's perform a practical example using three transactions.
 
 #### Transaction 1
 
@@ -163,7 +165,7 @@ SELECT * FROM txid_current_if_assigned();
 (1 row)
 ```
 
-The first transaction inserts new data into the table `temperature` but stays uncommitted. The transaction has a transaction ID of `5062310`.
+The first transaction inserts new data into the `temperature` table but remains uncommitted. The transaction has a transaction ID of `5062310`.
 
 #### Transaction 2
 
@@ -179,7 +181,7 @@ SELECT * FROM txid_current_if_assigned();
 (1 row)
 ```
 
-Also, the second transaction inserts data into the same table but also stays uncommitted. The ID of this transaction is `5062311`.
+The second transaction also inserts data into the same table but remains uncommitted. The transaction ID is `5062311`.
 
 #### Transaction 3
 
@@ -191,12 +193,12 @@ SELECT * FROM pg_current_snapshot();
 (1 row)
 ```
 
-The third transaction uses the function `pg_current_snapshot` to get the current snapshot. The output of the function means that all changes by transactions with an ID lower than `5062310` are visible. Changes that are equal to or larger than transaction ID `5062310` are not visible, and no uncommitted transaction exists at this point.
+The third transaction uses the `pg_current_snapshot` function to get the current snapshot. The output indicates that all changes by transactions with an ID lower than `5062310` are visible. Changes equal to or larger than transaction ID `5062310` are not visible, and no uncommitted transactions exist at this point.
 
-So, what happened to the still pending transactions `5062310` and `5062311`? Since no further transactions have been committed so far in this demo system, PostgreSQL has not changed the current transaction ID. However, this can be changed:
+So, what happened to the still-pending transactions `5062310` and `5062311`? Since no further transactions have been committed in this demo system, PostgreSQL has not changed the current transaction ID. However, this can be changed:
 
 ```sql
- SELECT * FROM pg_current_xact_id_if_assigned();
+SELECT * FROM pg_current_xact_id_if_assigned();
  pg_current_xact_id_if_assigned
 --------------------------------
 
@@ -215,13 +217,13 @@ SELECT * FROM pg_current_snapshot();
 (1 row)
 ```
 
-In contrast to the function `pg_current_xact_id_if_assigned`, the function `pg_current_xact_id` forces to assign a transaction ID to the current transaction. In our case, this is `5062312`. The usage of this transaction ID also leads to an update of the snapshot. 
+Unlike the `pg_current_xact_id_if_assigned` function, the `pg_current_xact_id` function forces the assignment of a transaction ID to the current transaction. In this case, the transaction ID is `5062312`. Using this transaction ID also updates the snapshot.
 
-The first value stays the same. Still, all tuples that are modified by transactions with an ID lower than `5062310` are visible in the current snapshot. However, the upper limit (`xmax`) has changed. Now, all changes that are equal to or larger than `5062313` are not visible in the current snapshot. Since our transaction ID is `5062312`, it makes sense that these changes should not be visible. What about the new part `5062310,5062311`? This is the `xip` part of the snapshot and means that the two transactions, `5062310` and `5062311`, were uncommitted at the moment when the snapshot was taken. Therefore, these changes should also not be visible in the current snapshot. As soon as one of these transactions commits and we take a new snapshot, the transaction ID is removed from `zip,`, and therefore, the changes become visible in the current snapshot. 
+The first value remains the same: all tuples modified by transactions with an ID lower than `5062310` are visible in the current snapshot. However, the upper limit (`xmax`) has changed. Now, all changes equal to or larger than `5062313` are not visible in the current snapshot. Since our transaction ID is `5062312`, it makes sense that these changes should not be visible. What about the new part `5062310,5062311`? This is the `xip` part of the snapshot, indicating that transactions `5062310` and `5062311` were uncommitted when the snapshot was taken. Therefore, these changes should also not be visible in the current snapshot. As soon as one of these transactions commits and we take a new snapshot, the transaction ID is removed from `xip`, and the changes become visible in the current snapshot.
 
 ### Exporting Snapshots
 
-Another interesting feature of PostgreSQL is the ability to ¢[export snapshots](https://www.postgresql.org/docs/current/functions-admin.html) and load them in other sessions. The export of a snapshot can be done by calling the function `pg_export_snapshot`. The function returns the ID of the snapshot and creates a corresponding file in the `pg_snapshots` folder of the data directory.
+Another interesting feature of PostgreSQL is the ability to [export snapshots](https://www.postgresql.org/docs/current/functions-admin.html) and load them in other sessions. A snapshot can be exported by calling the `pg_export_snapshot` function. The function returns the snapshot ID and creates a corresponding file in the `pg_snapshots` folder of the data directory.
 
 ```sql
 BEGIN;
@@ -233,8 +235,7 @@ SELECT * FROM pg_export_snapshot();
 (1 row)
 ```
 
-This file contains the same information as returned by `pg_current_snapshot`, which we discussed above. In addition, it contains further information about the used isolation level or the used database ID. 
-
+This file contains the same information as returned by `pg_current_snapshot`, which we discussed earlier. Additionally, it includes further information about the isolation level and the database ID.
 
 ```bash
 $ cat ~/postgresql-sandbox/data/REL_15_1_DEBUG/pg_snapshots/0000000C-000005F6-1
@@ -253,11 +254,12 @@ sxcnt:0
 rec:0
 ```
 
-This exported snapshot could be loaded into another transaction by calling `SET TRANSACTION SNAPSHOT 0000000C-000005F6-1` to run with the same snapshot as the transaction that created the snapshot.
+This exported snapshot can be loaded into another transaction by calling `SET TRANSACTION SNAPSHOT '0000000C-000005F6-1'` to run with the same snapshot as the transaction that created it.
 
 ### Snapshots and Transaction Isolation Level
-Depending on the [isolation level](https://www.postgresql.org/docs/current/transaction-iso.html), the snapshot is taken when the transaction is started (_Repeatable read_) or for every statement in the transaction (_Read committed_). When a new snapshot is created for each statement inside of a transaction, the committed data from other transactions becomes visible in the current transaction. If only one snapshot is created for the entire transaction, the `xmax` value stays constant, no new data from transactions with a higher ID becomes visible, and reads are repeatable.
 
+Depending on the [isolation level](https://www.postgresql.org/docs/current/transaction-iso.html), the snapshot is taken when the transaction starts (_Repeatable Read_) or for every statement in the transaction (_Read Committed_). When a new snapshot is created for each statement inside a transaction, committed data from other transactions becomes visible in the current transaction. If only one snapshot is created for the entire transaction, the `xmax` value remains constant, no new data from transactions with a higher ID becomes visible, and reads are repeatable.
 
 ## Summary
-This blog post discusses the basics of multi-version concurrency control in PostgreSQL. Afterward, snapshots are introduced and how they control the visibility of tuples. Also the integration with the table scan API is discussed.
+
+This blog post discusses the basics of multi-version concurrency control in PostgreSQL. It then introduces snapshots and explains how they control the visibility of tuples. The integration with the table scan API is also discussed.
