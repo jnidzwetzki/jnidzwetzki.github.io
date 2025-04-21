@@ -4,7 +4,7 @@
 apt-get install ruby-dev ruby-bundler
 bundle install
 
-export PATH=$PATH:~/.gem/ruby/2.7.0/bin
+export PATH=$PATH:./vendor/bundle/ruby/3.1.0/bin/
 
 bundle exec jekyll serve
 bundle exec jekyll serve --host=0.0.0.0
