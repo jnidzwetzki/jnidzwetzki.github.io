@@ -28,7 +28,7 @@ google_analytics: G-26VMDS60L9                          # Tracking ID, e.g. "UA-
 cookie_consent: true                                    # To respect the usage of cookies
 color_theme: auto                                       # auto, dark or light
 google_site_verification: psdO7-zEuyNNhb23zYwzoOSsr4xC3_E6bhA8fAGpBXw
-# Comments
+# Comments options
 comments:
   disqus_shortname:                                     # Your discus shortname for comments
   cusdis_app_id:                                        # Your cusdis data-app-id
@@ -49,6 +49,7 @@ paginate_path: "/blog/page:num"
 # BUILD SETTINGS
 sass:
   style: compressed
+  quiet_deps: true
 plugins: [jekyll-paginate, jekyll-seo-tag, jekyll-feed]
 exclude: [".jekyll-cache", ".jekyll-metadata", ".idea", "vendor/*", "assets/node_modules/*"]
 
