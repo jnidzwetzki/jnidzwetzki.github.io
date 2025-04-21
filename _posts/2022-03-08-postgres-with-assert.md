@@ -7,20 +7,20 @@ author: jan
 excerpt_separator: <!--more-->
 ---
 
-The [PostgreSQL](https://www.postgresql.org/) database server contains many `Assert` statements in its code. These statements are additional checks that can be evaluated to ensure that the performed operations are executeed as expecteed. However, evaluating of these statements takes some CPU time. Therefore, they are disabled in most production environments. 
+The [PostgreSQL](https://www.postgresql.org/) database server contains many `Assert` statements in its code. These statements are additional checks that can be evaluated to ensure that the performed operations are executed as expected. However, evaluating these statements takes some CPU time. Therefore, they are disabled in most production environments. 
 
 <!--more-->
-PostgreSQL is a very extensible and pluggable software. The PostgreSQL server can be extended by extensions. These [PostgreSQL Extensions](https://www.postgresql.org/docs/13/sql-createextension.html) can use Asserts statements in the code. 
+PostgreSQL is a very extensible and pluggable software. The PostgreSQL server can be extended through extensions. These [PostgreSQL Extensions](https://www.postgresql.org/docs/13/sql-createextension.html) can also use `Assert` statements in their code. 
 
-Such a statement looks as follows:
+An example of such a statement is as follows:
 
 ```c
 Assert(state->number_of_rows >= 0);
 ```
 
-The Assert statements are implemented as C Macros. If the condition is fulfilled, nothing happens. If the condition is not met, the software is interrupted and an error message is logged.
+The `Assert` statements are implemented as C macros. If the condition is fulfilled, nothing happens. If the condition is not met, the software is interrupted, and an error message is logged.
 
-These Assert macros are defined in the file `/usr/include/postgresql/12/server/c.h`:
+These `Assert` macros are defined in the file `/usr/include/postgresql/12/server/c.h`:
 
 ```c
 #ifndef USE_ASSERT_CHECKING
@@ -36,20 +36,21 @@ These Assert macros are defined in the file `/usr/include/postgresql/12/server/c
 #endif
 ```
 
-As can be seen in the listing, the Assert macro are only active if the `USE_ASSERT_CHECKING` option is set (or `FRONTEND` code is compiled). Otherwise, the Assert macro is replaced by `true` statements at compile time, which disables the evaluation of the Assert conditions. 
+As shown in the listing, the `Assert` macros are only active if the `USE_ASSERT_CHECKING` option is set (or `FRONTEND` code is compiled). Otherwise, the `Assert` macro is replaced by `true` statements at compile time, which disables the evaluation of the `Assert` conditions. 
 
-To check whether the current PostgreSQL installation evaluates Assert statements or not, the following command can be executed:
+To check whether the current PostgreSQL installation evaluates `Assert` statements or not, the following command can be executed:
 
 ```bash
 grep USE_ASSERT_CHECKING /usr/include/postgresql/12/server/pg_config.h
 ```
 
-If this returns a value of `1`, the assertions are active. In addition, all extensions that are complied against this server are also evaluate the Assert statements.
+If this returns a value of `1`, the assertions are active. Additionally, all extensions compiled against this server will also evaluate the `Assert` statements.
 
-## Recompiling the PostgreSQL with 
-If the check above returns `0`, the PostgreSQL server needs to be recompiled. If a Debian-based distribution is used, it is a good idea to modify and replace the existing Debian package. This will then behave exactly like the original Debian package (e.g., the distribution's own patches and changes are included) with the only difference that the assert statements are checked.
+## Recompiling PostgreSQL with Asserts Enabled
 
-To rebuild the PostgreSQL package, the source repositories must be included in the `/etc/apt/sources.list` file. Depending on whether the package is used from the Debian distribution or from the [PostgreSQL Apt repository](https://www.postgresql.org/download/linux/debian/), other source repositories must be included. 
+If the check above returns `0`, the PostgreSQL server needs to be recompiled. For Debian-based distributions, it is a good idea to modify and replace the existing Debian package. This ensures that the package behaves exactly like the original Debian package (e.g., includes the distribution's own patches and changes) with the only difference being that the `Assert` statements are checked.
+
+To rebuild the PostgreSQL package, the source repositories must be included in the `/etc/apt/sources.list` file. Depending on whether the package is used from the Debian distribution or from the [PostgreSQL Apt repository](https://www.postgresql.org/download/linux/debian/), different source repositories must be included. 
 
 ```
 # For the Debian repository
@@ -60,20 +61,20 @@ deb-src http://deb.debian.org/debian bullseye-updates main
 deb-src http://apt.postgresql.org/pub/repos/apt bullseye-pgdg main
 ```
 
-In this example, the PostgreSQL Server in version 12.10 is used from the PostgreSQL Apt repository running on a Debian 11 distribution. To download and unpack the sources of the PostgreSQL server, the following command can be used:
+In this example, PostgreSQL version 12.10 is used from the PostgreSQL Apt repository running on a Debian 11 distribution. To download and unpack the sources of the PostgreSQL server, the following commands can be used:
 
 ```bash
 apt-get source postgresql-12
 cd postgresql-12-12.10
 ```
 
-Before the sources can be rebuilt, the needed build dependencies need to be installed. This can be done as follows:
+Before the sources can be rebuilt, the necessary build dependencies need to be installed. This can be done as follows:
 
 ```bash
 apt-get build-dep postgresql
 ```
 
-Now, the sources can be compiled with the needed Assert statements. To perform this, the environment variable `DEB_BUILD_PROFILES` must be set to the value `pkg.postgresql.cassert`. This enables the required option `--enable-cassert` in the `configure` call during the build process. The build process can be started by executing `dpkg-buildpackage -rfakeroot`.
+Now, the sources can be compiled with the required `Assert` statements. To do this, the environment variable `DEB_BUILD_PROFILES` must be set to the value `pkg.postgresql.cassert`. This enables the required option `--enable-cassert` in the `configure` call during the build process. The build process can be started by executing `dpkg-buildpackage -rfakeroot`.
 
 ```bash
 export DEB_BUILD_OPTIONS=nocheck
@@ -81,7 +82,7 @@ export DEB_BUILD_PROFILES=pkg.postgresql.cassert
 dpkg-buildpackage -rfakeroot
 ```
 
-After the software has been compiled, in the parent directory, the following Debian packages should be created:
+After the software has been compiled, the following Debian packages should be created in the parent directory:
 
 ```bash
 jan@debian11-work:~# ls -l *.deb
@@ -110,13 +111,13 @@ jan@debian11-work:~# ls -l *.deb
 -rw-r--r-- 1 jan jan   993124 Mar  7 22:52 postgresql-server-dev-12_12.10-1.pgdg110+1_amd64.deb
 ```
 
-These needed packages can be installed by calling `dpkg -i <filenames>` or all produced Debian packages can be installed by executing:
+These packages can be installed by calling `dpkg -i <filenames>` or all produced Debian packages can be installed by executing:
 
 ```bash
 dpkg -i *.deb
 ```
 
-Afterward, a PostgreSQL server with active Assert macros is installed. This can be verified by executing:
+Afterward, a PostgreSQL server with active `Assert` macros is installed. This can be verified by executing:
 
 ```bash
 grep USE_ASSERT_CHECKING /usr/include/postgresql/12/server/pg_config.h
