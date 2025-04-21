@@ -9,37 +9,37 @@ order: 1
 
 ### Hi there 👋
 
-I am Jan, a software developer and computer scientist ([Dr. rer. nat.](https://www.fernuni-hagen.de/universitaet/stimmen/nidzwetzki.shtml)) with a focus on distributed databases and distributed systems. I live in Berlin (Germany) and have been working in IT for about 20 years. I worked as a system administrator, network administrator, software developer, and CTO. At the moment, I am working as a senior software developer on a PostgreSQL extension for time-series data.
+I am Jan, a software developer and computer scientist ([Dr. rer. nat.](https://www.fernuni-hagen.de/universitaet/stimmen/nidzwetzki.shtml)) specializing in distributed databases and distributed systems. I live in Berlin, Germany, and have been working in IT for about 20 years. Over the years, I have worked as a system administrator, network administrator, software developer, and CTO. Currently, I am a senior software developer working on a PostgreSQL extension for time-series data.
 
 - 🔭 My PhD project is [BBoxDB](https://bboxdb.org), a distributed key-bounding-box-value database. BBoxDB is a NoSQL database for multi-dimensional data implemented from scratch (see [full paper](https://link.springer.com/article/10.1007/s10619-019-07275-w)). With BBoxDB Streams, the software can also process multi-dimensional data streams and execute continuous queries (e.g., continuous range queries and continuous spatial joins, see the [full paper](https://link.springer.com/article/10.1007/s10619-022-07408-8)).
 
-- 🌱 I’m also maintaining the [SECONDO](https://secondo-database.github.io) database. This is an extensible database management system developed at the university at Hagen. The database can be extended by _Algebra Modules_ that implement custom data models and operators. The software focuses on the handling of spatial and spatio-temporal data. I also developed [Distributed SECONDO](https://secondo-database.github.io/DSecondo/DSECONDO-Website/index.html), a [distributed version](https://link.springer.com/chapter/10.1007/978-3-319-22363-6_28) of SECONDO.
+- 🌱 I also maintain the [SECONDO](https://secondo-database.github.io) database, an extensible database management system developed at the University of Hagen. The database can be extended with _Algebra Modules_ that implement custom data models and operators. The software focuses on handling spatial and spatio-temporal data. I also developed [Distributed SECONDO](https://secondo-database.github.io/DSecondo/DSECONDO-Website/index.html), a [distributed version](https://link.springer.com/chapter/10.1007/978-3-319-22363-6_28) of SECONDO.
 
-- 📚 I am the author of the book [Entwicklung eines skalierbaren und verteilten Datenbanksystems](https://www.springer.com/de/book/9783658124434) (my master thesis, awarded as outstanding work and available as a book published by Springer). 
+- 📚 I am the author of the book [Entwicklung eines skalierbaren und verteilten Datenbanksystems](https://www.springer.com/de/book/9783658124434), which is based on my master's thesis. This work was awarded as outstanding and is available as a book published by Springer.
 
-- 💬 I also talked at international conferences ([SSTD](http://sstd2015.org/), [IEEE BigData](http://cse.ucdenver.edu/~BSD2019/), [CIKM](https://www.cikm2018.units.it/), [EDBT](https://edbticdt2021.cs.ucy.ac.cy/), ...) about databases and published some peer-reviewed  scientific papers. Have a look at my [Demo Paper](https://ieeexplore.ieee.org/document/9005999), which won the IEEE best demo- and short paper award at the [BSD2019](http://cse.ucdenver.edu/~BSD2019/). See also my recent EDBT [Paper](https://edbt2021proceedings.github.io/docs/p170.pdf), available as open access publication.
+- 💬 I have spoken at international conferences ([SSTD](http://sstd2015.org/), [IEEE BigData](http://cse.ucdenver.edu/~BSD2019/), [CIKM](https://www.cikm2018.units.it/), [EDBT](https://edbticdt2021.cs.ucy.ac.cy/), ...) about databases and have published several peer-reviewed scientific papers. Check out my [Demo Paper](https://ieeexplore.ieee.org/document/9005999), which won the IEEE Best Demo and Short Paper Award at [BSD2019](http://cse.ucdenver.edu/~BSD2019/). You can also read my recent EDBT [Paper](https://edbt2021proceedings.github.io/docs/p170.pdf), available as an open-access publication.
 
-- 🤔 I’m looking for help on my [PostgreSQL Lock Tracer](https://github.com/jnidzwetzki/pg-lock-tracer) project. A collection of tools to gain deep insights into PostgreSQL's locking activities and troubleshoot performance-related issues.
+- 🤔 I’m looking for contributors to my [PostgreSQL Lock Tracer](https://github.com/jnidzwetzki/pg-lock-tracer) project, a collection of tools designed to provide deep insights into PostgreSQL's locking activities and troubleshoot performance-related issues.
 
 - 📫 How to reach me: jnidzwetzki@gmx.de 
 
-- ⚡ Fun fact: My first installed Linux Distribution was a SuSE 6.1 (Kernel 2.2.6) in 1999, and my first computer was a Pentium 1 with 100 MHz and 16 MB RAM running Windows 95.
+- ⚡ Fun fact: My first Linux distribution was SuSE 6.1 (Kernel 2.2.6), which I installed in 1999. My first computer was a Pentium 1 with 100 MHz and 16 MB RAM running Windows 95.
 
 ## Short Curriculum Vitae
 
-In the years 2002 - 2005, I did an apprenticeship as an IT specialist for system integration. From 2006 - 2009, parallel to my job, I attended a course for technical computer science at the DAA technical college. I successfully completed this course in 2009 as Staatlich geprüfter Informatiker (Certified Computer Scientist). 
+From 2002 to 2005, I completed an apprenticeship as an IT specialist for system integration. Between 2006 and 2009, I attended a course in technical computer science at the DAA Technical College while working full-time. I successfully completed this course in 2009, earning the title Staatlich geprüfter Informatiker (Certified Computer Scientist). 
 
-Between 2009 - 2022, I was enrolled as a part-time student at the FernUniversität in Hagen. In 2012, I graduated with a Bachelor of Science in Computer Science. In 2014, I graduated with a Master of Science in Computer Science with a focus on Operating Systems, Distributed, and Cooperative Systems. In 2022, I received a Dr. rer. nat. (PhD equivalent) in computer science with a [thesis](https://ub-deposit.fernuni-hagen.de/receive/mir_mods_00001836) on distributed databases. 
+From 2009 to 2022, I was enrolled as a part-time student at the FernUniversität in Hagen. In 2012, I earned a Bachelor of Science in Computer Science, followed by a Master of Science in Computer Science in 2014, focusing on Operating Systems, Distributed, and Cooperative Systems. In 2022, I received a Dr. rer. nat. (PhD equivalent) in Computer Science with a [thesis](https://ub-deposit.fernuni-hagen.de/receive/mir_mods_00001836) on distributed databases. 
 
-From 2012 - 2014, I was also a student assistant (part-time) at the chair of Cooperative Systems for the courses Operating Systems, Distributed Systems, and Computational Geometry. In the years 2020 - 2022, I was a research assistant (part-time) at the chair of Databases for New Applications and maintained the SECONDO database kernel.
+Between 2012 and 2014, I worked as a student assistant (part-time) at the Chair of Cooperative Systems, assisting with courses on Operating Systems, Distributed Systems, and Computational Geometry. From 2020 to 2022, I served as a research assistant (part-time) at the Chair of Databases for New Applications, where I maintained the SECONDO database kernel.
 
-For more information, see my profile at [LinkedIn](https://www.linkedin.com/in/jnidzwetzki).
+For more details, visit my profile on [LinkedIn](https://www.linkedin.com/in/jnidzwetzki).
 
 # My Interests
 
 * Database systems
 * Operating systems
-* Distributed, scalable and fault-tolerant systems
+* Distributed, scalable, and fault-tolerant systems
 * Computer networks
 * Transactions and parallelism
 * Economics, financial markets, and algorithmic trading systems
@@ -49,16 +49,16 @@ For more information, see my profile at [LinkedIn](https://www.linkedin.com/in/j
 * BBoxDB: A Distributed Key-Bounding-Box-Value Store - [My PhD Thesis](https://ub-deposit.fernuni-hagen.de/receive/mir_mods_00001836)
 * BBoxDB Streams: Scalable Processing of Multi-Dimensional Data Streams - [Distributed and Parallel Databases 2022](https://doi.org/10.1007/s10619-022-07408-8)
 * BBoxDB Streams: Scalable Processing of Multi-Dimensional Data Streams - [Technical Report 2021](https://ub-deposit.fernuni-hagen.de/receive/mir_mods_00001727)
-* Distributed Arrays: an algebra for generic distributed query processing - [Distributed and Parallel Databases 2021](https://link.springer.com/article/10.1007/s10619-021-07325-2) (co-author)
+* Distributed Arrays: An Algebra for Generic Distributed Query Processing - [Distributed and Parallel Databases 2021](https://link.springer.com/article/10.1007/s10619-021-07325-2) (co-author)
 * BBoxDB Streams: Distributed Processing of Real-World Streams of Position Data - [EDBT 2021](https://edbt2021proceedings.github.io/docs/p170.pdf) / [Slides](/assets/downloads/bboxdb_streams_edbt2021_slides.pdf)
-* BBoxDB: a distributed and highly available key-bounding-box-value store - [Distributed and Parallel Databases 2020](https://link.springer.com/article/10.1007/s10619-019-07275-w)
-* Demo Paper: Large Scale Spatial Data Processing With User Defined Filters In BBoxDB - [IEEE Big Spatial Data 2019](https://ieeexplore.ieee.org/document/9005999) / [Poster](/assets/downloads/bsd2019_poster.pdf) / [Slides](/assets/downloads/bboxdb_udf_slides_ieee_bigdata_2019.pdf)
+* BBoxDB: A Distributed and Highly Available Key-Bounding-Box-Value Store - [Distributed and Parallel Databases 2020](https://link.springer.com/article/10.1007/s10619-019-07275-w)
+* Demo Paper: Large-Scale Spatial Data Processing With User-Defined Filters in BBoxDB - [IEEE Big Spatial Data 2019](https://ieeexplore.ieee.org/document/9005999) / [Poster](/assets/downloads/bsd2019_poster.pdf) / [Slides](/assets/downloads/bboxdb_udf_slides_ieee_bigdata_2019.pdf)
 * BBoxDB - A Scalable Data Store for Multi-Dimensional Big Data - [CIKM 2018](https://dl.acm.org/citation.cfm?id=3269208) / [Poster](/assets/downloads/cikm2018_poster.pdf)
 * BBoxDB - A Distributed and Highly Available Key-Bounding-Box-Value Store - [Technical Report 2018](https://ub-deposit.fernuni-hagen.de/receive/mir_mods_00001277)
-* Distributed SECONDO: An extensible and scalable database management system - [Distributed and Parallel Databases 2017](https://link.springer.com/article/10.1007%2Fs10619-017-7198-9)
-* Distributed SECONDO: An extensible highly available and scalable database management system - [Technical Report 2016](https://www.fernuni-hagen.de/imperia/md/content/fakultaetfuermathematikundinformatik/forschung/berichte/bericht_371.pdf)
-* Distributed SECONDO: A Highly Available and Scalable System for Spatial Data Processing [SSTD 2015](https://link.springer.com/chapter/10.1007%2F978-3-319-22363-6_28) / [Poster](/assets/downloads/sstd2015_poster.pdf)
-* Distributed SECONDO - A Distributed DBMS based on SECONDO and Apache Cassandata - [My Master Thesis](https://www.springer.com/de/book/9783658124434)
+* Distributed SECONDO: An Extensible and Scalable Database Management System - [Distributed and Parallel Databases 2017](https://link.springer.com/article/10.1007%2Fs10619-017-7198-9)
+* Distributed SECONDO: An Extensible, Highly Available, and Scalable Database Management System - [Technical Report 2016](https://www.fernuni-hagen.de/imperia/md/content/fakultaetfuermathematikundinformatik/forschung/berichte/bericht_371.pdf)
+* Distributed SECONDO: A Highly Available and Scalable System for Spatial Data Processing - [SSTD 2015](https://link.springer.com/chapter/10.1007%2F978-3-319-22363-6_28) / [Poster](/assets/downloads/sstd2015_poster.pdf)
+* Distributed SECONDO - A Distributed DBMS Based on SECONDO and Apache Cassandra - [My Master Thesis](https://www.springer.com/de/book/9783658124434)
 * Optimierte Speicherzuteilung an Operatoren in Datenbanksystemen (_Optimized Memory Allocation to Operators in Database Systems_) - [Informatiktage 2013](https://dl.gi.de/handle/20.500.12116/4635) / [Poster](/assets/downloads/gi2013_poster.pdf)
 * Operator Cost Models for Progress Estimation and Optimization in Database Systems - My Bachelor Thesis
 
