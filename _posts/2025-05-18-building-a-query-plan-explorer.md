@@ -39,7 +39,10 @@ Since I spend most of my day with database internals, it was clear that I wanted
 ## Picasso Database Query Optimizer Visualizer
 The Picasso database query optimizer visualizer creates a multi-dimensional search space and executes one database query with different parameters from this search space to determine the query plan used by the database system. The found query plans (e.g., an index scan and a full table scan) are fingerprinted and plotted in an output graph. Similar plans are shown with the same color. Therefore, the tool visualizes the used query plans and their distribution and generates images from that information.
 
-# Query Plans in PostgreSQL
+## Plan Explorer
+The idea was to build a tool similar to Picasso using React as a static website. The required PostgreSQL installation to execute the SQL queries and run the query optimizer can be embedded directly into the browser using [PGlite](https://pglite.dev/). PGLite is a [WASM](https://en.wikipedia.org/wiki/WebAssembly) (WebAssembly – bytecode that is directly loaded and executed in the browser) build of PostgreSQL that can be loaded and executed in any WASM-capable browser (which is supported by most browsers these days).
+
+## Query Plans in PostgreSQL
 In PostgreSQL, you can get the used query plan by prefixing a query with `EXPLAIN`. If the keyword `JSON` is added as an option, the returned query plan is in JSON format, which is useful for processing the query plans with JavaScript.
 
 For example, if you have the following table structure:
@@ -68,9 +71,7 @@ In contrast, if only a small fraction of the table is returned by the query (i.e
 However, there is no easy way to determine when this change between the two query plans will happen. This tool will run the query with different `WHERE` clauses to answer this question. The example [section](#select-using-a-table-scan-or-an-index)
 shows how this decision will look for a concrete query.
 
-## Plan Explorer
-The idea was to build a tool similar to Picasso using React as a static website. The required PostgreSQL installation to execute the SQL queries and run the query optimizer can be embedded directly into the browser using [PGlite](https://pglite.dev/). PGLite is a [WASM](https://en.wikipedia.org/wiki/WebAssembly) (WebAssembly – bytecode that is directly loaded and executed in the browser) build of PostgreSQL that can be loaded and executed in any WASM-capable browser (which is supported by most browsers these days).
-
+## Tool Features
 So, the main tasks of the tool are:
 
 * Iterating over a one- or two-dimensional search space.
