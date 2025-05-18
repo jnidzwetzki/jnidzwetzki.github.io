@@ -8,15 +8,15 @@ author: jan
 excerpt_separator: <!--more-->
 ---
 
-_Large language models_ (LLMs) that generate code are common nowadays. Since a [couple of weeks](https://code.visualstudio.com/blogs/2025/04/07/agentMode), VS Code has an agent mode that performs multi-step coding tasks.
+_Large language models_ (LLMs) that generate code are nowadays common. Since a [couple of weeks](https://code.visualstudio.com/blogs/2025/04/07/agentMode), VS Code has an agent mode that performs multi-step coding tasks.
 
-I did active web development roughly 20-25 years ago, when [CGI](https://de.wikipedia.org/wiki/Common_Gateway_Interface), Perl, and early versions of PHP were a thing. I have no idea how modern web development actually works. I always had some projects in mind that I wanted to create, but I never had the time to dig into one of the modern JavaScript frameworks like React. GitHub Copilot looks like a way to create (web) applications just by describing the requirements (i.e., [vibe coding](https://en.wikipedia.org/wiki/Vibe_coding)) of an entire application.
+I was actively involved in web development roughly 20–25 years ago, when [CGI](https://de.wikipedia.org/wiki/Common_Gateway_Interface), Perl, and early versions of PHP were popular. I have no idea how modern web development actually works. I always had some projects in mind that I wanted to create, but I never had the time to dig into one of the modern JavaScript frameworks like React. GitHub Copilot now seems like a way to create (web) applications just by describing the requirements (i.e., [vibe coding](https://en.wikipedia.org/wiki/Vibe_coding)) for an entire application.
 
-This post describes my experience building a PostgreSQL query plan explorer using React and VS Code in two evenings without writing a single line of code.
+This post describes my experience building a PostgreSQL query plan explorer using React and VS Code in two evenings—without writing a single line of code myself.
 
 <!--more-->
 
-When I started with web development, building web applications was quite simple. You had HTML, the first version of CSS, some software, and the _Common Gateway Interface_ (CGI) standard. To build a dynamic website, you just wrote plain HTML to stdout like:
+When I started with web development, building web applications was quite simple. You had HTML, the first version of CSS, some software, and the _Common Gateway Interface_ (CGI) standard. To build a dynamic website, you just wrote plain HTML to stdout, like:
 
 ```perl
 #!/usr/bin/perl
@@ -27,9 +27,9 @@ print "<html><head></head><body>Hello World</body></html>\n";
 
 Since that time, the internet has evolved. CSS became increasingly popular, and I switched to PHP for web development. JavaScript, AJAX, and further technologies have changed the way websites work. In my career, I developed mostly backend components and switched to database internals after I finished university. So, I lost track of how modern web applications work.
 
-In 2020, I worked in a management role and managed a team of web developers. I learned a bit about recent technologies like React, GraphQL, and Node.js, but never wrote code. However, since then, I have wanted to build a modern web application to understand how this works today. But I never had enough time to look deeper into any of these technologies.
+In 2020, I worked in a management role and led a team of web developers. I learned a bit about recent technologies like React, GraphQL, and Node.js, but never wrote code myself. However, since then, I have wanted to build a modern web application to understand how this works today. But I never had enough time to look deeper into any of these technologies.
 
-The moment the agent mode for GitHub Copilot was released, it became clear to me that I wanted to challenge myself and see if I could build a modern web application without writing a single line of code, just by knowing the requirements, knowing which technologies can be used, and relying on 25-year-old knowledge about web development.
+The moment the agent mode for GitHub Copilot was released, it became clear to me that I wanted to challenge myself and see if I could build a modern web application without writing a single line of code—just by knowing the requirements, knowing which technologies can be used, and relying on 25-year-old knowledge about web development.
 
 # The Project
 Since I spend most of my day with database internals, it was clear that I wanted to build something DBMS-related. A few weeks ago, a friend of mine drew my attention to [Picasso](https://dl.acm.org/doi/10.14778/1920841.1921027).
@@ -78,7 +78,7 @@ So, the main tasks of the tool are:
 * Fingerprinting the returned query plans and finding similar query plans (i.e., plans with the same structure).
 * Generating a clear visualization from the gathered data.
 
-Using GitHub Copilot running in agent mode and GPT 4.1, I was able to build the desired tool in two evenings (roughly 2x 2.5 hours) and a few small corrections in the days afterwards. I described the requirements (e.g., "the user should be able to determine a one or two-dimensional search space", "dimension 1 of the search space should be optional", "the tool should have a modern UI").
+Using GitHub Copilot running in agent mode and GPT 4.1, I was able to build the desired tool in two evenings (roughly 2 × 2.5 hours) and a few small corrections in the days afterwards. I described the requirements (e.g., "the user should be able to determine a one or two-dimensional search space", "dimension 1 of the search space should be optional", "the tool should have a modern UI").
 
 The tool looks like this:
 
@@ -175,5 +175,7 @@ The generated image shows that PostgreSQL now uses four different query plans to
 
 # Conclusion
 I was able to build a modern web application that uses an in-browser version of PostgreSQL to visualize the query plans used for particular queries in just a few hours, despite having only minimal skills in modern web development. GitHub Copilot with GPT 4.1 did a very good job, and vibe coding really seems to be a viable approach for building simple web apps.
+
+I definitely learned less than I would have by building this tool in plain React and reading all the needed tutorials. But I spent just a couple of hours on the problem and have a usable tool. Otherwise, this would have been a multi-week project and I would never have taken up this development.
 
 The created tool is available at [https://jnidzwetzki.github.io/planexplorer/](https://jnidzwetzki.github.io/planexplorer/) and could be used by the database (research) community to explore the generated query plans by PostgreSQL. It might also be a valuable tool for PostgreSQL extension developers who create their own operators and cost models and want to understand when a particular query plan is chosen by the query optimizer.
