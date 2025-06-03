@@ -1,7 +1,7 @@
 ---
 layout: post
 title: >
-    The Art of Query Optimization
+    The Art of SQL Query Optimization
 tags: [PostgreSQL, Query Optimization, Research]
 feature-img: "assets/img/plan_explorer_query2.svg"
 author: jan
@@ -10,14 +10,14 @@ excerpt_separator: <!--more-->
 
 SQL is a declarative language; only the result of the query is specified. The exact steps to produce the result must be determined by the DBMS. Often, multiple ways exist to calculate a query result. For example, the DBMS can choose to use an index or perform a sequential scan on a table to find the needed tuples.
 
-The query optimizer is responsible for finding the most efficient plan for a given query. The plan generator creates possible plans, which are then evaluated based on their costs. Afterwards, the cheapest plan is chosen and executed. When the DBMS expects to return a large portion of the table, a full table scan can be more efficient than following the pointers in an index structure. However, it is hard to determine when the DBMS prefers one plan over another and when the switch between plans occurs.
+The query optimizer is responsible for finding the most efficient plan for a given query. The plan generator creates possible plans, which are then evaluated based on their costs. Afterward, the cheapest plan is chosen and executed. When the DBMS expects to return a large portion of the table, a full table scan can be more efficient than following the pointers in an index structure. However, it is hard to determine when the DBMS prefers one plan over another and when the switch between plans occurs.
 
-In a few evenings of vibe coding, [I implemented the plan explorer](https://jnidzwetzki.github.io/2025/05/18/building-a-query-plan-explorer.html) for PostgreSQL. It iterates over a search space and generates visualizations that show when the plan changes, and how many tuples are expected and actually returned. This blog post examines the "art" of query optimization. It discusses the plan explorer tool, the images the tool generates, and the insights the tool provides into the decisions made by the PostgreSQL query optimizer.
+In a few evenings of vibe coding, [I implemented the plan explorer](https://jnidzwetzki.github.io/2025/05/18/building-a-query-plan-explorer.html) for PostgreSQL. It iterates over a search space and generates visualizations that show when the plan changes and how many tuples are expected versus the actual number returned. This blog post examines the "art" of query optimization. It discusses the plan explorer tool, the images the tool generates, and the insights the tool provides into the decisions made by the PostgreSQL query optimizer.
 
 <!--more-->
 
 # Plan Explorer
-Plan Explorer is a tool that iterates over a two-dimensional search space and executes a given SQL query for each parameter combination. Based on the returned query plans (and actual query executions), various diagrams are generated. These diagrams have an artistic aspect, but they also provide insights into the workings of the query optimizer and visualize the decisions made (i.e., at which point PostgreSQL considers using a certain index).
+Plan Explorer is a tool that iterates over a two-dimensional search space and executes a given SQL query for each parameter combination. Based on the returned query plans (and actual query executions), various diagrams are generated. These diagrams have an artistic aspect, but they also provide valuable insights into the workings of the query optimizer and visually represent the decisions made (i.e., at which point PostgreSQL considers using a specific index).
 
 The tool is based on the ideas of [Picasso](https://dl.acm.org/doi/10.14778/1920841.1921027), but implemented as a modern web application.
 
@@ -48,7 +48,7 @@ flowchart LR
     end
 ```
 
-A further feature of the server mode is that the queries can also be executed (`EXPLAIN (ANALYZE)`) instead of only being planned (`EXPLAIN`). When only the planning of the query is performed, the tool works much faster and can complete iterating over the given search space quickly. On the other hand, if the query is actually executed, further information such as the actual number of returned tuples or the execution time is provided by PostgreSQL.
+A further feature of the server mode is that the queries can also be executed (`EXPLAIN (ANALYZE)`) instead of only being planned (`EXPLAIN`). When only the planning of the query is performed, the tool operates much faster and can quickly iterate over the given search space. On the other hand, if the query is actually executed, PostgreSQL provides further information, such as the actual number of returned tuples or the execution time.
 
 ## Generated Drawings
 The plan explorer tool creates several different drawings from one query. These drawings are:
@@ -60,7 +60,7 @@ The plan explorer tool creates several different drawings from one query. These 
 * The actual number of result tuples
 * The difference between the estimated and actual number of result tuples 
 
-For a database administrator, the different query plans and their distribution might be the most interesting output of the tool. For a developer who has implemented custom scan nodes and cost models, the other outputs might be interesting as well. They allow you to understand if the cost models work as expected. 
+For a database administrator, the different query plans and their distribution might be the most interesting output of the tool. For a developer who has implemented custom scan nodes and cost models, the other outputs may also be of interest. They enable database developers to determine if the cost models function as expected. 
 
 # Example Query Discussion
 
@@ -272,16 +272,16 @@ The second query plan ```Hash Join > Seq Scan(d1) > Hash > Index Scan(d2)``` has
 ```
 
 ## Expected Total Cost and Actual Time
-Also drawings for the expected total cost and the actual time are shown. The first image shows that PostgreSQL assumes the highest costs in the lower left corner. This is the moment, when both predicates of the `WHERE` condition let all tuples (`> 0`) pass. The costs decrease when one of the predicates can filter more tuples and PostgreSQL needs to join less tuples. The lowest costs are in the upper right corner of the image. The lines have some irregularities since the query plan changes for the parameter combinations which also affects the total costs of the query.
+Also, drawings for the expected total cost and the actual time are shown. The first image shows that PostgreSQL assumes the highest costs in the lower left corner. This is the moment when both predicates of the `WHERE` condition let all tuples (`> 0`) pass. The costs decrease when one of the predicates can filter more tuples, and PostgreSQL needs to join fewer tuples. The lowest costs are in the upper right corner of the image. The lines have some irregularities since the query plan changes for the parameter combinations, which also affects the total costs of the query.
 
 {% include aligner.html images="planexplorer/total_cost.svg" %}
 
-Closely related to the last image is the total execution time. It shows how long the DBMS actually needs to execute the query. The image shows also the trend that the query becomes faster when less tuples have to be processed. However, the times are a bit more scattered. This has two reasons: (i) in the current version of the tool just a single execution of the query is performed and outliers are not handled (e.g., by taking the average value over multiple executions) and (ii) the query is short and changing the parameters have not a big impact on the actual execution time.
+Closely related to the last image is the total execution time. It shows how long the DBMS actually needs to execute the query. The image also shows the trend that the query becomes faster when fewer tuples have to be processed. However, the times are a bit more scattered. This has two reasons: (i) in the current version of the tool, just a single execution of the query is performed and outliers are not handled (e.g., by taking the average value over multiple executions), and (ii) the query is short and changing the parameters have not a big impact on the actual execution time.
 
 {% include aligner.html images="planexplorer/total_time.svg" %}
 
 ## Expected and Actual Tuples
-The following next three images show the expected, actual returned tuples, and the difference between these two values. It can be seen by comparing the first two images that the pattern of the expected and the actual returned tuples is different and PostgreSQL actually performed a misprediction. The first drawing shows diagonal lines and the actual graph shows horizontal lines (i.e., changing one of the parameters leads to more tuples in the output independently from the other parameter) and PostgreSQL expects some correlation (so called _cross-column dependencies_) between these parameters. See the function `clauselist_selectivity()` and its [comment](https://github.com/postgres/postgres/blob/58fbfde152b28ca119fef4168550a1a4fef61560/src/backend/optimizer/path/clausesel.c#L57-L98
+The following next three images show the expected, actual returned tuples and the difference between these two values. It can be seen by comparing the first two images that the pattern of the expected and the actual returned tuples is different and PostgreSQL actually performed a misprediction. The first drawing shows diagonal lines and the actual graph shows horizontal lines (i.e., changing one of the parameters leads to more tuples in the output independently from the other parameter) and PostgreSQL expects some correlation (so-called _cross-column dependencies_) between these parameters. See the function `clauselist_selectivity()` and its [comment](https://github.com/postgres/postgres/blob/58fbfde152b28ca119fef4168550a1a4fef61560/src/backend/optimizer/path/clausesel.c#L57-L98
 ) for more details. Using [extended statistics](https://www.postgresql.org/docs/17/planner-stats.html) might help to get a better prediction (this might be covered in a follow-up blog posts).
 
 
