@@ -12,7 +12,7 @@ SQL is a declarative language; only the result of the query is specified. The ex
 
 The query optimizer is responsible for finding the most efficient plan for a given query. The plan generator creates possible plans, which are then evaluated based on their costs. Afterward, the cheapest plan is chosen and executed. When the DBMS expects to return a large portion of the table, a full table scan can be more efficient than following the pointers in an index structure. However, it is hard to determine when the DBMS prefers one plan over another and when the switch between plans occurs.
 
-In a few evenings of vibe coding, [I implemented the plan explorer](https://jnidzwetzki.github.io/2025/05/18/building-a-query-plan-explorer.html) for PostgreSQL. It iterates over a search space and generates visualizations that show when the plan changes and how many tuples are expected versus the actual number returned. This blog post examines the "art" of query optimization. It discusses the plan explorer tool, the images the tool generates, and the insights the tool provides into the decisions made by the PostgreSQL query optimizer.
+In a few evenings, [I implemented the plan explorer](https://jnidzwetzki.github.io/2025/05/18/building-a-query-plan-explorer.html) for PostgreSQL. It iterates over a search space and generates visualizations that show when the plan changes and how many tuples are expected versus the actual number returned. This blog post examines the "art" of query optimization. It discusses the plan explorer tool, the images the tool generates, and the insights the tool provides into the decisions made by the PostgreSQL query optimizer.
 
 <!--more-->
 
