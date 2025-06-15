@@ -9,31 +9,33 @@ order: 1
 
 ### Hi there 👋
 
-I am Jan, a software developer and computer scientist ([Dr. rer. nat.](https://www.fernuni-hagen.de/universitaet/stimmen/nidzwetzki.shtml)) specializing in distributed databases and distributed systems. I live in Berlin, Germany, and have been working in IT for about 20 years. Over the years, I have worked as a system administrator, network administrator, software developer, and CTO. Currently, I am a senior software developer working on a PostgreSQL extension for time-series data.
+I'm Jan, a software developer and computer scientist ([Dr. rer. nat.](https://www.fernuni-hagen.de/universitaet/stimmen/nidzwetzki.shtml)) specializing in distributed databases and distributed systems. Based in Hamburg, Germany, I have over 20 years of experience in IT, having worked as a system administrator, network administrator, software developer, and CTO. Currently, I am a software engineer focused on developing a tenant-aware, distributed, and storage/compute-decoupled version of PostgreSQL.
 
-- 🔭 My PhD project is [BBoxDB](https://bboxdb.org), a distributed key-bounding-box-value database. BBoxDB is a NoSQL database for multi-dimensional data implemented from scratch (see [full paper](https://link.springer.com/article/10.1007/s10619-019-07275-w)). With BBoxDB Streams, the software can also process multi-dimensional data streams and execute continuous queries (e.g., continuous range queries and continuous spatial joins, see the [full paper](https://link.springer.com/article/10.1007/s10619-022-07408-8)).
+- 🎨 My current side project is the [Query Plan Explorer](https://jnidzwetzki.github.io/planexplorer/), a tool that helps users understand when the PostgreSQL optimizer switches from one plan to another and how accurate the tuple estimations are. The software iterates over a one- or two-dimensional search space and plans the given query for each parameter combination. The output is a "drawing" that visualizes results such as the chosen plan, estimated and actual returned tuples, and the mismatch between these values. This project explores the intersection of art and query optimizer insights.
 
-- 🌱 I also maintain the [SECONDO](https://secondo-database.github.io) database, an extensible database management system developed at the University of Hagen. The database can be extended with _Algebra Modules_ that implement custom data models and operators. The software focuses on handling spatial and spatio-temporal data. I also developed [Distributed SECONDO](https://secondo-database.github.io/DSecondo/DSECONDO-Website/index.html), a [distributed version](https://link.springer.com/chapter/10.1007/978-3-319-22363-6_28) of SECONDO.
+- 🔭 My PhD project is [BBoxDB](https://bboxdb.org), a distributed key-bounding-box-value database. BBoxDB is a NoSQL database for multi-dimensional data, implemented from scratch (see [full paper](https://link.springer.com/article/10.1007/s10619-019-07275-w)). With BBoxDB Streams, the software can also process multi-dimensional data streams and execute continuous queries (e.g., continuous range queries and continuous spatial joins, see the [full paper](https://link.springer.com/article/10.1007/s10619-022-07408-8)).
 
-- 📚 I am the author of the book [Entwicklung eines skalierbaren und verteilten Datenbanksystems](https://www.springer.com/de/book/9783658124434), which is based on my master's thesis. This work was awarded as outstanding and is available as a book published by Springer.
+- 🌱 I also maintain the [SECONDO](https://secondo-database.github.io) database, an extensible database management system developed at the University of Hagen. SECONDO can be extended with _Algebra Modules_ that implement custom data models and operators, focusing on spatial and spatio-temporal data. I also developed [Distributed SECONDO](https://secondo-database.github.io/DSecondo/DSECONDO-Website/index.html), a [distributed version](https://link.springer.com/chapter/10.1007/978-3-319-22363-6_28) of SECONDO.
+
+- 📚 I am the author of [Entwicklung eines skalierbaren und verteilten Datenbanksystems](https://www.springer.com/de/book/9783658124434), a book based on my master's thesis. This work was recognized as outstanding and published by Springer.
 
 - 💬 I have spoken at international conferences ([SSTD](http://sstd2015.org/), [IEEE BigData](http://cse.ucdenver.edu/~BSD2019/), [CIKM](https://www.cikm2018.units.it/), [EDBT](https://edbticdt2021.cs.ucy.ac.cy/), ...) about databases and have published several peer-reviewed scientific papers. Check out my [Demo Paper](https://ieeexplore.ieee.org/document/9005999), which won the IEEE Best Demo and Short Paper Award at [BSD2019](http://cse.ucdenver.edu/~BSD2019/). You can also read my recent EDBT [Paper](https://edbt2021proceedings.github.io/docs/p170.pdf), available as an open-access publication.
 
-- 🤔 I’m looking for contributors to my [PostgreSQL Lock Tracer](https://github.com/jnidzwetzki/pg-lock-tracer) project, a collection of tools designed to provide deep insights into PostgreSQL's locking activities and troubleshoot performance-related issues.
+- 🤔 I’m looking for contributors to my [PostgreSQL Lock Tracer](https://github.com/jnidzwetzki/pg-lock-tracer) project, a collection of tools designed to provide deep insights into PostgreSQL's locking activities and help troubleshoot performance-related issues.
 
-- 📫 How to reach me: jnidzwetzki@gmx.de 
+- 📫 Contact: jnidzwetzki@gmx.de
 
 - ⚡ Fun fact: My first Linux distribution was SuSE 6.1 (Kernel 2.2.6), which I installed in 1999. My first computer was a Pentium 1 with 100 MHz and 16 MB RAM running Windows 95.
 
 ## Short Curriculum Vitae
 
-From 2002 to 2005, I completed an apprenticeship as an IT specialist for system integration. Between 2006 and 2009, I attended a course in technical computer science at the DAA Technical College while working full-time. I successfully completed this course in 2009, earning the title Staatlich geprüfter Informatiker (Certified Computer Scientist). 
+From 2002 to 2005, I completed an apprenticeship as an IT specialist for system integration. Between 2006 and 2009, I attended a technical computer science course at the DAA Technical College while working full-time, graduating in 2009 as a Staatlich geprüfter Informatiker (Certified Computer Scientist).
 
-From 2009 to 2022, I was enrolled as a part-time student at the FernUniversität in Hagen. In 2012, I earned a Bachelor of Science in Computer Science, followed by a Master of Science in Computer Science in 2014, focusing on Operating Systems, Distributed, and Cooperative Systems. In 2022, I received a Dr. rer. nat. (PhD equivalent) in Computer Science with a [thesis](https://ub-deposit.fernuni-hagen.de/receive/mir_mods_00001836) on distributed databases. 
+From 2009 to 2022, I studied part-time at FernUniversität in Hagen. In 2012, I earned a Bachelor of Science in Computer Science, followed by a Master of Science in Computer Science in 2014, focusing on Operating Systems, Distributed, and Cooperative Systems. In 2022, I received a Dr. rer. nat. (PhD equivalent) in Computer Science with a [thesis](https://ub-deposit.fernuni-hagen.de/receive/mir_mods_00001836) on distributed databases.
 
 Between 2012 and 2014, I worked as a student assistant (part-time) at the Chair of Cooperative Systems, assisting with courses on Operating Systems, Distributed Systems, and Computational Geometry. From 2020 to 2022, I served as a research assistant (part-time) at the Chair of Databases for New Applications, where I maintained the SECONDO database kernel.
 
-For more details, visit my profile on [LinkedIn](https://www.linkedin.com/in/jnidzwetzki).
+For more details, visit my [LinkedIn](https://www.linkedin.com/in/jnidzwetzki) profile.
 
 # My Interests
 
