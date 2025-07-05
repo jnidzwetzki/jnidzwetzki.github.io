@@ -133,7 +133,7 @@ CFLAGS="-ggdb -O0 -g3 -fno-omit-frame-pointer"
 Several types of flame graphs exist. In addition to the standard flame graph, the most common are off-CPU flame graphs and differential flame graphs. These will be discussed in the following sections.
 
 ### On-CPU / Off-CPU Flame Graphs
-Usually, the flame graphs show the time spent in the code while the CPU is executing it. However, sometimes it is also useful to see how much time a process spends waiting for resources (e.g., I/O operations). In this case, off-CPU flame graphs can be used. The profiler adds also the time to the call stacks when the process is not running on the CPU. 
+Usually, the flame graphs show the time spent in the code while the CPU is executing it. However, sometimes it is also useful to see how much time a process spends waiting for resources (e.g., I/O operations). In this case, off-CPU flame graphs can be used. The profiler also adds the time to the call stacks when the process is not running on the CPU. 
 
 ### Differential Flame Graphs
 Differential flame graphs are used to compare two different profiler runs. Usually, the first run is a baseline run, which is used to compare the second run (e.g., after a potential performance improvement). 
