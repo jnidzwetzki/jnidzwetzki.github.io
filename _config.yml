@@ -10,7 +10,7 @@ favicon: assets/favicon.ico                             # Icon displayed in the 
 
 # Header and footer text
 header_text: Jan's blog - big data and databases 
-header_feature_image: assets/img/pexels/computer.jpeg 
+header_feature_image: assets/img/flamegraph2.png
 header_feature_image_responsive: false
 footer_text: Random things about big data, databases, and distributed systems
 

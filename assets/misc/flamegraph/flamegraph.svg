@@ -1,0 +1,2688 @@
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg version="1.1" width="1200" height="854" onload="init(evt)" viewBox="0 0 1200 854" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<!-- Flame graph stack visualization. See https://github.com/brendangregg/FlameGraph for latest version, and http://www.brendangregg.com/flamegraphs.html for examples. -->
+<!-- NOTES:  -->
+<defs>
+	<linearGradient id="background" y1="0" y2="1" x1="0" x2="0" >
+		<stop stop-color="#eeeeee" offset="5%" />
+		<stop stop-color="#eeeeb0" offset="95%" />
+	</linearGradient>
+</defs>
+<style type="text/css">
+	text { font-family:Verdana; font-size:12px; fill:rgb(0,0,0); }
+	#search, #ignorecase { opacity:0.1; cursor:pointer; }
+	#search:hover, #search.show, #ignorecase:hover, #ignorecase.show { opacity:1; }
+	#subtitle { text-anchor:middle; font-color:rgb(160,160,160); }
+	#title { text-anchor:middle; font-size:17px}
+	#unzoom { cursor:pointer; }
+	#frames > *:hover { stroke:black; stroke-width:0.5; cursor:pointer; }
+	.hide { display:none; }
+	.parent { opacity:0.5; }
+</style>
+<script type="text/ecmascript">
+<![CDATA[
+	"use strict";
+	var details, searchbtn, unzoombtn, matchedtxt, svg, searching, currentSearchTerm, ignorecase, ignorecaseBtn;
+	function init(evt) {
+		details = document.getElementById("details").firstChild;
+		searchbtn = document.getElementById("search");
+		ignorecaseBtn = document.getElementById("ignorecase");
+		unzoombtn = document.getElementById("unzoom");
+		matchedtxt = document.getElementById("matched");
+		svg = document.getElementsByTagName("svg")[0];
+		searching = 0;
+		currentSearchTerm = null;
+
+		// use GET parameters to restore a flamegraphs state.
+		var params = get_params();
+		if (params.x && params.y)
+			zoom(find_group(document.querySelector('[x="' + params.x + '"][y="' + params.y + '"]')));
+                if (params.s) search(params.s);
+	}
+
+	// event listeners
+	window.addEventListener("click", function(e) {
+		var target = find_group(e.target);
+		if (target) {
+			if (target.nodeName == "a") {
+				if (e.ctrlKey === false) return;
+				e.preventDefault();
+			}
+			if (target.classList.contains("parent")) unzoom();
+			zoom(target);
+			if (!document.querySelector('.parent')) {
+				clearzoom();
+				return;
+			}
+
+			// set parameters for zoom state
+			var el = target.querySelector("rect");
+			if (el && el.attributes && el.attributes.y && el.attributes._orig_x) {
+				var params = get_params()
+				params.x = el.attributes._orig_x.value;
+				params.y = el.attributes.y.value;
+				history.replaceState(null, null, parse_params(params));
+			}
+		}
+		else if (e.target.id == "unzoom") clearzoom();
+		else if (e.target.id == "search") search_prompt();
+		else if (e.target.id == "ignorecase") toggle_ignorecase();
+	}, false)
+
+	// mouse-over for info
+	// show
+	window.addEventListener("mouseover", function(e) {
+		var target = find_group(e.target);
+		if (target) details.nodeValue = "Function: " + g_to_text(target);
+	}, false)
+
+	// clear
+	window.addEventListener("mouseout", function(e) {
+		var target = find_group(e.target);
+		if (target) details.nodeValue = ' ';
+	}, false)
+
+	// ctrl-F for search
+	// ctrl-I to toggle case-sensitive search
+	window.addEventListener("keydown",function (e) {
+		if (e.keyCode === 114 || (e.ctrlKey && e.keyCode === 70)) {
+			e.preventDefault();
+			search_prompt();
+		}
+		else if (e.ctrlKey && e.keyCode === 73) {
+			e.preventDefault();
+			toggle_ignorecase();
+		}
+	}, false)
+
+	// functions
+	function get_params() {
+		var params = {};
+		var paramsarr = window.location.search.substr(1).split('&');
+		for (var i = 0; i < paramsarr.length; ++i) {
+			var tmp = paramsarr[i].split("=");
+			if (!tmp[0] || !tmp[1]) continue;
+			params[tmp[0]]  = decodeURIComponent(tmp[1]);
+		}
+		return params;
+	}
+	function parse_params(params) {
+		var uri = "?";
+		for (var key in params) {
+			uri += key + '=' + encodeURIComponent(params[key]) + '&';
+		}
+		if (uri.slice(-1) == "&")
+			uri = uri.substring(0, uri.length - 1);
+		if (uri == '?')
+			uri = window.location.href.split('?')[0];
+		return uri;
+	}
+	function find_child(node, selector) {
+		var children = node.querySelectorAll(selector);
+		if (children.length) return children[0];
+	}
+	function find_group(node) {
+		var parent = node.parentElement;
+		if (!parent) return;
+		if (parent.id == "frames") return node;
+		return find_group(parent);
+	}
+	function orig_save(e, attr, val) {
+		if (e.attributes["_orig_" + attr] != undefined) return;
+		if (e.attributes[attr] == undefined) return;
+		if (val == undefined) val = e.attributes[attr].value;
+		e.setAttribute("_orig_" + attr, val);
+	}
+	function orig_load(e, attr) {
+		if (e.attributes["_orig_"+attr] == undefined) return;
+		e.attributes[attr].value = e.attributes["_orig_" + attr].value;
+		e.removeAttribute("_orig_"+attr);
+	}
+	function g_to_text(e) {
+		var text = find_child(e, "title").firstChild.nodeValue;
+		return (text)
+	}
+	function g_to_func(e) {
+		var func = g_to_text(e);
+		// if there's any manipulation we want to do to the function
+		// name before it's searched, do it here before returning.
+		return (func);
+	}
+	function update_text(e) {
+		var r = find_child(e, "rect");
+		var t = find_child(e, "text");
+		var w = parseFloat(r.attributes.width.value) -3;
+		var txt = find_child(e, "title").textContent.replace(/\([^(]*\)$/,"");
+		t.attributes.x.value = parseFloat(r.attributes.x.value) + 3;
+
+		// Smaller than this size won't fit anything
+		if (w < 2 * 12 * 0.59) {
+			t.textContent = "";
+			return;
+		}
+
+		t.textContent = txt;
+		// Fit in full text width
+		if (/^ *$/.test(txt) || t.getSubStringLength(0, txt.length) < w)
+			return;
+
+		for (var x = txt.length - 2; x > 0; x--) {
+			if (t.getSubStringLength(0, x + 2) <= w) {
+				t.textContent = txt.substring(0, x) + "..";
+				return;
+			}
+		}
+		t.textContent = "";
+	}
+
+	// zoom
+	function zoom_reset(e) {
+		if (e.attributes != undefined) {
+			orig_load(e, "x");
+			orig_load(e, "width");
+		}
+		if (e.childNodes == undefined) return;
+		for (var i = 0, c = e.childNodes; i < c.length; i++) {
+			zoom_reset(c[i]);
+		}
+	}
+	function zoom_child(e, x, ratio) {
+		if (e.attributes != undefined) {
+			if (e.attributes.x != undefined) {
+				orig_save(e, "x");
+				e.attributes.x.value = (parseFloat(e.attributes.x.value) - x - 10) * ratio + 10;
+				if (e.tagName == "text")
+					e.attributes.x.value = find_child(e.parentNode, "rect[x]").attributes.x.value + 3;
+			}
+			if (e.attributes.width != undefined) {
+				orig_save(e, "width");
+				e.attributes.width.value = parseFloat(e.attributes.width.value) * ratio;
+			}
+		}
+
+		if (e.childNodes == undefined) return;
+		for (var i = 0, c = e.childNodes; i < c.length; i++) {
+			zoom_child(c[i], x - 10, ratio);
+		}
+	}
+	function zoom_parent(e) {
+		if (e.attributes) {
+			if (e.attributes.x != undefined) {
+				orig_save(e, "x");
+				e.attributes.x.value = 10;
+			}
+			if (e.attributes.width != undefined) {
+				orig_save(e, "width");
+				e.attributes.width.value = parseInt(svg.width.baseVal.value) - (10 * 2);
+			}
+		}
+		if (e.childNodes == undefined) return;
+		for (var i = 0, c = e.childNodes; i < c.length; i++) {
+			zoom_parent(c[i]);
+		}
+	}
+	function zoom(node) {
+		var attr = find_child(node, "rect").attributes;
+		var width = parseFloat(attr.width.value);
+		var xmin = parseFloat(attr.x.value);
+		var xmax = parseFloat(xmin + width);
+		var ymin = parseFloat(attr.y.value);
+		var ratio = (svg.width.baseVal.value - 2 * 10) / width;
+
+		// XXX: Workaround for JavaScript float issues (fix me)
+		var fudge = 0.0001;
+
+		unzoombtn.classList.remove("hide");
+
+		var el = document.getElementById("frames").children;
+		for (var i = 0; i < el.length; i++) {
+			var e = el[i];
+			var a = find_child(e, "rect").attributes;
+			var ex = parseFloat(a.x.value);
+			var ew = parseFloat(a.width.value);
+			var upstack;
+			// Is it an ancestor
+			if (0 == 0) {
+				upstack = parseFloat(a.y.value) > ymin;
+			} else {
+				upstack = parseFloat(a.y.value) < ymin;
+			}
+			if (upstack) {
+				// Direct ancestor
+				if (ex <= xmin && (ex+ew+fudge) >= xmax) {
+					e.classList.add("parent");
+					zoom_parent(e);
+					update_text(e);
+				}
+				// not in current path
+				else
+					e.classList.add("hide");
+			}
+			// Children maybe
+			else {
+				// no common path
+				if (ex < xmin || ex + fudge >= xmax) {
+					e.classList.add("hide");
+				}
+				else {
+					zoom_child(e, xmin, ratio);
+					update_text(e);
+				}
+			}
+		}
+		search();
+	}
+	function unzoom() {
+		unzoombtn.classList.add("hide");
+		var el = document.getElementById("frames").children;
+		for(var i = 0; i < el.length; i++) {
+			el[i].classList.remove("parent");
+			el[i].classList.remove("hide");
+			zoom_reset(el[i]);
+			update_text(el[i]);
+		}
+		search();
+	}
+	function clearzoom() {
+		unzoom();
+
+		// remove zoom state
+		var params = get_params();
+		if (params.x) delete params.x;
+		if (params.y) delete params.y;
+		history.replaceState(null, null, parse_params(params));
+	}
+
+	// search
+	function toggle_ignorecase() {
+		ignorecase = !ignorecase;
+		if (ignorecase) {
+			ignorecaseBtn.classList.add("show");
+		} else {
+			ignorecaseBtn.classList.remove("show");
+		}
+		reset_search();
+		search();
+	}
+	function reset_search() {
+		var el = document.querySelectorAll("#frames rect");
+		for (var i = 0; i < el.length; i++) {
+			orig_load(el[i], "fill")
+		}
+		var params = get_params();
+		delete params.s;
+		history.replaceState(null, null, parse_params(params));
+	}
+	function search_prompt() {
+		if (!searching) {
+			var term = prompt("Enter a search term (regexp " +
+			    "allowed, eg: ^ext4_)"
+			    + (ignorecase ? ", ignoring case" : "")
+			    + "\nPress Ctrl-i to toggle case sensitivity", "");
+			if (term != null) search(term);
+		} else {
+			reset_search();
+			searching = 0;
+			currentSearchTerm = null;
+			searchbtn.classList.remove("show");
+			searchbtn.firstChild.nodeValue = "Search"
+			matchedtxt.classList.add("hide");
+			matchedtxt.firstChild.nodeValue = ""
+		}
+	}
+	function search(term) {
+		if (term) currentSearchTerm = term;
+
+		var re = new RegExp(currentSearchTerm, ignorecase ? 'i' : '');
+		var el = document.getElementById("frames").children;
+		var matches = new Object();
+		var maxwidth = 0;
+		for (var i = 0; i < el.length; i++) {
+			var e = el[i];
+			var func = g_to_func(e);
+			var rect = find_child(e, "rect");
+			if (func == null || rect == null)
+				continue;
+
+			// Save max width. Only works as we have a root frame
+			var w = parseFloat(rect.attributes.width.value);
+			if (w > maxwidth)
+				maxwidth = w;
+
+			if (func.match(re)) {
+				// highlight
+				var x = parseFloat(rect.attributes.x.value);
+				orig_save(rect, "fill");
+				rect.attributes.fill.value = "rgb(230,0,230)";
+
+				// remember matches
+				if (matches[x] == undefined) {
+					matches[x] = w;
+				} else {
+					if (w > matches[x]) {
+						// overwrite with parent
+						matches[x] = w;
+					}
+				}
+				searching = 1;
+			}
+		}
+		if (!searching)
+			return;
+		var params = get_params();
+		params.s = currentSearchTerm;
+		history.replaceState(null, null, parse_params(params));
+
+		searchbtn.classList.add("show");
+		searchbtn.firstChild.nodeValue = "Reset Search";
+
+		// calculate percent matched, excluding vertical overlap
+		var count = 0;
+		var lastx = -1;
+		var lastw = 0;
+		var keys = Array();
+		for (k in matches) {
+			if (matches.hasOwnProperty(k))
+				keys.push(k);
+		}
+		// sort the matched frames by their x location
+		// ascending, then width descending
+		keys.sort(function(a, b){
+			return a - b;
+		});
+		// Step through frames saving only the biggest bottom-up frames
+		// thanks to the sort order. This relies on the tree property
+		// where children are always smaller than their parents.
+		var fudge = 0.0001;	// JavaScript floating point
+		for (var k in keys) {
+			var x = parseFloat(keys[k]);
+			var w = matches[keys[k]];
+			if (x >= lastx + lastw - fudge) {
+				count += w;
+				lastx = x;
+				lastw = w;
+			}
+		}
+		// display matched percent
+		matchedtxt.classList.remove("hide");
+		var pct = 100 * count / maxwidth;
+		if (pct != 100) pct = pct.toFixed(1)
+		matchedtxt.firstChild.nodeValue = "Matched: " + pct + "%";
+	}
+]]>
+</script>
+<rect x="0.0" y="0" width="1200.0" height="854.0" fill="url(#background)"  />
+<text id="title" x="600.00" y="24" >Flame Graph</text>
+<text id="details" x="10.00" y="837" > </text>
+<text id="unzoom" x="10.00" y="24" class="hide">Reset Zoom</text>
+<text id="search" x="1090.00" y="24" >Search</text>
+<text id="ignorecase" x="1174.00" y="24" >ic</text>
+<text id="matched" x="1090.00" y="837" > </text>
+<g id="frames">
+<g >
+<title>pg_atomic_fetch_sub_u32_impl (1 samples, 0.16%)</title><rect x="458.5" y="245" width="1.9" height="15.0" fill="rgb(243,110,12)" rx="2" ry="2" />
+<text  x="461.52" y="255.5" ></text>
+</g>
+<g >
+<title>do_syscall_64 (1 samples, 0.16%)</title><rect x="547.1" y="261" width="1.9" height="15.0" fill="rgb(205,106,41)" rx="2" ry="2" />
+<text  x="550.06" y="271.5" ></text>
+</g>
+<g >
+<title>vma_alloc_folio (1 samples, 0.16%)</title><rect x="1188.1" y="677" width="1.9" height="15.0" fill="rgb(242,193,28)" rx="2" ry="2" />
+<text  x="1191.08" y="687.5" ></text>
+</g>
+<g >
+<title>LWLockHeldByMeInMode (1 samples, 0.16%)</title><rect x="231.4" y="421" width="1.9" height="15.0" fill="rgb(232,34,29)" rx="2" ry="2" />
+<text  x="234.37" y="431.5" ></text>
+</g>
+<g >
+<title>register_dirty_segment (1 samples, 0.16%)</title><rect x="595.2" y="309" width="1.9" height="15.0" fill="rgb(205,205,42)" rx="2" ry="2" />
+<text  x="598.19" y="319.5" ></text>
+</g>
+<g >
+<title>__alloc_pages (17 samples, 2.77%)</title><rect x="556.7" y="85" width="32.7" height="15.0" fill="rgb(210,6,39)" rx="2" ry="2" />
+<text  x="559.69" y="95.5" >__..</text>
+</g>
+<g >
+<title>ItemPointerSetInvalid (1 samples, 0.16%)</title><rect x="1016.8" y="341" width="1.9" height="15.0" fill="rgb(237,76,50)" rx="2" ry="2" />
+<text  x="1019.75" y="351.5" ></text>
+</g>
+<g >
+<title>getlen (4 samples, 0.65%)</title><rect x="1032.2" y="373" width="7.7" height="15.0" fill="rgb(237,14,16)" rx="2" ry="2" />
+<text  x="1035.15" y="383.5" ></text>
+</g>
+<g >
+<title>GetVisibilityMapPins (7 samples, 1.14%)</title><rect x="302.6" y="405" width="13.5" height="15.0" fill="rgb(222,97,28)" rx="2" ry="2" />
+<text  x="305.59" y="415.5" ></text>
+</g>
+<g >
+<title>tlb_batch_pages_flush (1 samples, 0.16%)</title><rect x="10.0" y="661" width="1.9" height="15.0" fill="rgb(243,180,52)" rx="2" ry="2" />
+<text  x="13.00" y="671.5" ></text>
+</g>
+<g >
+<title>LockBuffer (3 samples, 0.49%)</title><rect x="233.3" y="421" width="5.8" height="15.0" fill="rgb(250,165,28)" rx="2" ry="2" />
+<text  x="236.30" y="431.5" ></text>
+</g>
+<g >
+<title>CStringGetDatum (1 samples, 0.16%)</title><rect x="912.8" y="389" width="1.9" height="15.0" fill="rgb(221,85,9)" rx="2" ry="2" />
+<text  x="915.81" y="399.5" ></text>
+</g>
+<g >
+<title>XLogBytePosToRecPtr (5 samples, 0.82%)</title><rect x="697.2" y="373" width="9.6" height="15.0" fill="rgb(211,41,38)" rx="2" ry="2" />
+<text  x="700.21" y="383.5" ></text>
+</g>
+<g >
+<title>GetPrivateRefCount (1 samples, 0.16%)</title><rect x="533.6" y="373" width="1.9" height="15.0" fill="rgb(227,221,31)" rx="2" ry="2" />
+<text  x="536.59" y="383.5" ></text>
+</g>
+<g >
+<title>BufferGetBlockNumber (3 samples, 0.49%)</title><rect x="210.2" y="421" width="5.8" height="15.0" fill="rgb(251,50,23)" rx="2" ry="2" />
+<text  x="213.20" y="431.5" ></text>
+</g>
+<g >
+<title>CommitTransactionCommandInternal (2 samples, 0.33%)</title><rect x="1182.3" y="597" width="3.9" height="15.0" fill="rgb(210,155,19)" rx="2" ry="2" />
+<text  x="1185.30" y="607.5" ></text>
+</g>
+<g >
+<title>WALInsertLockAcquire (1 samples, 0.16%)</title><rect x="670.3" y="405" width="1.9" height="15.0" fill="rgb(226,11,51)" rx="2" ry="2" />
+<text  x="673.26" y="415.5" ></text>
+</g>
+<g >
+<title>MemoryContextSwitchTo (1 samples, 0.16%)</title><rect x="999.4" y="421" width="2.0" height="15.0" fill="rgb(246,62,27)" rx="2" ry="2" />
+<text  x="1002.43" y="431.5" ></text>
+</g>
+<g >
+<title>PostgresMain (610 samples, 99.51%)</title><rect x="11.9" y="661" width="1174.3" height="15.0" fill="rgb(247,187,34)" rx="2" ry="2" />
+<text  x="14.92" y="671.5" >PostgresMain</text>
+</g>
+<g >
+<title>GetPrivateRefCountEntry (9 samples, 1.47%)</title><rect x="466.2" y="277" width="17.3" height="15.0" fill="rgb(221,183,54)" rx="2" ry="2" />
+<text  x="469.22" y="287.5" ></text>
+</g>
+<g >
+<title>handle_mm_fault (2 samples, 0.33%)</title><rect x="1145.7" y="229" width="3.9" height="15.0" fill="rgb(222,44,5)" rx="2" ry="2" />
+<text  x="1148.73" y="239.5" ></text>
+</g>
+<g >
+<title>dumptuples (9 samples, 1.47%)</title><rect x="1151.5" y="341" width="17.3" height="15.0" fill="rgb(219,163,45)" rx="2" ry="2" />
+<text  x="1154.50" y="351.5" ></text>
+</g>
+<g >
+<title>__memmove_ssse3 (1 samples, 0.16%)</title><rect x="1161.1" y="309" width="2.0" height="15.0" fill="rgb(248,94,46)" rx="2" ry="2" />
+<text  x="1164.13" y="319.5" ></text>
+</g>
+<g >
+<title>ResourceOwnerRememberBuffer (1 samples, 0.16%)</title><rect x="485.5" y="277" width="1.9" height="15.0" fill="rgb(221,125,20)" rx="2" ry="2" />
+<text  x="488.46" y="287.5" ></text>
+</g>
+<g >
+<title>tuplestore_gettupleslot (32 samples, 5.22%)</title><rect x="1007.1" y="405" width="61.6" height="15.0" fill="rgb(244,188,30)" rx="2" ry="2" />
+<text  x="1010.13" y="415.5" >tuples..</text>
+</g>
+<g >
+<title>tts_buffer_heap_copyslot (55 samples, 8.97%)</title><rect x="35.0" y="453" width="105.9" height="15.0" fill="rgb(248,63,4)" rx="2" ry="2" />
+<text  x="38.02" y="463.5" >tts_buffer_h..</text>
+</g>
+<g >
+<title>PageXLogRecPtrGet (1 samples, 0.16%)</title><rect x="768.4" y="389" width="2.0" height="15.0" fill="rgb(214,161,25)" rx="2" ry="2" />
+<text  x="771.43" y="399.5" ></text>
+</g>
+<g >
+<title>pg_comp_crc32c_sse42 (2 samples, 0.33%)</title><rect x="735.7" y="389" width="3.9" height="15.0" fill="rgb(241,25,1)" rx="2" ry="2" />
+<text  x="738.71" y="399.5" ></text>
+</g>
+<g >
+<title>ext4_bio_write_page (1 samples, 0.16%)</title><rect x="1184.2" y="293" width="2.0" height="15.0" fill="rgb(240,229,38)" rx="2" ry="2" />
+<text  x="1187.23" y="303.5" ></text>
+</g>
+<g >
+<title>writetup_heap (8 samples, 1.31%)</title><rect x="1153.4" y="325" width="15.4" height="15.0" fill="rgb(212,183,24)" rx="2" ry="2" />
+<text  x="1156.43" y="335.5" ></text>
+</g>
+<g >
+<title>AllocSetCheck (2 samples, 0.33%)</title><rect x="15.8" y="453" width="3.8" height="15.0" fill="rgb(215,17,8)" rx="2" ry="2" />
+<text  x="18.77" y="463.5" ></text>
+</g>
+<g >
+<title>heap_compute_data_size (10 samples, 1.63%)</title><rect x="75.4" y="389" width="19.3" height="15.0" fill="rgb(205,27,27)" rx="2" ry="2" />
+<text  x="78.45" y="399.5" ></text>
+</g>
+<g >
+<title>pgstat_count_io_op (9 samples, 1.47%)</title><rect x="508.6" y="309" width="17.3" height="15.0" fill="rgb(214,154,37)" rx="2" ry="2" />
+<text  x="511.56" y="319.5" ></text>
+</g>
+<g >
+<title>do_mas_align_munmap (1 samples, 0.16%)</title><rect x="10.0" y="709" width="1.9" height="15.0" fill="rgb(229,29,11)" rx="2" ry="2" />
+<text  x="13.00" y="719.5" ></text>
+</g>
+<g >
+<title>RecordTransactionCommit (2 samples, 0.33%)</title><rect x="1182.3" y="565" width="3.9" height="15.0" fill="rgb(230,76,40)" rx="2" ry="2" />
+<text  x="1185.30" y="575.5" ></text>
+</g>
+<g >
+<title>fetch_att (2 samples, 0.33%)</title><rect x="947.5" y="341" width="3.8" height="15.0" fill="rgb(235,100,20)" rx="2" ry="2" />
+<text  x="950.46" y="351.5" ></text>
+</g>
+<g >
+<title>BufferIsValid (1 samples, 0.16%)</title><rect x="329.5" y="389" width="2.0" height="15.0" fill="rgb(232,193,8)" rx="2" ry="2" />
+<text  x="332.54" y="399.5" ></text>
+</g>
+<g >
+<title>get_hash_value (1 samples, 0.16%)</title><rect x="537.4" y="293" width="2.0" height="15.0" fill="rgb(228,41,0)" rx="2" ry="2" />
+<text  x="540.44" y="303.5" ></text>
+</g>
+<g >
+<title>__fdget_pos (1 samples, 0.16%)</title><rect x="547.1" y="229" width="1.9" height="15.0" fill="rgb(205,100,23)" rx="2" ry="2" />
+<text  x="550.06" y="239.5" ></text>
+</g>
+<g >
+<title>palloc0 (1 samples, 0.16%)</title><rect x="127.4" y="405" width="1.9" height="15.0" fill="rgb(206,19,19)" rx="2" ry="2" />
+<text  x="130.42" y="415.5" ></text>
+</g>
+<g >
+<title>exc_page_fault (3 samples, 0.49%)</title><rect x="1143.8" y="261" width="5.8" height="15.0" fill="rgb(248,137,7)" rx="2" ry="2" />
+<text  x="1146.80" y="271.5" ></text>
+</g>
+<g >
+<title>_raw_spin_trylock (1 samples, 0.16%)</title><rect x="556.7" y="53" width="1.9" height="15.0" fill="rgb(221,59,33)" rx="2" ry="2" />
+<text  x="559.69" y="63.5" ></text>
+</g>
+<g >
+<title>__memmove_ssse3 (1 samples, 0.16%)</title><rect x="733.8" y="389" width="1.9" height="15.0" fill="rgb(213,81,10)" rx="2" ry="2" />
+<text  x="736.78" y="399.5" ></text>
+</g>
+<g >
+<title>asm_exc_page_fault (3 samples, 0.49%)</title><rect x="1143.8" y="277" width="5.8" height="15.0" fill="rgb(234,32,43)" rx="2" ry="2" />
+<text  x="1146.80" y="287.5" ></text>
+</g>
+<g >
+<title>ReadBufferBI (1 samples, 0.16%)</title><rect x="279.5" y="421" width="1.9" height="15.0" fill="rgb(241,168,48)" rx="2" ry="2" />
+<text  x="282.49" y="431.5" ></text>
+</g>
+<g >
+<title>BufferIsValid (1 samples, 0.16%)</title><rect x="221.7" y="405" width="2.0" height="15.0" fill="rgb(243,96,53)" rx="2" ry="2" />
+<text  x="224.75" y="415.5" ></text>
+</g>
+<g >
+<title>BufTableHashCode (1 samples, 0.16%)</title><rect x="385.4" y="309" width="1.9" height="15.0" fill="rgb(254,20,19)" rx="2" ry="2" />
+<text  x="388.37" y="319.5" ></text>
+</g>
+<g >
+<title>__brk (1 samples, 0.16%)</title><rect x="10.0" y="773" width="1.9" height="15.0" fill="rgb(241,192,44)" rx="2" ry="2" />
+<text  x="13.00" y="783.5" ></text>
+</g>
+<g >
+<title>Int32GetDatum (1 samples, 0.16%)</title><rect x="960.9" y="309" width="2.0" height="15.0" fill="rgb(226,163,34)" rx="2" ry="2" />
+<text  x="963.93" y="319.5" ></text>
+</g>
+<g >
+<title>LWLockRelease (5 samples, 0.82%)</title><rect x="718.4" y="357" width="9.6" height="15.0" fill="rgb(208,153,16)" rx="2" ry="2" />
+<text  x="721.38" y="367.5" ></text>
+</g>
+<g >
+<title>GetMemoryChunkSpace (1 samples, 0.16%)</title><rect x="1120.7" y="357" width="1.9" height="15.0" fill="rgb(221,211,39)" rx="2" ry="2" />
+<text  x="1123.70" y="367.5" ></text>
+</g>
+<g >
+<title>tts_minimal_getsomeattrs (10 samples, 1.63%)</title><rect x="943.6" y="357" width="19.3" height="15.0" fill="rgb(241,112,17)" rx="2" ry="2" />
+<text  x="946.61" y="367.5" ></text>
+</g>
+<g >
+<title>pg_atomic_sub_fetch_u32 (4 samples, 0.65%)</title><rect x="720.3" y="341" width="7.7" height="15.0" fill="rgb(208,10,39)" rx="2" ry="2" />
+<text  x="723.31" y="351.5" ></text>
+</g>
+<g >
+<title>MemoryChunkIsExternal (1 samples, 0.16%)</title><rect x="17.7" y="437" width="1.9" height="15.0" fill="rgb(223,49,12)" rx="2" ry="2" />
+<text  x="20.70" y="447.5" ></text>
+</g>
+<g >
+<title>ExtendBufferedRelBy (33 samples, 5.38%)</title><rect x="535.5" y="389" width="63.5" height="15.0" fill="rgb(216,159,52)" rx="2" ry="2" />
+<text  x="538.51" y="399.5" >Extend..</text>
+</g>
+<g >
+<title>folio_alloc (17 samples, 2.77%)</title><rect x="556.7" y="101" width="32.7" height="15.0" fill="rgb(238,142,42)" rx="2" ry="2" />
+<text  x="559.69" y="111.5" >fo..</text>
+</g>
+<g >
+<title>ExecMaterializeSlot (4 samples, 0.65%)</title><rect x="154.4" y="469" width="7.7" height="15.0" fill="rgb(229,77,4)" rx="2" ry="2" />
+<text  x="157.37" y="479.5" ></text>
+</g>
+<g >
+<title>cstring_to_text (9 samples, 1.47%)</title><rect x="974.4" y="373" width="17.3" height="15.0" fill="rgb(243,85,16)" rx="2" ry="2" />
+<text  x="977.40" y="383.5" ></text>
+</g>
+<g >
+<title>pg_atomic_compare_exchange_u32 (1 samples, 0.16%)</title><rect x="712.6" y="341" width="1.9" height="15.0" fill="rgb(216,50,14)" rx="2" ry="2" />
+<text  x="715.61" y="351.5" ></text>
+</g>
+<g >
+<title>ExtendBufferedRelCommon (33 samples, 5.38%)</title><rect x="535.5" y="373" width="63.5" height="15.0" fill="rgb(234,125,44)" rx="2" ry="2" />
+<text  x="538.51" y="383.5" >Extend..</text>
+</g>
+<g >
+<title>pg_atomic_compare_exchange_u32_impl (1 samples, 0.16%)</title><rect x="712.6" y="325" width="1.9" height="15.0" fill="rgb(251,169,32)" rx="2" ry="2" />
+<text  x="715.61" y="335.5" ></text>
+</g>
+<g >
+<title>pg_atomic_sub_fetch_u32_impl (1 samples, 0.16%)</title><rect x="629.8" y="357" width="2.0" height="15.0" fill="rgb(219,202,15)" rx="2" ry="2" />
+<text  x="632.84" y="367.5" ></text>
+</g>
+<g >
+<title>set_sentinel (1 samples, 0.16%)</title><rect x="928.2" y="341" width="1.9" height="15.0" fill="rgb(206,179,45)" rx="2" ry="2" />
+<text  x="931.21" y="351.5" ></text>
+</g>
+<g >
+<title>PageGetMaxOffsetNumber (1 samples, 0.16%)</title><rect x="614.4" y="405" width="2.0" height="15.0" fill="rgb(208,55,22)" rx="2" ry="2" />
+<text  x="617.44" y="415.5" ></text>
+</g>
+<g >
+<title>pg_atomic_fetch_sub_u32_impl (4 samples, 0.65%)</title><rect x="720.3" y="309" width="7.7" height="15.0" fill="rgb(249,144,8)" rx="2" ry="2" />
+<text  x="723.31" y="319.5" ></text>
+</g>
+<g >
+<title>tts_minimal_store_tuple (1 samples, 0.16%)</title><rect x="1028.3" y="389" width="1.9" height="15.0" fill="rgb(234,156,51)" rx="2" ry="2" />
+<text  x="1031.30" y="399.5" ></text>
+</g>
+<g >
+<title>ExecInterpExpr (1 samples, 0.16%)</title><rect x="997.5" y="421" width="1.9" height="15.0" fill="rgb(228,82,16)" rx="2" ry="2" />
+<text  x="1000.50" y="431.5" ></text>
+</g>
+<g >
+<title>PinBuffer (17 samples, 2.77%)</title><rect x="460.4" y="293" width="32.8" height="15.0" fill="rgb(224,10,8)" rx="2" ry="2" />
+<text  x="463.44" y="303.5" >Pi..</text>
+</g>
+<g >
+<title>standard_ExecutorEnd (4 samples, 0.65%)</title><rect x="11.9" y="565" width="7.7" height="15.0" fill="rgb(209,0,12)" rx="2" ry="2" />
+<text  x="14.92" y="575.5" ></text>
+</g>
+<g >
+<title>AllocSetAlloc (3 samples, 0.49%)</title><rect x="924.4" y="357" width="5.7" height="15.0" fill="rgb(211,36,45)" rx="2" ry="2" />
+<text  x="927.36" y="367.5" ></text>
+</g>
+<g >
+<title>fsm_readbuf (1 samples, 0.16%)</title><rect x="529.7" y="373" width="2.0" height="15.0" fill="rgb(210,64,15)" rx="2" ry="2" />
+<text  x="532.74" y="383.5" ></text>
+</g>
+<g >
+<title>pg_atomic_fetch_sub_u32_impl (1 samples, 0.16%)</title><rect x="629.8" y="341" width="2.0" height="15.0" fill="rgb(225,206,37)" rx="2" ry="2" />
+<text  x="632.84" y="351.5" ></text>
+</g>
+<g >
+<title>AllocSetFree (3 samples, 0.49%)</title><rect x="1018.7" y="309" width="5.8" height="15.0" fill="rgb(223,33,20)" rx="2" ry="2" />
+<text  x="1021.68" y="319.5" ></text>
+</g>
+<g >
+<title>UnpinBuffer (1 samples, 0.16%)</title><rect x="656.8" y="405" width="1.9" height="15.0" fill="rgb(226,192,39)" rx="2" ry="2" />
+<text  x="659.79" y="415.5" ></text>
+</g>
+<g >
+<title>XLogRegisterData (1 samples, 0.16%)</title><rect x="190.9" y="437" width="2.0" height="15.0" fill="rgb(254,12,50)" rx="2" ry="2" />
+<text  x="193.95" y="447.5" ></text>
+</g>
+<g >
+<title>readtup_heap (15 samples, 2.45%)</title><rect x="1039.9" y="373" width="28.8" height="15.0" fill="rgb(248,188,31)" rx="2" ry="2" />
+<text  x="1042.85" y="383.5" >re..</text>
+</g>
+<g >
+<title>pg_atomic_exchange_u64 (1 samples, 0.16%)</title><rect x="728.0" y="357" width="1.9" height="15.0" fill="rgb(221,64,15)" rx="2" ry="2" />
+<text  x="731.01" y="367.5" ></text>
+</g>
+<g >
+<title>fdatasync (2 samples, 0.33%)</title><rect x="1182.3" y="501" width="3.9" height="15.0" fill="rgb(208,174,42)" rx="2" ry="2" />
+<text  x="1185.30" y="511.5" ></text>
+</g>
+<g >
+<title>InitBufferTag (3 samples, 0.49%)</title><rect x="433.5" y="293" width="5.8" height="15.0" fill="rgb(230,98,50)" rx="2" ry="2" />
+<text  x="436.49" y="303.5" ></text>
+</g>
+<g >
+<title>__x64_sys_pwrite64 (2 samples, 0.33%)</title><rect x="1157.3" y="197" width="3.8" height="15.0" fill="rgb(243,97,40)" rx="2" ry="2" />
+<text  x="1160.28" y="207.5" ></text>
+</g>
+<g >
+<title>BufferGetTag (7 samples, 1.14%)</title><rect x="810.8" y="405" width="13.5" height="15.0" fill="rgb(231,19,33)" rx="2" ry="2" />
+<text  x="813.78" y="415.5" ></text>
+</g>
+<g >
+<title>UnpinBufferNoOwner (8 samples, 1.31%)</title><rect x="641.4" y="373" width="15.4" height="15.0" fill="rgb(238,202,27)" rx="2" ry="2" />
+<text  x="644.39" y="383.5" ></text>
+</g>
+<g >
+<title>tlb_finish_mmu (1 samples, 0.16%)</title><rect x="10.0" y="677" width="1.9" height="15.0" fill="rgb(226,217,51)" rx="2" ry="2" />
+<text  x="13.00" y="687.5" ></text>
+</g>
+<g >
+<title>pagecache_get_page (1 samples, 0.16%)</title><rect x="1159.2" y="117" width="1.9" height="15.0" fill="rgb(211,87,26)" rx="2" ry="2" />
+<text  x="1162.20" y="127.5" ></text>
+</g>
+<g >
+<title>do_syscall_64 (2 samples, 0.33%)</title><rect x="1182.3" y="469" width="3.9" height="15.0" fill="rgb(245,37,47)" rx="2" ry="2" />
+<text  x="1185.30" y="479.5" ></text>
+</g>
+<g >
+<title>tuplestore_putvalues (29 samples, 4.73%)</title><rect x="1118.8" y="373" width="55.8" height="15.0" fill="rgb(228,187,31)" rx="2" ry="2" />
+<text  x="1121.78" y="383.5" >tuple..</text>
+</g>
+<g >
+<title>CleanUpLock (1 samples, 0.16%)</title><rect x="543.2" y="309" width="1.9" height="15.0" fill="rgb(243,157,41)" rx="2" ry="2" />
+<text  x="546.21" y="319.5" ></text>
+</g>
+<g >
+<title>do_syscall_64 (1 samples, 0.16%)</title><rect x="10.0" y="741" width="1.9" height="15.0" fill="rgb(245,92,15)" rx="2" ry="2" />
+<text  x="13.00" y="751.5" ></text>
+</g>
+<g >
+<title>pfree (1 samples, 0.16%)</title><rect x="1172.7" y="309" width="1.9" height="15.0" fill="rgb(226,76,6)" rx="2" ry="2" />
+<text  x="1175.68" y="319.5" ></text>
+</g>
+<g >
+<title>get_page_from_freelist (1 samples, 0.16%)</title><rect x="1147.7" y="149" width="1.9" height="15.0" fill="rgb(210,105,44)" rx="2" ry="2" />
+<text  x="1150.65" y="159.5" ></text>
+</g>
+<g >
+<title>ExecScanFetch (34 samples, 5.55%)</title><rect x="1003.3" y="437" width="65.4" height="15.0" fill="rgb(206,26,21)" rx="2" ry="2" />
+<text  x="1006.28" y="447.5" >ExecSca..</text>
+</g>
+<g >
+<title>__alloc_pages (2 samples, 0.33%)</title><rect x="1145.7" y="165" width="3.9" height="15.0" fill="rgb(223,189,38)" rx="2" ry="2" />
+<text  x="1148.73" y="175.5" ></text>
+</g>
+<g >
+<title>ExecProcNode (1 samples, 0.16%)</title><rect x="1180.4" y="501" width="1.9" height="15.0" fill="rgb(238,51,16)" rx="2" ry="2" />
+<text  x="1183.38" y="511.5" ></text>
+</g>
+<g >
+<title>RegisterSyncRequest (1 samples, 0.16%)</title><rect x="595.2" y="293" width="1.9" height="15.0" fill="rgb(218,156,42)" rx="2" ry="2" />
+<text  x="598.19" y="303.5" ></text>
+</g>
+<g >
+<title>LockAcquire (1 samples, 0.16%)</title><rect x="539.4" y="325" width="1.9" height="15.0" fill="rgb(226,11,43)" rx="2" ry="2" />
+<text  x="542.36" y="335.5" ></text>
+</g>
+<g >
+<title>hash_search_with_hash_value (1 samples, 0.16%)</title><rect x="535.5" y="293" width="1.9" height="15.0" fill="rgb(246,16,21)" rx="2" ry="2" />
+<text  x="538.51" y="303.5" ></text>
+</g>
+<g >
+<title>tts_buffer_heap_clear (1 samples, 0.16%)</title><rect x="137.0" y="437" width="2.0" height="15.0" fill="rgb(234,41,37)" rx="2" ry="2" />
+<text  x="140.05" y="447.5" ></text>
+</g>
+<g >
+<title>mdzeroextend (25 samples, 4.08%)</title><rect x="549.0" y="325" width="48.1" height="15.0" fill="rgb(208,192,22)" rx="2" ry="2" />
+<text  x="551.99" y="335.5" >mdze..</text>
+</g>
+<g >
+<title>PageIsAllVisible (1 samples, 0.16%)</title><rect x="314.1" y="389" width="2.0" height="15.0" fill="rgb(209,159,42)" rx="2" ry="2" />
+<text  x="317.14" y="399.5" ></text>
+</g>
+<g >
+<title>do_syscall_64 (2 samples, 0.33%)</title><rect x="1157.3" y="213" width="3.8" height="15.0" fill="rgb(240,193,5)" rx="2" ry="2" />
+<text  x="1160.28" y="223.5" ></text>
+</g>
+<g >
+<title>__memmove_ssse3 (2 samples, 0.33%)</title><rect x="1186.2" y="773" width="3.8" height="15.0" fill="rgb(220,5,40)" rx="2" ry="2" />
+<text  x="1189.15" y="783.5" ></text>
+</g>
+<g >
+<title>XLogRecordAssemble (22 samples, 3.59%)</title><rect x="743.4" y="405" width="42.4" height="15.0" fill="rgb(224,119,36)" rx="2" ry="2" />
+<text  x="746.41" y="415.5" >XLo..</text>
+</g>
+<g >
+<title>XLogFlush (2 samples, 0.33%)</title><rect x="1182.3" y="549" width="3.9" height="15.0" fill="rgb(225,43,12)" rx="2" ry="2" />
+<text  x="1185.30" y="559.5" ></text>
+</g>
+<g >
+<title>pfree (4 samples, 0.65%)</title><rect x="1018.7" y="325" width="7.7" height="15.0" fill="rgb(208,204,49)" rx="2" ry="2" />
+<text  x="1021.68" y="335.5" ></text>
+</g>
+<g >
+<title>XLogBytePosToEndRecPtr (3 samples, 0.49%)</title><rect x="691.4" y="373" width="5.8" height="15.0" fill="rgb(251,91,22)" rx="2" ry="2" />
+<text  x="694.44" y="383.5" ></text>
+</g>
+<g >
+<title>MemoryContextCallResetCallbacks (1 samples, 0.16%)</title><rect x="1099.5" y="405" width="2.0" height="15.0" fill="rgb(208,95,16)" rx="2" ry="2" />
+<text  x="1102.53" y="415.5" ></text>
+</g>
+<g >
+<title>BufFileDumpBuffer (3 samples, 0.49%)</title><rect x="1155.4" y="293" width="5.7" height="15.0" fill="rgb(206,20,41)" rx="2" ry="2" />
+<text  x="1158.35" y="303.5" ></text>
+</g>
+<g >
+<title>heap_freetuple (5 samples, 0.82%)</title><rect x="46.6" y="405" width="9.6" height="15.0" fill="rgb(221,10,41)" rx="2" ry="2" />
+<text  x="49.57" y="415.5" ></text>
+</g>
+<g >
+<title>clear_page_erms (16 samples, 2.61%)</title><rect x="558.6" y="53" width="30.8" height="15.0" fill="rgb(224,59,43)" rx="2" ry="2" />
+<text  x="561.61" y="63.5" >cl..</text>
+</g>
+<g >
+<title>rwsem_spin_on_owner (1 samples, 0.16%)</title><rect x="552.8" y="85" width="2.0" height="15.0" fill="rgb(246,131,13)" rx="2" ry="2" />
+<text  x="555.84" y="95.5" ></text>
+</g>
+<g >
+<title>BufFileReadCommon (4 samples, 0.65%)</title><rect x="1055.3" y="341" width="7.7" height="15.0" fill="rgb(241,130,9)" rx="2" ry="2" />
+<text  x="1058.25" y="351.5" ></text>
+</g>
+<g >
+<title>sentinel_ok (2 samples, 0.33%)</title><rect x="50.4" y="357" width="3.9" height="15.0" fill="rgb(216,153,7)" rx="2" ry="2" />
+<text  x="53.42" y="367.5" ></text>
+</g>
+<g >
+<title>ItemPointerSetInvalid (4 samples, 0.65%)</title><rect x="860.8" y="389" width="7.7" height="15.0" fill="rgb(232,128,41)" rx="2" ry="2" />
+<text  x="863.83" y="399.5" ></text>
+</g>
+<g >
+<title>ExecInterpExpr (62 samples, 10.11%)</title><rect x="872.4" y="405" width="119.3" height="15.0" fill="rgb(229,184,2)" rx="2" ry="2" />
+<text  x="875.38" y="415.5" >ExecInterpExpr</text>
+</g>
+<g >
+<title>ExecScan (36 samples, 5.87%)</title><rect x="1105.3" y="437" width="69.3" height="15.0" fill="rgb(218,160,18)" rx="2" ry="2" />
+<text  x="1108.30" y="447.5" >ExecScan</text>
+</g>
+<g >
+<title>ExecProcNodeFirst (604 samples, 98.53%)</title><rect x="19.6" y="517" width="1162.7" height="15.0" fill="rgb(236,217,54)" rx="2" ry="2" />
+<text  x="22.62" y="527.5" >ExecProcNodeFirst</text>
+</g>
+<g >
+<title>entry_SYSCALL_64_after_hwframe (2 samples, 0.33%)</title><rect x="1182.3" y="485" width="3.9" height="15.0" fill="rgb(205,194,16)" rx="2" ry="2" />
+<text  x="1185.30" y="495.5" ></text>
+</g>
+<g >
+<title>filemap_read (1 samples, 0.16%)</title><rect x="1061.0" y="197" width="2.0" height="15.0" fill="rgb(207,20,42)" rx="2" ry="2" />
+<text  x="1064.03" y="207.5" ></text>
+</g>
+<g >
+<title>CheckOpSlotCompatibility (1 samples, 0.16%)</title><rect x="914.7" y="389" width="2.0" height="15.0" fill="rgb(228,129,18)" rx="2" ry="2" />
+<text  x="917.73" y="399.5" ></text>
+</g>
+<g >
+<title>pg_rotate_left32 (3 samples, 0.49%)</title><rect x="412.3" y="229" width="5.8" height="15.0" fill="rgb(254,201,21)" rx="2" ry="2" />
+<text  x="415.32" y="239.5" ></text>
+</g>
+<g >
+<title>handle_softirqs (1 samples, 0.16%)</title><rect x="830.0" y="325" width="2.0" height="15.0" fill="rgb(232,168,16)" rx="2" ry="2" />
+<text  x="833.03" y="335.5" ></text>
+</g>
+<g >
+<title>charge_memcg (1 samples, 0.16%)</title><rect x="554.8" y="53" width="1.9" height="15.0" fill="rgb(254,148,27)" rx="2" ry="2" />
+<text  x="557.76" y="63.5" ></text>
+</g>
+<g >
+<title>pg_leftmost_one_pos32 (1 samples, 0.16%)</title><rect x="937.8" y="325" width="2.0" height="15.0" fill="rgb(206,114,47)" rx="2" ry="2" />
+<text  x="940.83" y="335.5" ></text>
+</g>
+<g >
+<title>hash_search (1 samples, 0.16%)</title><rect x="545.1" y="309" width="2.0" height="15.0" fill="rgb(230,26,0)" rx="2" ry="2" />
+<text  x="548.14" y="319.5" ></text>
+</g>
+<g >
+<title>IsSubxactTopXidLogPending (3 samples, 0.49%)</title><rect x="664.5" y="405" width="5.8" height="15.0" fill="rgb(219,187,50)" rx="2" ry="2" />
+<text  x="667.49" y="415.5" ></text>
+</g>
+<g >
+<title>ItemPointerGetOffsetNumber (2 samples, 0.33%)</title><rect x="181.3" y="437" width="3.9" height="15.0" fill="rgb(208,148,19)" rx="2" ry="2" />
+<text  x="184.32" y="447.5" ></text>
+</g>
+<g >
+<title>pagecache_get_page (18 samples, 2.94%)</title><rect x="554.8" y="133" width="34.6" height="15.0" fill="rgb(227,75,40)" rx="2" ry="2" />
+<text  x="557.76" y="143.5" >pa..</text>
+</g>
+<g >
+<title>_mdnblocks (2 samples, 0.33%)</title><rect x="591.3" y="309" width="3.9" height="15.0" fill="rgb(241,109,16)" rx="2" ry="2" />
+<text  x="594.34" y="319.5" ></text>
+</g>
+<g >
+<title>tts_buffer_heap_clear (8 samples, 1.31%)</title><rect x="40.8" y="421" width="15.4" height="15.0" fill="rgb(207,72,51)" rx="2" ry="2" />
+<text  x="43.80" y="431.5" ></text>
+</g>
+<g >
+<title>CommitTransaction (2 samples, 0.33%)</title><rect x="1182.3" y="581" width="3.9" height="15.0" fill="rgb(254,106,30)" rx="2" ry="2" />
+<text  x="1185.30" y="591.5" ></text>
+</g>
+<g >
+<title>__memmove_ssse3 (2 samples, 0.33%)</title><rect x="102.4" y="373" width="3.8" height="15.0" fill="rgb(250,30,0)" rx="2" ry="2" />
+<text  x="105.40" y="383.5" ></text>
+</g>
+<g >
+<title>__do_sys_brk (1 samples, 0.16%)</title><rect x="10.0" y="725" width="1.9" height="15.0" fill="rgb(210,204,5)" rx="2" ry="2" />
+<text  x="13.00" y="735.5" ></text>
+</g>
+<g >
+<title>tts_virtual_clear (4 samples, 0.65%)</title><rect x="860.8" y="405" width="7.7" height="15.0" fill="rgb(209,25,16)" rx="2" ry="2" />
+<text  x="863.83" y="415.5" ></text>
+</g>
+<g >
+<title>UnlockReleaseBuffer (21 samples, 3.43%)</title><rect x="618.3" y="421" width="40.4" height="15.0" fill="rgb(216,191,12)" rx="2" ry="2" />
+<text  x="621.29" y="431.5" >Unl..</text>
+</g>
+<g >
+<title>LWLockAcquire (9 samples, 1.47%)</title><rect x="439.3" y="293" width="17.3" height="15.0" fill="rgb(215,225,42)" rx="2" ry="2" />
+<text  x="442.27" y="303.5" ></text>
+</g>
+<g >
+<title>PortalRun (608 samples, 99.18%)</title><rect x="11.9" y="629" width="1170.4" height="15.0" fill="rgb(233,199,9)" rx="2" ry="2" />
+<text  x="14.92" y="639.5" >PortalRun</text>
+</g>
+<g >
+<title>StartReadBuffer (1 samples, 0.16%)</title><rect x="527.8" y="373" width="1.9" height="15.0" fill="rgb(214,115,16)" rx="2" ry="2" />
+<text  x="530.81" y="383.5" ></text>
+</g>
+<g >
+<title>GetPrivateRefCountEntry (1 samples, 0.16%)</title><rect x="828.1" y="373" width="1.9" height="15.0" fill="rgb(232,229,47)" rx="2" ry="2" />
+<text  x="831.11" y="383.5" ></text>
+</g>
+<g >
+<title>IOContextForStrategy (1 samples, 0.16%)</title><rect x="502.8" y="309" width="1.9" height="15.0" fill="rgb(248,165,48)" rx="2" ry="2" />
+<text  x="505.79" y="319.5" ></text>
+</g>
+<g >
+<title>MemoryContextResetOnly (2 samples, 0.33%)</title><rect x="15.8" y="485" width="3.8" height="15.0" fill="rgb(205,196,46)" rx="2" ry="2" />
+<text  x="18.77" y="495.5" ></text>
+</g>
+<g >
+<title>tuplestore_gettuple (1 samples, 0.16%)</title><rect x="1005.2" y="405" width="1.9" height="15.0" fill="rgb(205,11,46)" rx="2" ry="2" />
+<text  x="1008.20" y="415.5" ></text>
+</g>
+<g >
+<title>__libc_start_call_main (610 samples, 99.51%)</title><rect x="11.9" y="773" width="1174.3" height="15.0" fill="rgb(245,46,16)" rx="2" ry="2" />
+<text  x="14.92" y="783.5" >__libc_start_call_main</text>
+</g>
+<g >
+<title>ExecInsert (370 samples, 60.36%)</title><rect x="140.9" y="485" width="712.2" height="15.0" fill="rgb(251,71,34)" rx="2" ry="2" />
+<text  x="143.90" y="495.5" >ExecInsert</text>
+</g>
+<g >
+<title>hash_bytes (1 samples, 0.16%)</title><rect x="395.0" y="261" width="1.9" height="15.0" fill="rgb(247,49,38)" rx="2" ry="2" />
+<text  x="397.99" y="271.5" ></text>
+</g>
+<g >
+<title>LockBuffer (6 samples, 0.98%)</title><rect x="620.2" y="405" width="11.6" height="15.0" fill="rgb(210,191,3)" rx="2" ry="2" />
+<text  x="623.21" y="415.5" ></text>
+</g>
+<g >
+<title>LWLockAttemptLock (1 samples, 0.16%)</title><rect x="712.6" y="357" width="1.9" height="15.0" fill="rgb(238,186,33)" rx="2" ry="2" />
+<text  x="715.61" y="367.5" ></text>
+</g>
+<g >
+<title>BackendInitialize (610 samples, 99.51%)</title><rect x="11.9" y="677" width="1174.3" height="15.0" fill="rgb(230,136,50)" rx="2" ry="2" />
+<text  x="14.92" y="687.5" >BackendInitialize</text>
+</g>
+<g >
+<title>__filemap_add_folio (1 samples, 0.16%)</title><rect x="554.8" y="85" width="1.9" height="15.0" fill="rgb(211,180,8)" rx="2" ry="2" />
+<text  x="557.76" y="95.5" ></text>
+</g>
+<g >
+<title>IsCatalogRelation (1 samples, 0.16%)</title><rect x="227.5" y="405" width="1.9" height="15.0" fill="rgb(228,156,37)" rx="2" ry="2" />
+<text  x="230.52" y="415.5" ></text>
+</g>
+<g >
+<title>asm_sysvec_apic_timer_interrupt (1 samples, 0.16%)</title><rect x="830.0" y="373" width="2.0" height="15.0" fill="rgb(249,183,47)" rx="2" ry="2" />
+<text  x="833.03" y="383.5" ></text>
+</g>
+<g >
+<title>GetPrivateRefCount (5 samples, 0.82%)</title><rect x="814.6" y="389" width="9.7" height="15.0" fill="rgb(228,228,33)" rx="2" ry="2" />
+<text  x="817.63" y="399.5" ></text>
+</g>
+<g >
+<title>MemoryChunkGetValue (1 samples, 0.16%)</title><rect x="1097.6" y="373" width="1.9" height="15.0" fill="rgb(220,41,20)" rx="2" ry="2" />
+<text  x="1100.60" y="383.5" ></text>
+</g>
+<g >
+<title>fill_val (1 samples, 0.16%)</title><rect x="1132.3" y="325" width="1.9" height="15.0" fill="rgb(227,133,4)" rx="2" ry="2" />
+<text  x="1135.25" y="335.5" ></text>
+</g>
+<g >
+<title>BlockIdSet (3 samples, 0.49%)</title><rect x="862.8" y="373" width="5.7" height="15.0" fill="rgb(243,99,6)" rx="2" ry="2" />
+<text  x="865.76" y="383.5" ></text>
+</g>
+<g >
+<title>GetBufferDescriptor (1 samples, 0.16%)</title><rect x="214.0" y="405" width="2.0" height="15.0" fill="rgb(239,205,5)" rx="2" ry="2" />
+<text  x="217.05" y="415.5" ></text>
+</g>
+<g >
+<title>ext4_da_get_block_prep (1 samples, 0.16%)</title><rect x="1157.3" y="101" width="1.9" height="15.0" fill="rgb(211,92,24)" rx="2" ry="2" />
+<text  x="1160.28" y="111.5" ></text>
+</g>
+<g >
+<title>CopyXLogRecordToWAL (4 samples, 0.65%)</title><rect x="678.0" y="389" width="7.7" height="15.0" fill="rgb(244,115,12)" rx="2" ry="2" />
+<text  x="680.96" y="399.5" ></text>
+</g>
+<g >
+<title>ResourceOwnerRemember (1 samples, 0.16%)</title><rect x="485.5" y="261" width="1.9" height="15.0" fill="rgb(234,167,48)" rx="2" ry="2" />
+<text  x="488.46" y="271.5" ></text>
+</g>
+<g >
+<title>__filemap_fdatawrite_range (1 samples, 0.16%)</title><rect x="1184.2" y="405" width="2.0" height="15.0" fill="rgb(240,179,22)" rx="2" ry="2" />
+<text  x="1187.23" y="415.5" ></text>
+</g>
+<g >
+<title>FunctionNext (34 samples, 5.55%)</title><rect x="1003.3" y="421" width="65.4" height="15.0" fill="rgb(229,91,12)" rx="2" ry="2" />
+<text  x="1006.28" y="431.5" >Functio..</text>
+</g>
+<g >
+<title>__filemap_get_folio (18 samples, 2.94%)</title><rect x="554.8" y="117" width="34.6" height="15.0" fill="rgb(205,11,31)" rx="2" ry="2" />
+<text  x="557.76" y="127.5" >__..</text>
+</g>
+<g >
+<title>standard_ExecutorRun (604 samples, 98.53%)</title><rect x="19.6" y="565" width="1162.7" height="15.0" fill="rgb(245,134,34)" rx="2" ry="2" />
+<text  x="22.62" y="575.5" >standard_ExecutorRun</text>
+</g>
+<g >
+<title>heap_freetuple (2 samples, 0.33%)</title><rect x="36.9" y="421" width="3.9" height="15.0" fill="rgb(235,171,49)" rx="2" ry="2" />
+<text  x="39.95" y="431.5" ></text>
+</g>
+<g >
+<title>heap_free_minimal_tuple (1 samples, 0.16%)</title><rect x="1172.7" y="325" width="1.9" height="15.0" fill="rgb(217,77,1)" rx="2" ry="2" />
+<text  x="1175.68" y="335.5" ></text>
+</g>
+<g >
+<title>WALInsertLockAcquire (2 samples, 0.33%)</title><rect x="710.7" y="389" width="3.8" height="15.0" fill="rgb(217,208,30)" rx="2" ry="2" />
+<text  x="713.69" y="399.5" ></text>
+</g>
+<g >
+<title>folio_alloc (1 samples, 0.16%)</title><rect x="1159.2" y="85" width="1.9" height="15.0" fill="rgb(216,196,3)" rx="2" ry="2" />
+<text  x="1162.20" y="95.5" ></text>
+</g>
+<g >
+<title>textin (1 samples, 0.16%)</title><rect x="995.6" y="405" width="1.9" height="15.0" fill="rgb(241,5,51)" rx="2" ry="2" />
+<text  x="998.58" y="415.5" ></text>
+</g>
+<g >
+<title>BufferGetBlock (2 samples, 0.33%)</title><rect x="806.9" y="389" width="3.9" height="15.0" fill="rgb(252,155,38)" rx="2" ry="2" />
+<text  x="809.93" y="399.5" ></text>
+</g>
+<g >
+<title>slot_getsomeattrs_int (11 samples, 1.79%)</title><rect x="941.7" y="373" width="21.2" height="15.0" fill="rgb(238,130,53)" rx="2" ry="2" />
+<text  x="944.68" y="383.5" ></text>
+</g>
+<g >
+<title>BufferIsValid (2 samples, 0.33%)</title><rect x="310.3" y="389" width="3.8" height="15.0" fill="rgb(235,212,50)" rx="2" ry="2" />
+<text  x="313.29" y="399.5" ></text>
+</g>
+<g >
+<title>__alloc_pages (1 samples, 0.16%)</title><rect x="1159.2" y="69" width="1.9" height="15.0" fill="rgb(224,87,25)" rx="2" ry="2" />
+<text  x="1162.20" y="79.5" ></text>
+</g>
+<g >
+<title>palloc (2 samples, 0.33%)</title><rect x="1064.9" y="357" width="3.8" height="15.0" fill="rgb(236,28,42)" rx="2" ry="2" />
+<text  x="1067.88" y="367.5" ></text>
+</g>
+<g >
+<title>pg_atomic_sub_fetch_u32_impl (4 samples, 0.65%)</title><rect x="720.3" y="325" width="7.7" height="15.0" fill="rgb(234,65,51)" rx="2" ry="2" />
+<text  x="723.31" y="335.5" ></text>
+</g>
+<g >
+<title>mpage_prepare_extent_to_map (1 samples, 0.16%)</title><rect x="1184.2" y="341" width="2.0" height="15.0" fill="rgb(229,213,42)" rx="2" ry="2" />
+<text  x="1187.23" y="351.5" ></text>
+</g>
+<g >
+<title>ext4_writepages (1 samples, 0.16%)</title><rect x="1184.2" y="357" width="2.0" height="15.0" fill="rgb(239,42,39)" rx="2" ry="2" />
+<text  x="1187.23" y="367.5" ></text>
+</g>
+<g >
+<title>syscall_enter_from_user_mode (1 samples, 0.16%)</title><rect x="591.3" y="245" width="2.0" height="15.0" fill="rgb(216,171,3)" rx="2" ry="2" />
+<text  x="594.34" y="255.5" ></text>
+</g>
+<g >
+<title>InvalidateVictimBuffer (2 samples, 0.33%)</title><rect x="535.5" y="325" width="3.9" height="15.0" fill="rgb(240,187,7)" rx="2" ry="2" />
+<text  x="538.51" y="335.5" ></text>
+</g>
+<g >
+<title>BufferGetBlockNumber (1 samples, 0.16%)</title><rect x="533.6" y="389" width="1.9" height="15.0" fill="rgb(217,18,52)" rx="2" ry="2" />
+<text  x="536.59" y="399.5" ></text>
+</g>
+<g >
+<title>pgstat_count_io_op_n (6 samples, 0.98%)</title><rect x="510.5" y="293" width="11.5" height="15.0" fill="rgb(232,116,5)" rx="2" ry="2" />
+<text  x="513.49" y="303.5" ></text>
+</g>
+<g >
+<title>heap_free_minimal_tuple (3 samples, 0.49%)</title><rect x="1163.1" y="309" width="5.7" height="15.0" fill="rgb(235,174,1)" rx="2" ry="2" />
+<text  x="1166.05" y="319.5" ></text>
+</g>
+<g >
+<title>ExecInsert (1 samples, 0.16%)</title><rect x="19.6" y="501" width="1.9" height="15.0" fill="rgb(235,44,1)" rx="2" ry="2" />
+<text  x="22.62" y="511.5" ></text>
+</g>
+<g >
+<title>ext4_da_write_begin (2 samples, 0.33%)</title><rect x="1157.3" y="133" width="3.8" height="15.0" fill="rgb(214,95,12)" rx="2" ry="2" />
+<text  x="1160.28" y="143.5" ></text>
+</g>
+<g >
+<title>palloc0 (1 samples, 0.16%)</title><rect x="125.5" y="389" width="1.9" height="15.0" fill="rgb(209,176,11)" rx="2" ry="2" />
+<text  x="128.50" y="399.5" ></text>
+</g>
+<g >
+<title>ExecScan (127 samples, 20.72%)</title><rect x="857.0" y="453" width="244.5" height="15.0" fill="rgb(244,171,10)" rx="2" ry="2" />
+<text  x="859.98" y="463.5" >ExecScan</text>
+</g>
+<g >
+<title>filemap_add_folio (1 samples, 0.16%)</title><rect x="554.8" y="101" width="1.9" height="15.0" fill="rgb(217,43,0)" rx="2" ry="2" />
+<text  x="557.76" y="111.5" ></text>
+</g>
+<g >
+<title>mpage_submit_page (1 samples, 0.16%)</title><rect x="1184.2" y="309" width="2.0" height="15.0" fill="rgb(247,205,14)" rx="2" ry="2" />
+<text  x="1187.23" y="319.5" ></text>
+</g>
+<g >
+<title>ItemPointerGetBlockNumber (1 samples, 0.16%)</title><rect x="229.4" y="421" width="2.0" height="15.0" fill="rgb(212,118,12)" rx="2" ry="2" />
+<text  x="232.45" y="431.5" ></text>
+</g>
+<g >
+<title>hash_initial_lookup (1 samples, 0.16%)</title><rect x="429.6" y="261" width="2.0" height="15.0" fill="rgb(213,85,22)" rx="2" ry="2" />
+<text  x="432.64" y="271.5" ></text>
+</g>
+<g >
+<title>FreeExecutorState (4 samples, 0.65%)</title><rect x="11.9" y="549" width="7.7" height="15.0" fill="rgb(228,217,41)" rx="2" ry="2" />
+<text  x="14.92" y="559.5" ></text>
+</g>
+<g >
+<title>AllocSetFree (4 samples, 0.65%)</title><rect x="46.6" y="373" width="7.7" height="15.0" fill="rgb(232,139,23)" rx="2" ry="2" />
+<text  x="49.57" y="383.5" ></text>
+</g>
+<g >
+<title>pg_atomic_sub_fetch_u32 (1 samples, 0.16%)</title><rect x="500.9" y="293" width="1.9" height="15.0" fill="rgb(242,122,13)" rx="2" ry="2" />
+<text  x="503.86" y="303.5" ></text>
+</g>
+<g >
+<title>BufferDescriptorGetContentLock (1 samples, 0.16%)</title><rect x="835.8" y="389" width="1.9" height="15.0" fill="rgb(248,49,29)" rx="2" ry="2" />
+<text  x="838.81" y="399.5" ></text>
+</g>
+<g >
+<title>LWLockRelease (3 samples, 0.49%)</title><rect x="626.0" y="389" width="5.8" height="15.0" fill="rgb(253,55,20)" rx="2" ry="2" />
+<text  x="628.99" y="399.5" ></text>
+</g>
+<g >
+<title>pg_atomic_sub_fetch_u32 (2 samples, 0.33%)</title><rect x="456.6" y="277" width="3.8" height="15.0" fill="rgb(251,60,49)" rx="2" ry="2" />
+<text  x="459.59" y="287.5" ></text>
+</g>
+<g >
+<title>pfree (3 samples, 0.49%)</title><rect x="1163.1" y="293" width="5.7" height="15.0" fill="rgb(224,48,3)" rx="2" ry="2" />
+<text  x="1166.05" y="303.5" ></text>
+</g>
+<g >
+<title>ReadBufferBI (97 samples, 15.82%)</title><rect x="343.0" y="405" width="186.7" height="15.0" fill="rgb(211,37,22)" rx="2" ry="2" />
+<text  x="346.02" y="415.5" >ReadBufferBI</text>
+</g>
+<g >
+<title>__libc_pread (1 samples, 0.16%)</title><rect x="1061.0" y="277" width="2.0" height="15.0" fill="rgb(225,179,23)" rx="2" ry="2" />
+<text  x="1064.03" y="287.5" ></text>
+</g>
+<g >
+<title>GetMemoryChunkSpace (1 samples, 0.16%)</title><rect x="1063.0" y="357" width="1.9" height="15.0" fill="rgb(210,179,22)" rx="2" ry="2" />
+<text  x="1065.95" y="367.5" ></text>
+</g>
+<g >
+<title>CStringGetDatum (1 samples, 0.16%)</title><rect x="922.4" y="373" width="2.0" height="15.0" fill="rgb(218,80,3)" rx="2" ry="2" />
+<text  x="925.43" y="383.5" ></text>
+</g>
+<g >
+<title>pg_ltoa (1 samples, 0.16%)</title><rect x="939.8" y="389" width="1.9" height="15.0" fill="rgb(214,74,40)" rx="2" ry="2" />
+<text  x="942.76" y="399.5" ></text>
+</g>
+<g >
+<title>smgrnblocks (1 samples, 0.16%)</title><rect x="547.1" y="341" width="1.9" height="15.0" fill="rgb(241,156,7)" rx="2" ry="2" />
+<text  x="550.06" y="351.5" ></text>
+</g>
+<g >
+<title>pg_pwritev_with_retry (22 samples, 3.59%)</title><rect x="549.0" y="277" width="42.3" height="15.0" fill="rgb(210,73,14)" rx="2" ry="2" />
+<text  x="551.99" y="287.5" >pg_..</text>
+</g>
+<g >
+<title>BufferGetPage (1 samples, 0.16%)</title><rect x="308.4" y="389" width="1.9" height="15.0" fill="rgb(235,198,47)" rx="2" ry="2" />
+<text  x="311.37" y="399.5" ></text>
+</g>
+<g >
+<title>do_syscall_64 (22 samples, 3.59%)</title><rect x="549.0" y="229" width="42.3" height="15.0" fill="rgb(244,66,11)" rx="2" ry="2" />
+<text  x="551.99" y="239.5" >do_..</text>
+</g>
+<g >
+<title>vfs_read (1 samples, 0.16%)</title><rect x="1061.0" y="213" width="2.0" height="15.0" fill="rgb(220,91,38)" rx="2" ry="2" />
+<text  x="1064.03" y="223.5" ></text>
+</g>
+<g >
+<title>ForwardSyncRequest (1 samples, 0.16%)</title><rect x="595.2" y="277" width="1.9" height="15.0" fill="rgb(242,137,45)" rx="2" ry="2" />
+<text  x="598.19" y="287.5" ></text>
+</g>
+<g >
+<title>ext4_block_write_begin (1 samples, 0.16%)</title><rect x="552.8" y="133" width="2.0" height="15.0" fill="rgb(251,135,48)" rx="2" ry="2" />
+<text  x="555.84" y="143.5" ></text>
+</g>
+<g >
+<title>ProcessQuery (608 samples, 99.18%)</title><rect x="11.9" y="597" width="1170.4" height="15.0" fill="rgb(224,104,17)" rx="2" ry="2" />
+<text  x="14.92" y="607.5" >ProcessQuery</text>
+</g>
+<g >
+<title>exc_page_fault (1 samples, 0.16%)</title><rect x="1188.1" y="741" width="1.9" height="15.0" fill="rgb(208,64,12)" rx="2" ry="2" />
+<text  x="1191.08" y="751.5" ></text>
+</g>
+<g >
+<title>IsSubxactTopXidLogPending (1 samples, 0.16%)</title><rect x="766.5" y="389" width="1.9" height="15.0" fill="rgb(247,96,44)" rx="2" ry="2" />
+<text  x="769.51" y="399.5" ></text>
+</g>
+<g >
+<title>AllocSetAlloc (4 samples, 0.65%)</title><rect x="984.0" y="325" width="7.7" height="15.0" fill="rgb(212,109,48)" rx="2" ry="2" />
+<text  x="987.03" y="335.5" ></text>
+</g>
+<g >
+<title>__alloc_pages (1 samples, 0.16%)</title><rect x="1188.1" y="645" width="1.9" height="15.0" fill="rgb(249,163,40)" rx="2" ry="2" />
+<text  x="1191.08" y="655.5" ></text>
+</g>
+<g >
+<title>palloc (7 samples, 1.14%)</title><rect x="978.3" y="341" width="13.4" height="15.0" fill="rgb(225,154,19)" rx="2" ry="2" />
+<text  x="981.25" y="351.5" ></text>
+</g>
+<g >
+<title>cstring_to_text_with_len (8 samples, 1.31%)</title><rect x="976.3" y="357" width="15.4" height="15.0" fill="rgb(217,110,1)" rx="2" ry="2" />
+<text  x="979.33" y="367.5" ></text>
+</g>
+<g >
+<title>syscall_exit_to_user_mode (1 samples, 0.16%)</title><rect x="593.3" y="245" width="1.9" height="15.0" fill="rgb(208,57,33)" rx="2" ry="2" />
+<text  x="596.26" y="255.5" ></text>
+</g>
+<g >
+<title>BufferDescriptorGetBuffer (1 samples, 0.16%)</title><rect x="647.2" y="357" width="1.9" height="15.0" fill="rgb(235,186,18)" rx="2" ry="2" />
+<text  x="650.16" y="367.5" ></text>
+</g>
+<g >
+<title>__x64_sys_fdatasync (2 samples, 0.33%)</title><rect x="1182.3" y="453" width="3.9" height="15.0" fill="rgb(232,203,49)" rx="2" ry="2" />
+<text  x="1185.30" y="463.5" ></text>
+</g>
+<g >
+<title>AllocSetAlloc (7 samples, 1.14%)</title><rect x="1136.1" y="325" width="13.5" height="15.0" fill="rgb(237,186,45)" rx="2" ry="2" />
+<text  x="1139.10" y="335.5" ></text>
+</g>
+<g >
+<title>GetPrivateRefCountEntry (1 samples, 0.16%)</title><rect x="431.6" y="293" width="1.9" height="15.0" fill="rgb(212,44,33)" rx="2" ry="2" />
+<text  x="434.57" y="303.5" ></text>
+</g>
+<g >
+<title>__irq_exit_rcu (1 samples, 0.16%)</title><rect x="830.0" y="341" width="2.0" height="15.0" fill="rgb(251,61,14)" rx="2" ry="2" />
+<text  x="833.03" y="351.5" ></text>
+</g>
+<g >
+<title>pg_atomic_read_u32_impl (2 samples, 0.33%)</title><rect x="450.8" y="245" width="3.9" height="15.0" fill="rgb(245,108,28)" rx="2" ry="2" />
+<text  x="453.82" y="255.5" ></text>
+</g>
+<g >
+<title>__fget_light (1 samples, 0.16%)</title><rect x="547.1" y="213" width="1.9" height="15.0" fill="rgb(220,25,3)" rx="2" ry="2" />
+<text  x="550.06" y="223.5" ></text>
+</g>
+<g >
+<title>sentinel_ok (1 samples, 0.16%)</title><rect x="1022.5" y="293" width="2.0" height="15.0" fill="rgb(244,135,9)" rx="2" ry="2" />
+<text  x="1025.53" y="303.5" ></text>
+</g>
+<g >
+<title>postmaster_child_launch (610 samples, 99.51%)</title><rect x="11.9" y="693" width="1174.3" height="15.0" fill="rgb(229,179,42)" rx="2" ry="2" />
+<text  x="14.92" y="703.5" >postmaster_child_launch</text>
+</g>
+<g >
+<title>unmap_region (1 samples, 0.16%)</title><rect x="10.0" y="693" width="1.9" height="15.0" fill="rgb(213,212,32)" rx="2" ry="2" />
+<text  x="13.00" y="703.5" ></text>
+</g>
+<g >
+<title>list_free_private (1 samples, 0.16%)</title><rect x="162.1" y="469" width="1.9" height="15.0" fill="rgb(245,197,27)" rx="2" ry="2" />
+<text  x="165.07" y="479.5" ></text>
+</g>
+<g >
+<title>tts_virtual_clear (1 samples, 0.16%)</title><rect x="1001.4" y="421" width="1.9" height="15.0" fill="rgb(234,171,50)" rx="2" ry="2" />
+<text  x="1004.35" y="431.5" ></text>
+</g>
+<g >
+<title>pg_atomic_read_u32 (2 samples, 0.33%)</title><rect x="497.0" y="293" width="3.9" height="15.0" fill="rgb(205,59,3)" rx="2" ry="2" />
+<text  x="500.01" y="303.5" ></text>
+</g>
+<g >
+<title>ResourceOwnerForget (1 samples, 0.16%)</title><rect x="633.7" y="373" width="1.9" height="15.0" fill="rgb(236,13,23)" rx="2" ry="2" />
+<text  x="636.69" y="383.5" ></text>
+</g>
+<g >
+<title>ExecMakeTableFunctionResult (36 samples, 5.87%)</title><rect x="1105.3" y="389" width="69.3" height="15.0" fill="rgb(206,17,49)" rx="2" ry="2" />
+<text  x="1108.30" y="399.5" >ExecMak..</text>
+</g>
+<g >
+<title>MemoryContextSwitchTo (1 samples, 0.16%)</title><rect x="1122.6" y="357" width="2.0" height="15.0" fill="rgb(253,59,19)" rx="2" ry="2" />
+<text  x="1125.63" y="367.5" ></text>
+</g>
+<g >
+<title>do_syscall_64 (2 samples, 0.33%)</title><rect x="591.3" y="261" width="3.9" height="15.0" fill="rgb(225,39,12)" rx="2" ry="2" />
+<text  x="594.34" y="271.5" ></text>
+</g>
+<g >
+<title>issue_xlog_fsync (2 samples, 0.33%)</title><rect x="1182.3" y="517" width="3.9" height="15.0" fill="rgb(241,57,54)" rx="2" ry="2" />
+<text  x="1185.30" y="527.5" ></text>
+</g>
+<g >
+<title>DatumGetPointer (1 samples, 0.16%)</title><rect x="123.6" y="357" width="1.9" height="15.0" fill="rgb(254,75,26)" rx="2" ry="2" />
+<text  x="126.57" y="367.5" ></text>
+</g>
+<g >
+<title>LWLockReleaseClearVar (1 samples, 0.16%)</title><rect x="685.7" y="389" width="1.9" height="15.0" fill="rgb(229,206,46)" rx="2" ry="2" />
+<text  x="688.66" y="399.5" ></text>
+</g>
+<g >
+<title>ReadBufferExtended (93 samples, 15.17%)</title><rect x="350.7" y="389" width="179.0" height="15.0" fill="rgb(205,165,31)" rx="2" ry="2" />
+<text  x="353.72" y="399.5" >ReadBufferExtended</text>
+</g>
+<g >
+<title>filemap_get_read_batch (1 samples, 0.16%)</title><rect x="1061.0" y="165" width="2.0" height="15.0" fill="rgb(232,4,28)" rx="2" ry="2" />
+<text  x="1064.03" y="175.5" ></text>
+</g>
+<g >
+<title>GetMemoryChunkMethodID (1 samples, 0.16%)</title><rect x="1120.7" y="341" width="1.9" height="15.0" fill="rgb(222,48,50)" rx="2" ry="2" />
+<text  x="1123.70" y="351.5" ></text>
+</g>
+<g >
+<title>StartReadBuffer (88 samples, 14.36%)</title><rect x="356.5" y="357" width="169.4" height="15.0" fill="rgb(230,79,23)" rx="2" ry="2" />
+<text  x="359.49" y="367.5" >StartReadBuffer</text>
+</g>
+<g >
+<title>heap_fill_tuple (16 samples, 2.61%)</title><rect x="94.7" y="389" width="30.8" height="15.0" fill="rgb(226,228,20)" rx="2" ry="2" />
+<text  x="97.70" y="399.5" >he..</text>
+</g>
+<g >
+<title>GetPrivateRefCount (3 samples, 0.49%)</title><rect x="331.5" y="389" width="5.7" height="15.0" fill="rgb(235,168,17)" rx="2" ry="2" />
+<text  x="334.47" y="399.5" ></text>
+</g>
+<g >
+<title>LWLockAttemptLock (1 samples, 0.16%)</title><rect x="337.2" y="373" width="2.0" height="15.0" fill="rgb(244,74,39)" rx="2" ry="2" />
+<text  x="340.24" y="383.5" ></text>
+</g>
+<g >
+<title>tts_virtual_copy_heap_tuple (38 samples, 6.20%)</title><rect x="56.2" y="421" width="73.1" height="15.0" fill="rgb(254,165,13)" rx="2" ry="2" />
+<text  x="59.20" y="431.5" >tts_virt..</text>
+</g>
+<g >
+<title>__libc_pwrite (22 samples, 3.59%)</title><rect x="549.0" y="261" width="42.3" height="15.0" fill="rgb(247,68,9)" rx="2" ry="2" />
+<text  x="551.99" y="271.5" >__l..</text>
+</g>
+<g >
+<title>pg_leftmost_one_pos32 (1 samples, 0.16%)</title><rect x="989.8" y="293" width="1.9" height="15.0" fill="rgb(209,149,51)" rx="2" ry="2" />
+<text  x="992.80" y="303.5" ></text>
+</g>
+<g >
+<title>ItemPointerSetInvalid (2 samples, 0.33%)</title><rect x="1012.9" y="357" width="3.9" height="15.0" fill="rgb(233,63,52)" rx="2" ry="2" />
+<text  x="1015.90" y="367.5" ></text>
+</g>
+<g >
+<title>BufferGetPage (1 samples, 0.16%)</title><rect x="165.9" y="437" width="1.9" height="15.0" fill="rgb(236,7,21)" rx="2" ry="2" />
+<text  x="168.92" y="447.5" ></text>
+</g>
+<g >
+<title>StartReadBuffersImpl (88 samples, 14.36%)</title><rect x="356.5" y="341" width="169.4" height="15.0" fill="rgb(231,145,19)" rx="2" ry="2" />
+<text  x="359.49" y="351.5" >StartReadBuffersImpl</text>
+</g>
+<g >
+<title>generic_perform_write (2 samples, 0.33%)</title><rect x="1157.3" y="149" width="3.8" height="15.0" fill="rgb(236,198,13)" rx="2" ry="2" />
+<text  x="1160.28" y="159.5" ></text>
+</g>
+<g >
+<title>__mem_cgroup_uncharge_list (1 samples, 0.16%)</title><rect x="10.0" y="629" width="1.9" height="15.0" fill="rgb(245,78,18)" rx="2" ry="2" />
+<text  x="13.00" y="639.5" ></text>
+</g>
+<g >
+<title>heap_insert (339 samples, 55.30%)</title><rect x="192.9" y="437" width="652.5" height="15.0" fill="rgb(233,123,46)" rx="2" ry="2" />
+<text  x="195.87" y="447.5" >heap_insert</text>
+</g>
+<g >
+<title>release_pages (1 samples, 0.16%)</title><rect x="10.0" y="645" width="1.9" height="15.0" fill="rgb(205,53,6)" rx="2" ry="2" />
+<text  x="13.00" y="655.5" ></text>
+</g>
+<g >
+<title>filemap_fdatawrite_wbc (1 samples, 0.16%)</title><rect x="1184.2" y="389" width="2.0" height="15.0" fill="rgb(225,157,35)" rx="2" ry="2" />
+<text  x="1187.23" y="399.5" ></text>
+</g>
+<g >
+<title>ReserveXLogInsertLocation (12 samples, 1.96%)</title><rect x="687.6" y="389" width="23.1" height="15.0" fill="rgb(228,74,1)" rx="2" ry="2" />
+<text  x="690.59" y="399.5" >R..</text>
+</g>
+<g >
+<title>slot_deform_heap_tuple (6 samples, 0.98%)</title><rect x="951.3" y="341" width="11.6" height="15.0" fill="rgb(250,205,5)" rx="2" ry="2" />
+<text  x="954.31" y="351.5" ></text>
+</g>
+<g >
+<title>GrantLockLocal (1 samples, 0.16%)</title><rect x="539.4" y="293" width="1.9" height="15.0" fill="rgb(239,136,6)" rx="2" ry="2" />
+<text  x="542.36" y="303.5" ></text>
+</g>
+<g >
+<title>BufFileReadExact (6 samples, 0.98%)</title><rect x="1051.4" y="357" width="11.6" height="15.0" fill="rgb(226,141,53)" rx="2" ry="2" />
+<text  x="1054.40" y="367.5" ></text>
+</g>
+<g >
+<title>pgstat_count_heap_insert (1 samples, 0.16%)</title><rect x="843.5" y="421" width="1.9" height="15.0" fill="rgb(235,43,16)" rx="2" ry="2" />
+<text  x="846.51" y="431.5" ></text>
+</g>
+<g >
+<title>AllocSetAllocChunkFromBlock (1 samples, 0.16%)</title><rect x="926.3" y="341" width="1.9" height="15.0" fill="rgb(205,26,37)" rx="2" ry="2" />
+<text  x="929.28" y="351.5" ></text>
+</g>
+<g >
+<title>CheckAndSetLockHeld (1 samples, 0.16%)</title><rect x="539.4" y="277" width="1.9" height="15.0" fill="rgb(212,86,54)" rx="2" ry="2" />
+<text  x="542.36" y="287.5" ></text>
+</g>
+<g >
+<title>pg_atomic_sub_fetch_u32 (1 samples, 0.16%)</title><rect x="629.8" y="373" width="2.0" height="15.0" fill="rgb(212,156,19)" rx="2" ry="2" />
+<text  x="632.84" y="383.5" ></text>
+</g>
+<g >
+<title>__x64_sys_pread64 (1 samples, 0.16%)</title><rect x="1061.0" y="229" width="2.0" height="15.0" fill="rgb(239,84,20)" rx="2" ry="2" />
+<text  x="1064.03" y="239.5" ></text>
+</g>
+<g >
+<title>AllocSetAllocChunkFromBlock (1 samples, 0.16%)</title><rect x="986.0" y="309" width="1.9" height="15.0" fill="rgb(231,220,21)" rx="2" ry="2" />
+<text  x="988.95" y="319.5" ></text>
+</g>
+<g >
+<title>ItemPointerSetInvalid (1 samples, 0.16%)</title><rect x="73.5" y="389" width="1.9" height="15.0" fill="rgb(213,145,0)" rx="2" ry="2" />
+<text  x="76.52" y="399.5" ></text>
+</g>
+<g >
+<title>pg_atomic_compare_exchange_u32 (3 samples, 0.49%)</title><rect x="256.4" y="405" width="5.8" height="15.0" fill="rgb(246,59,50)" rx="2" ry="2" />
+<text  x="259.39" y="415.5" ></text>
+</g>
+<g >
+<title>PageAddItemExtended (2 samples, 0.33%)</title><rect x="608.7" y="405" width="3.8" height="15.0" fill="rgb(244,131,52)" rx="2" ry="2" />
+<text  x="611.66" y="415.5" ></text>
+</g>
+<g >
+<title>GetFullPageWriteInfo (1 samples, 0.16%)</title><rect x="662.6" y="405" width="1.9" height="15.0" fill="rgb(216,174,43)" rx="2" ry="2" />
+<text  x="665.56" y="415.5" ></text>
+</g>
+<g >
+<title>pg_atomic_compare_exchange_u32_impl (2 samples, 0.33%)</title><rect x="487.4" y="261" width="3.8" height="15.0" fill="rgb(211,85,29)" rx="2" ry="2" />
+<text  x="490.39" y="271.5" ></text>
+</g>
+<g >
+<title>UnpinBuffer (12 samples, 1.96%)</title><rect x="633.7" y="389" width="23.1" height="15.0" fill="rgb(250,151,38)" rx="2" ry="2" />
+<text  x="636.69" y="399.5" >U..</text>
+</g>
+<g >
+<title>ExecFunctionScan (36 samples, 5.87%)</title><rect x="1105.3" y="453" width="69.3" height="15.0" fill="rgb(246,212,46)" rx="2" ry="2" />
+<text  x="1108.30" y="463.5" >ExecFun..</text>
+</g>
+<g >
+<title>ExecEvalExprSwitchContext (67 samples, 10.93%)</title><rect x="868.5" y="421" width="129.0" height="15.0" fill="rgb(235,28,7)" rx="2" ry="2" />
+<text  x="871.53" y="431.5" >ExecEvalExprSwit..</text>
+</g>
+<g >
+<title>__handle_mm_fault (2 samples, 0.33%)</title><rect x="1145.7" y="213" width="3.9" height="15.0" fill="rgb(248,62,18)" rx="2" ry="2" />
+<text  x="1148.73" y="223.5" ></text>
+</g>
+<g >
+<title>ext4_buffered_write_iter (2 samples, 0.33%)</title><rect x="1157.3" y="165" width="3.8" height="15.0" fill="rgb(226,9,27)" rx="2" ry="2" />
+<text  x="1160.28" y="175.5" ></text>
+</g>
+<g >
+<title>pg_atomic_write_u32 (1 samples, 0.16%)</title><rect x="541.3" y="325" width="1.9" height="15.0" fill="rgb(226,136,31)" rx="2" ry="2" />
+<text  x="544.29" y="335.5" ></text>
+</g>
+<g >
+<title>tag_hash (1 samples, 0.16%)</title><rect x="545.1" y="293" width="2.0" height="15.0" fill="rgb(225,117,11)" rx="2" ry="2" />
+<text  x="548.14" y="303.5" ></text>
+</g>
+<g >
+<title>BufTableHashPartition (1 samples, 0.16%)</title><rect x="420.0" y="293" width="1.9" height="15.0" fill="rgb(219,91,7)" rx="2" ry="2" />
+<text  x="423.02" y="303.5" ></text>
+</g>
+<g >
+<title>StartReadBuffersImpl (1 samples, 0.16%)</title><rect x="525.9" y="357" width="1.9" height="15.0" fill="rgb(221,141,46)" rx="2" ry="2" />
+<text  x="528.89" y="367.5" ></text>
+</g>
+<g >
+<title>MemoryContextReset (17 samples, 2.77%)</title><rect x="1068.7" y="437" width="32.8" height="15.0" fill="rgb(227,68,1)" rx="2" ry="2" />
+<text  x="1071.73" y="447.5" >Me..</text>
+</g>
+<g >
+<title>BufferIsValid (1 samples, 0.16%)</title><rect x="35.0" y="421" width="1.9" height="15.0" fill="rgb(246,97,29)" rx="2" ry="2" />
+<text  x="38.02" y="431.5" ></text>
+</g>
+<g >
+<title>heap_fill_tuple (2 samples, 0.33%)</title><rect x="1130.3" y="341" width="3.9" height="15.0" fill="rgb(233,13,20)" rx="2" ry="2" />
+<text  x="1133.33" y="351.5" ></text>
+</g>
+<g >
+<title>PinBufferForBlock (78 samples, 12.72%)</title><rect x="375.7" y="325" width="150.2" height="15.0" fill="rgb(238,152,33)" rx="2" ry="2" />
+<text  x="378.74" y="335.5" >PinBufferForBlock</text>
+</g>
+<g >
+<title>AllocSetAllocChunkFromBlock (4 samples, 0.65%)</title><rect x="1141.9" y="309" width="7.7" height="15.0" fill="rgb(237,153,36)" rx="2" ry="2" />
+<text  x="1144.88" y="319.5" ></text>
+</g>
+<g >
+<title>syscall_enter_from_user_mode (1 samples, 0.16%)</title><rect x="589.4" y="213" width="1.9" height="15.0" fill="rgb(224,184,47)" rx="2" ry="2" />
+<text  x="592.41" y="223.5" ></text>
+</g>
+<g >
+<title>ext4_da_write_begin (20 samples, 3.26%)</title><rect x="550.9" y="149" width="38.5" height="15.0" fill="rgb(237,138,34)" rx="2" ry="2" />
+<text  x="553.91" y="159.5" >ext..</text>
+</g>
+<g >
+<title>ReadBuffer_common (91 samples, 14.85%)</title><rect x="352.6" y="373" width="175.2" height="15.0" fill="rgb(205,27,36)" rx="2" ry="2" />
+<text  x="355.64" y="383.5" >ReadBuffer_common</text>
+</g>
+<g >
+<title>table_tuple_insert (1 samples, 0.16%)</title><rect x="1178.5" y="485" width="1.9" height="15.0" fill="rgb(229,200,33)" rx="2" ry="2" />
+<text  x="1181.45" y="495.5" ></text>
+</g>
+<g >
+<title>clear_page_erms (1 samples, 0.16%)</title><rect x="1159.2" y="37" width="1.9" height="15.0" fill="rgb(238,1,42)" rx="2" ry="2" />
+<text  x="1162.20" y="47.5" ></text>
+</g>
+<g >
+<title>__x64_sys_pwrite64 (21 samples, 3.43%)</title><rect x="549.0" y="213" width="40.4" height="15.0" fill="rgb(235,149,38)" rx="2" ry="2" />
+<text  x="551.99" y="223.5" >__x..</text>
+</g>
+<g >
+<title>DatumGetCString (1 samples, 0.16%)</title><rect x="870.5" y="405" width="1.9" height="15.0" fill="rgb(210,28,2)" rx="2" ry="2" />
+<text  x="873.46" y="415.5" ></text>
+</g>
+<g >
+<title>pg_ltoa (5 samples, 0.82%)</title><rect x="930.1" y="373" width="9.7" height="15.0" fill="rgb(222,7,46)" rx="2" ry="2" />
+<text  x="933.13" y="383.5" ></text>
+</g>
+<g >
+<title>BufFileReadMaybeEOF (2 samples, 0.33%)</title><rect x="1036.0" y="357" width="3.9" height="15.0" fill="rgb(213,48,50)" rx="2" ry="2" />
+<text  x="1039.00" y="367.5" ></text>
+</g>
+<g >
+<title>vfs_write (2 samples, 0.33%)</title><rect x="1157.3" y="181" width="3.8" height="15.0" fill="rgb(213,89,16)" rx="2" ry="2" />
+<text  x="1160.28" y="191.5" ></text>
+</g>
+<g >
+<title>__mem_cgroup_charge (1 samples, 0.16%)</title><rect x="554.8" y="69" width="1.9" height="15.0" fill="rgb(206,174,50)" rx="2" ry="2" />
+<text  x="557.76" y="79.5" ></text>
+</g>
+<g >
+<title>__strlen_sse2 (3 samples, 0.49%)</title><rect x="968.6" y="373" width="5.8" height="15.0" fill="rgb(252,206,28)" rx="2" ry="2" />
+<text  x="971.63" y="383.5" ></text>
+</g>
+<g >
+<title>BufTableDelete (1 samples, 0.16%)</title><rect x="535.5" y="309" width="1.9" height="15.0" fill="rgb(235,166,25)" rx="2" ry="2" />
+<text  x="538.51" y="319.5" ></text>
+</g>
+<g >
+<title>GetPrivateRefCountEntry (2 samples, 0.33%)</title><rect x="601.0" y="373" width="3.8" height="15.0" fill="rgb(229,209,33)" rx="2" ry="2" />
+<text  x="603.96" y="383.5" ></text>
+</g>
+<g >
+<title>UnlockRelationForExtension (2 samples, 0.33%)</title><rect x="543.2" y="341" width="3.9" height="15.0" fill="rgb(245,194,46)" rx="2" ry="2" />
+<text  x="546.21" y="351.5" ></text>
+</g>
+<g >
+<title>heap_prepare_insert (1 samples, 0.16%)</title><rect x="841.6" y="421" width="1.9" height="15.0" fill="rgb(227,89,15)" rx="2" ry="2" />
+<text  x="844.58" y="431.5" ></text>
+</g>
+<g >
+<title>hash_search_with_hash_value (1 samples, 0.16%)</title><rect x="543.2" y="293" width="1.9" height="15.0" fill="rgb(235,61,54)" rx="2" ry="2" />
+<text  x="546.21" y="303.5" ></text>
+</g>
+<g >
+<title>ExecProject (1 samples, 0.16%)</title><rect x="855.1" y="453" width="1.9" height="15.0" fill="rgb(240,32,4)" rx="2" ry="2" />
+<text  x="858.06" y="463.5" ></text>
+</g>
+<g >
+<title>MemoryChunkGetBlock (1 samples, 0.16%)</title><rect x="1095.7" y="373" width="1.9" height="15.0" fill="rgb(223,37,7)" rx="2" ry="2" />
+<text  x="1098.68" y="383.5" ></text>
+</g>
+<g >
+<title>ServerLoop (610 samples, 99.51%)</title><rect x="11.9" y="725" width="1174.3" height="15.0" fill="rgb(220,1,33)" rx="2" ry="2" />
+<text  x="14.92" y="735.5" >ServerLoop</text>
+</g>
+<g >
+<title>heap_fill_tuple (1 samples, 0.16%)</title><rect x="58.1" y="405" width="1.9" height="15.0" fill="rgb(238,69,37)" rx="2" ry="2" />
+<text  x="61.12" y="415.5" ></text>
+</g>
+<g >
+<title>pg_add_s32_overflow (1 samples, 0.16%)</title><rect x="1116.9" y="341" width="1.9" height="15.0" fill="rgb(246,164,38)" rx="2" ry="2" />
+<text  x="1119.85" y="351.5" ></text>
+</g>
+<g >
+<title>BufferAlloc (5 samples, 0.82%)</title><rect x="366.1" y="325" width="9.6" height="15.0" fill="rgb(221,63,26)" rx="2" ry="2" />
+<text  x="369.12" y="335.5" ></text>
+</g>
+<g >
+<title>BufferIsValid (1 samples, 0.16%)</title><rect x="624.1" y="389" width="1.9" height="15.0" fill="rgb(243,29,2)" rx="2" ry="2" />
+<text  x="627.06" y="399.5" ></text>
+</g>
+<g >
+<title>_mdnblocks (1 samples, 0.16%)</title><rect x="547.1" y="309" width="1.9" height="15.0" fill="rgb(218,81,5)" rx="2" ry="2" />
+<text  x="550.06" y="319.5" ></text>
+</g>
+<g >
+<title>FileWriteV (3 samples, 0.49%)</title><rect x="1155.4" y="261" width="5.7" height="15.0" fill="rgb(207,149,44)" rx="2" ry="2" />
+<text  x="1158.35" y="271.5" ></text>
+</g>
+<g >
+<title>LockBuffer (12 samples, 1.96%)</title><rect x="316.1" y="405" width="23.1" height="15.0" fill="rgb(231,73,54)" rx="2" ry="2" />
+<text  x="319.07" y="415.5" >L..</text>
+</g>
+<g >
+<title>BufferAlloc (60 samples, 9.79%)</title><rect x="387.3" y="309" width="115.5" height="15.0" fill="rgb(252,17,54)" rx="2" ry="2" />
+<text  x="390.29" y="319.5" >BufferAlloc</text>
+</g>
+<g >
+<title>pg_atomic_sub_fetch_u32_impl (1 samples, 0.16%)</title><rect x="595.2" y="229" width="1.9" height="15.0" fill="rgb(242,35,52)" rx="2" ry="2" />
+<text  x="598.19" y="239.5" ></text>
+</g>
+<g >
+<title>slot_getsomeattrs_int (1 samples, 0.16%)</title><rect x="962.9" y="389" width="1.9" height="15.0" fill="rgb(242,192,14)" rx="2" ry="2" />
+<text  x="965.85" y="399.5" ></text>
+</g>
+<g >
+<title>AllocSetCheck (2 samples, 0.33%)</title><rect x="11.9" y="485" width="3.9" height="15.0" fill="rgb(213,178,18)" rx="2" ry="2" />
+<text  x="14.92" y="495.5" ></text>
+</g>
+<g >
+<title>ExecGetInsertNewTuple (59 samples, 9.62%)</title><rect x="27.3" y="485" width="113.6" height="15.0" fill="rgb(226,43,44)" rx="2" ry="2" />
+<text  x="30.32" y="495.5" >ExecGetInsertN..</text>
+</g>
+<g >
+<title>ResourceOwnerForgetBuffer (3 samples, 0.49%)</title><rect x="635.6" y="373" width="5.8" height="15.0" fill="rgb(217,219,33)" rx="2" ry="2" />
+<text  x="638.61" y="383.5" ></text>
+</g>
+<g >
+<title>pgstat_tracks_io_object (3 samples, 0.49%)</title><rect x="516.3" y="261" width="5.7" height="15.0" fill="rgb(226,160,21)" rx="2" ry="2" />
+<text  x="519.26" y="271.5" ></text>
+</g>
+<g >
+<title>LWLockRelease (1 samples, 0.16%)</title><rect x="504.7" y="309" width="1.9" height="15.0" fill="rgb(229,91,42)" rx="2" ry="2" />
+<text  x="507.71" y="319.5" ></text>
+</g>
+<g >
+<title>set_sentinel (3 samples, 0.49%)</title><rect x="1143.8" y="293" width="5.8" height="15.0" fill="rgb(246,215,28)" rx="2" ry="2" />
+<text  x="1146.80" y="303.5" ></text>
+</g>
+<g >
+<title>sysvec_apic_timer_interrupt (1 samples, 0.16%)</title><rect x="830.0" y="357" width="2.0" height="15.0" fill="rgb(209,223,20)" rx="2" ry="2" />
+<text  x="833.03" y="367.5" ></text>
+</g>
+<g >
+<title>FileZero (22 samples, 3.59%)</title><rect x="549.0" y="309" width="42.3" height="15.0" fill="rgb(208,101,29)" rx="2" ry="2" />
+<text  x="551.99" y="319.5" >Fil..</text>
+</g>
+<g >
+<title>tts_minimal_clear (5 samples, 0.82%)</title><rect x="1016.8" y="357" width="9.6" height="15.0" fill="rgb(252,75,9)" rx="2" ry="2" />
+<text  x="1019.75" y="367.5" ></text>
+</g>
+<g >
+<title>PageGetItem (1 samples, 0.16%)</title><rect x="612.5" y="405" width="1.9" height="15.0" fill="rgb(235,125,11)" rx="2" ry="2" />
+<text  x="615.51" y="415.5" ></text>
+</g>
+<g >
+<title>clear_page_erms (1 samples, 0.16%)</title><rect x="1188.1" y="613" width="1.9" height="15.0" fill="rgb(221,167,47)" rx="2" ry="2" />
+<text  x="1191.08" y="623.5" ></text>
+</g>
+<g >
+<title>get_page_from_freelist (17 samples, 2.77%)</title><rect x="556.7" y="69" width="32.7" height="15.0" fill="rgb(227,102,24)" rx="2" ry="2" />
+<text  x="559.69" y="79.5" >ge..</text>
+</g>
+<g >
+<title>BufferIsDirty (5 samples, 0.82%)</title><rect x="824.3" y="405" width="9.6" height="15.0" fill="rgb(238,136,36)" rx="2" ry="2" />
+<text  x="827.26" y="415.5" ></text>
+</g>
+<g >
+<title>pg_rotate_left32 (1 samples, 0.16%)</title><rect x="418.1" y="245" width="1.9" height="15.0" fill="rgb(230,9,41)" rx="2" ry="2" />
+<text  x="421.09" y="255.5" ></text>
+</g>
+<g >
+<title>AllocSetAlloc (1 samples, 0.16%)</title><rect x="69.7" y="389" width="1.9" height="15.0" fill="rgb(211,16,44)" rx="2" ry="2" />
+<text  x="72.67" y="399.5" ></text>
+</g>
+<g >
+<title>ExtendBufferedRelShared (32 samples, 5.22%)</title><rect x="535.5" y="357" width="61.6" height="15.0" fill="rgb(208,67,32)" rx="2" ry="2" />
+<text  x="538.51" y="367.5" >Extend..</text>
+</g>
+<g >
+<title>int4out (1 samples, 0.16%)</title><rect x="993.7" y="405" width="1.9" height="15.0" fill="rgb(241,176,32)" rx="2" ry="2" />
+<text  x="996.65" y="415.5" ></text>
+</g>
+<g >
+<title>MemoryChunkSetHdrMask (1 samples, 0.16%)</title><rect x="1141.9" y="293" width="1.9" height="15.0" fill="rgb(239,68,6)" rx="2" ry="2" />
+<text  x="1144.88" y="303.5" ></text>
+</g>
+<g >
+<title>PointerGetDatum (1 samples, 0.16%)</title><rect x="966.7" y="373" width="1.9" height="15.0" fill="rgb(240,185,9)" rx="2" ry="2" />
+<text  x="969.70" y="383.5" ></text>
+</g>
+<g >
+<title>ExecProcNode (604 samples, 98.53%)</title><rect x="19.6" y="533" width="1162.7" height="15.0" fill="rgb(238,98,50)" rx="2" ry="2" />
+<text  x="22.62" y="543.5" >ExecProcNode</text>
+</g>
+<g >
+<title>RecordAndGetPageWithFreeSpace (2 samples, 0.33%)</title><rect x="529.7" y="405" width="3.9" height="15.0" fill="rgb(249,118,32)" rx="2" ry="2" />
+<text  x="532.74" y="415.5" ></text>
+</g>
+<g >
+<title>entry_SYSCALL_64_after_hwframe (22 samples, 3.59%)</title><rect x="549.0" y="245" width="42.3" height="15.0" fill="rgb(229,56,6)" rx="2" ry="2" />
+<text  x="551.99" y="255.5" >ent..</text>
+</g>
+<g >
+<title>pgstat_tracks_io_op (5 samples, 0.82%)</title><rect x="512.4" y="277" width="9.6" height="15.0" fill="rgb(216,149,36)" rx="2" ry="2" />
+<text  x="515.41" y="287.5" ></text>
+</g>
+<g >
+<title>AllocSetCheck (8 samples, 1.31%)</title><rect x="1084.1" y="389" width="15.4" height="15.0" fill="rgb(206,95,41)" rx="2" ry="2" />
+<text  x="1087.13" y="399.5" ></text>
+</g>
+<g >
+<title>pg_atomic_compare_exchange_u32_impl (2 samples, 0.33%)</title><rect x="258.3" y="389" width="3.9" height="15.0" fill="rgb(219,75,27)" rx="2" ry="2" />
+<text  x="261.32" y="399.5" ></text>
+</g>
+<g >
+<title>ReservePrivateRefCountEntry (1 samples, 0.16%)</title><rect x="493.2" y="293" width="1.9" height="15.0" fill="rgb(223,74,39)" rx="2" ry="2" />
+<text  x="496.16" y="303.5" ></text>
+</g>
+<g >
+<title>MakeExpandedObjectReadOnlyInternal (2 samples, 0.33%)</title><rect x="918.6" y="389" width="3.8" height="15.0" fill="rgb(247,2,26)" rx="2" ry="2" />
+<text  x="921.58" y="399.5" ></text>
+</g>
+<g >
+<title>ItemPointerGetBlockNumber (1 samples, 0.16%)</title><rect x="179.4" y="437" width="1.9" height="15.0" fill="rgb(253,128,34)" rx="2" ry="2" />
+<text  x="182.40" y="447.5" ></text>
+</g>
+<g >
+<title>table_tuple_insert (355 samples, 57.91%)</title><rect x="164.0" y="469" width="683.4" height="15.0" fill="rgb(224,79,25)" rx="2" ry="2" />
+<text  x="167.00" y="479.5" >table_tuple_insert</text>
+</g>
+<g >
+<title>LWLockAttemptLock (5 samples, 0.82%)</title><rect x="445.0" y="277" width="9.7" height="15.0" fill="rgb(235,178,23)" rx="2" ry="2" />
+<text  x="448.04" y="287.5" ></text>
+</g>
+<g >
+<title>BufFileLoadBuffer (1 samples, 0.16%)</title><rect x="1061.0" y="325" width="2.0" height="15.0" fill="rgb(250,206,2)" rx="2" ry="2" />
+<text  x="1064.03" y="335.5" ></text>
+</g>
+<g >
+<title>__libc_pwrite (3 samples, 0.49%)</title><rect x="1155.4" y="245" width="5.7" height="15.0" fill="rgb(209,50,47)" rx="2" ry="2" />
+<text  x="1158.35" y="255.5" ></text>
+</g>
+<g >
+<title>BlockIdSet (1 samples, 0.16%)</title><rect x="71.6" y="389" width="1.9" height="15.0" fill="rgb(232,187,54)" rx="2" ry="2" />
+<text  x="74.60" y="399.5" ></text>
+</g>
+<g >
+<title>MemoryChunkSetHdrMask (1 samples, 0.16%)</title><rect x="926.3" y="325" width="1.9" height="15.0" fill="rgb(217,150,50)" rx="2" ry="2" />
+<text  x="929.28" y="335.5" ></text>
+</g>
+<g >
+<title>tts_buffer_heap_materialize (3 samples, 0.49%)</title><rect x="156.3" y="453" width="5.8" height="15.0" fill="rgb(219,104,42)" rx="2" ry="2" />
+<text  x="159.30" y="463.5" ></text>
+</g>
+<g >
+<title>ItemPointerCopy (1 samples, 0.16%)</title><rect x="164.0" y="453" width="1.9" height="15.0" fill="rgb(218,127,12)" rx="2" ry="2" />
+<text  x="167.00" y="463.5" ></text>
+</g>
+<g >
+<title>ext4_inode_journal_mode (1 samples, 0.16%)</title><rect x="1182.3" y="421" width="1.9" height="15.0" fill="rgb(216,117,30)" rx="2" ry="2" />
+<text  x="1185.30" y="431.5" ></text>
+</g>
+<g >
+<title>ksys_lseek (1 samples, 0.16%)</title><rect x="547.1" y="245" width="1.9" height="15.0" fill="rgb(224,97,5)" rx="2" ry="2" />
+<text  x="550.06" y="255.5" ></text>
+</g>
+<g >
+<title>GetPrivateRefCount (3 samples, 0.49%)</title><rect x="826.2" y="389" width="5.8" height="15.0" fill="rgb(216,182,12)" rx="2" ry="2" />
+<text  x="829.18" y="399.5" ></text>
+</g>
+<g >
+<title>GetPrivateRefCountEntry (1 samples, 0.16%)</title><rect x="335.3" y="373" width="1.9" height="15.0" fill="rgb(244,144,14)" rx="2" ry="2" />
+<text  x="338.32" y="383.5" ></text>
+</g>
+<g >
+<title>ExecProject (76 samples, 12.40%)</title><rect x="857.0" y="437" width="146.3" height="15.0" fill="rgb(218,104,39)" rx="2" ry="2" />
+<text  x="859.98" y="447.5" >ExecProject</text>
+</g>
+<g >
+<title>slot_getsomeattrs (11 samples, 1.79%)</title><rect x="941.7" y="389" width="21.2" height="15.0" fill="rgb(246,7,11)" rx="2" ry="2" />
+<text  x="944.68" y="399.5" ></text>
+</g>
+<g >
+<title>postgres (613 samples, 100.00%)</title><rect x="10.0" y="789" width="1180.0" height="15.0" fill="rgb(230,92,20)" rx="2" ry="2" />
+<text  x="13.00" y="799.5" >postgres</text>
+</g>
+<g >
+<title>tts_buffer_heap_materialize (3 samples, 0.49%)</title><rect x="847.4" y="469" width="5.7" height="15.0" fill="rgb(245,100,21)" rx="2" ry="2" />
+<text  x="850.36" y="479.5" ></text>
+</g>
+<g >
+<title>ResourceOwnerForget (2 samples, 0.33%)</title><rect x="637.5" y="357" width="3.9" height="15.0" fill="rgb(231,137,0)" rx="2" ry="2" />
+<text  x="640.54" y="367.5" ></text>
+</g>
+<g >
+<title>CacheInvalidateHeapTuple (1 samples, 0.16%)</title><rect x="167.8" y="437" width="2.0" height="15.0" fill="rgb(248,91,40)" rx="2" ry="2" />
+<text  x="170.85" y="447.5" ></text>
+</g>
+<g >
+<title>finish_xact_command (2 samples, 0.33%)</title><rect x="1182.3" y="629" width="3.9" height="15.0" fill="rgb(217,103,38)" rx="2" ry="2" />
+<text  x="1185.30" y="639.5" ></text>
+</g>
+<g >
+<title>LWLockHeldByMeInMode (3 samples, 0.49%)</title><rect x="250.6" y="405" width="5.8" height="15.0" fill="rgb(216,106,32)" rx="2" ry="2" />
+<text  x="253.62" y="415.5" ></text>
+</g>
+<g >
+<title>tuplestore_puttuple_common (13 samples, 2.12%)</title><rect x="1149.6" y="357" width="25.0" height="15.0" fill="rgb(232,51,50)" rx="2" ry="2" />
+<text  x="1152.58" y="367.5" >t..</text>
+</g>
+<g >
+<title>PostmasterMain (610 samples, 99.51%)</title><rect x="11.9" y="741" width="1174.3" height="15.0" fill="rgb(231,58,23)" rx="2" ry="2" />
+<text  x="14.92" y="751.5" >PostmasterMain</text>
+</g>
+<g >
+<title>LWLockRelease (1 samples, 0.16%)</title><rect x="595.2" y="261" width="1.9" height="15.0" fill="rgb(241,169,40)" rx="2" ry="2" />
+<text  x="598.19" y="271.5" ></text>
+</g>
+<g >
+<title>per_MultiFuncCall (1 samples, 0.16%)</title><rect x="1114.9" y="341" width="2.0" height="15.0" fill="rgb(245,103,35)" rx="2" ry="2" />
+<text  x="1117.93" y="351.5" ></text>
+</g>
+<g >
+<title>BufferGetPage (2 samples, 0.33%)</title><rect x="806.9" y="405" width="3.9" height="15.0" fill="rgb(219,92,20)" rx="2" ry="2" />
+<text  x="809.93" y="415.5" ></text>
+</g>
+<g >
+<title>BufferIsExclusiveLocked (1 samples, 0.16%)</title><rect x="223.7" y="421" width="1.9" height="15.0" fill="rgb(234,68,35)" rx="2" ry="2" />
+<text  x="226.67" y="431.5" ></text>
+</g>
+<g >
+<title>ExecClearTuple (11 samples, 1.79%)</title><rect x="35.0" y="437" width="21.2" height="15.0" fill="rgb(206,114,33)" rx="2" ry="2" />
+<text  x="38.02" y="447.5" ></text>
+</g>
+<g >
+<title>BufFileReadMaybeEOF (1 samples, 0.16%)</title><rect x="1030.2" y="373" width="2.0" height="15.0" fill="rgb(238,152,32)" rx="2" ry="2" />
+<text  x="1033.23" y="383.5" ></text>
+</g>
+<g >
+<title>LWLockRelease (2 samples, 0.33%)</title><rect x="456.6" y="293" width="3.8" height="15.0" fill="rgb(254,164,15)" rx="2" ry="2" />
+<text  x="459.59" y="303.5" ></text>
+</g>
+<g >
+<title>hash_bytes (11 samples, 1.79%)</title><rect x="396.9" y="245" width="21.2" height="15.0" fill="rgb(236,135,7)" rx="2" ry="2" />
+<text  x="399.92" y="255.5" ></text>
+</g>
+<g >
+<title>__handle_mm_fault (1 samples, 0.16%)</title><rect x="1188.1" y="693" width="1.9" height="15.0" fill="rgb(254,196,19)" rx="2" ry="2" />
+<text  x="1191.08" y="703.5" ></text>
+</g>
+<g >
+<title>generic_perform_write (21 samples, 3.43%)</title><rect x="549.0" y="165" width="40.4" height="15.0" fill="rgb(253,163,38)" rx="2" ry="2" />
+<text  x="551.99" y="175.5" >gen..</text>
+</g>
+<g >
+<title>ExecARInsertTriggers (1 samples, 0.16%)</title><rect x="152.4" y="469" width="2.0" height="15.0" fill="rgb(229,66,22)" rx="2" ry="2" />
+<text  x="155.45" y="479.5" ></text>
+</g>
+<g >
+<title>do_writepages (1 samples, 0.16%)</title><rect x="1184.2" y="373" width="2.0" height="15.0" fill="rgb(215,30,36)" rx="2" ry="2" />
+<text  x="1187.23" y="383.5" ></text>
+</g>
+<g >
+<title>PageGetHeapFreeSpace (2 samples, 0.33%)</title><rect x="339.2" y="405" width="3.8" height="15.0" fill="rgb(235,1,28)" rx="2" ry="2" />
+<text  x="342.17" y="415.5" ></text>
+</g>
+<g >
+<title>heapam_tuple_insert (354 samples, 57.75%)</title><rect x="165.9" y="453" width="681.5" height="15.0" fill="rgb(250,87,39)" rx="2" ry="2" />
+<text  x="168.92" y="463.5" >heapam_tuple_insert</text>
+</g>
+<g >
+<title>ext4_da_get_block_prep (1 samples, 0.16%)</title><rect x="552.8" y="117" width="2.0" height="15.0" fill="rgb(248,196,16)" rx="2" ry="2" />
+<text  x="555.84" y="127.5" ></text>
+</g>
+<g >
+<title>pg_atomic_compare_exchange_u32 (1 samples, 0.16%)</title><rect x="654.9" y="357" width="1.9" height="15.0" fill="rgb(239,198,25)" rx="2" ry="2" />
+<text  x="657.86" y="367.5" ></text>
+</g>
+<g >
+<title>ext4_sync_file (2 samples, 0.33%)</title><rect x="1182.3" y="437" width="3.9" height="15.0" fill="rgb(239,56,5)" rx="2" ry="2" />
+<text  x="1185.30" y="447.5" ></text>
+</g>
+<g >
+<title>hash_bytes (1 samples, 0.16%)</title><rect x="545.1" y="277" width="2.0" height="15.0" fill="rgb(252,40,6)" rx="2" ry="2" />
+<text  x="548.14" y="287.5" ></text>
+</g>
+<g >
+<title>BufferIsValid (1 samples, 0.16%)</title><rect x="824.3" y="389" width="1.9" height="15.0" fill="rgb(211,133,52)" rx="2" ry="2" />
+<text  x="827.26" y="399.5" ></text>
+</g>
+<g >
+<title>ItemPointerIsValid (1 samples, 0.16%)</title><rect x="229.4" y="405" width="2.0" height="15.0" fill="rgb(219,190,48)" rx="2" ry="2" />
+<text  x="232.45" y="415.5" ></text>
+</g>
+<g >
+<title>ReservePrivateRefCountEntry (1 samples, 0.16%)</title><rect x="506.6" y="309" width="2.0" height="15.0" fill="rgb(251,13,24)" rx="2" ry="2" />
+<text  x="509.64" y="319.5" ></text>
+</g>
+<g >
+<title>handle_mm_fault (1 samples, 0.16%)</title><rect x="1188.1" y="709" width="1.9" height="15.0" fill="rgb(228,201,19)" rx="2" ry="2" />
+<text  x="1191.08" y="719.5" ></text>
+</g>
+<g >
+<title>PageAddItemExtended (3 samples, 0.49%)</title><rect x="262.2" y="421" width="5.7" height="15.0" fill="rgb(236,80,0)" rx="2" ry="2" />
+<text  x="265.17" y="431.5" ></text>
+</g>
+<g >
+<title>pg_atomic_compare_exchange_u32_impl (1 samples, 0.16%)</title><rect x="654.9" y="341" width="1.9" height="15.0" fill="rgb(207,137,18)" rx="2" ry="2" />
+<text  x="657.86" y="351.5" ></text>
+</g>
+<g >
+<title>GetPrivateRefCount (3 samples, 0.49%)</title><rect x="244.8" y="405" width="5.8" height="15.0" fill="rgb(216,83,37)" rx="2" ry="2" />
+<text  x="247.85" y="415.5" ></text>
+</g>
+<g >
+<title>do_user_addr_fault (3 samples, 0.49%)</title><rect x="1143.8" y="245" width="5.8" height="15.0" fill="rgb(233,73,10)" rx="2" ry="2" />
+<text  x="1146.80" y="255.5" ></text>
+</g>
+<g >
+<title>PortalRunMulti (608 samples, 99.18%)</title><rect x="11.9" y="613" width="1170.4" height="15.0" fill="rgb(226,148,27)" rx="2" ry="2" />
+<text  x="14.92" y="623.5" >PortalRunMulti</text>
+</g>
+<g >
+<title>pg_atomic_read_u32 (1 samples, 0.16%)</title><rect x="839.7" y="405" width="1.9" height="15.0" fill="rgb(228,220,13)" rx="2" ry="2" />
+<text  x="842.66" y="415.5" ></text>
+</g>
+<g >
+<title>textin (14 samples, 2.28%)</title><rect x="964.8" y="389" width="26.9" height="15.0" fill="rgb(221,221,29)" rx="2" ry="2" />
+<text  x="967.78" y="399.5" >t..</text>
+</g>
+<g >
+<title>GetPrivateRefCountEntry (1 samples, 0.16%)</title><rect x="837.7" y="373" width="2.0" height="15.0" fill="rgb(206,79,37)" rx="2" ry="2" />
+<text  x="840.73" y="383.5" ></text>
+</g>
+<g >
+<title>RelationGetBufferForTuple (1 samples, 0.16%)</title><rect x="185.2" y="437" width="1.9" height="15.0" fill="rgb(229,120,36)" rx="2" ry="2" />
+<text  x="188.17" y="447.5" ></text>
+</g>
+<g >
+<title>tts_virtual_copy_heap_tuple (1 samples, 0.16%)</title><rect x="139.0" y="437" width="1.9" height="15.0" fill="rgb(228,25,11)" rx="2" ry="2" />
+<text  x="141.97" y="447.5" ></text>
+</g>
+<g >
+<title>GetBufferDescriptor (1 samples, 0.16%)</title><rect x="606.7" y="405" width="2.0" height="15.0" fill="rgb(218,187,27)" rx="2" ry="2" />
+<text  x="609.74" y="415.5" ></text>
+</g>
+<g >
+<title>MemoryContextDeleteOnly (4 samples, 0.65%)</title><rect x="11.9" y="517" width="7.7" height="15.0" fill="rgb(250,174,13)" rx="2" ry="2" />
+<text  x="14.92" y="527.5" ></text>
+</g>
+<g >
+<title>ExecCopySlot (57 samples, 9.30%)</title><rect x="31.2" y="469" width="109.7" height="15.0" fill="rgb(233,26,38)" rx="2" ry="2" />
+<text  x="34.17" y="479.5" >ExecCopySlot</text>
+</g>
+<g >
+<title>entry_SYSCALL_64_after_hwframe (1 samples, 0.16%)</title><rect x="547.1" y="277" width="1.9" height="15.0" fill="rgb(237,100,25)" rx="2" ry="2" />
+<text  x="550.06" y="287.5" ></text>
+</g>
+<g >
+<title>AllocSetFreeIndex (2 samples, 0.33%)</title><rect x="987.9" y="309" width="3.8" height="15.0" fill="rgb(223,165,27)" rx="2" ry="2" />
+<text  x="990.88" y="319.5" ></text>
+</g>
+<g >
+<title>mdnblocks (1 samples, 0.16%)</title><rect x="547.1" y="325" width="1.9" height="15.0" fill="rgb(253,102,25)" rx="2" ry="2" />
+<text  x="550.06" y="335.5" ></text>
+</g>
+<g >
+<title>ExecutorEnd (4 samples, 0.65%)</title><rect x="11.9" y="581" width="7.7" height="15.0" fill="rgb(252,40,15)" rx="2" ry="2" />
+<text  x="14.92" y="591.5" ></text>
+</g>
+<g >
+<title>RelationPutHeapTuple (10 samples, 1.63%)</title><rect x="599.0" y="421" width="19.3" height="15.0" fill="rgb(211,123,27)" rx="2" ry="2" />
+<text  x="602.04" y="431.5" ></text>
+</g>
+<g >
+<title>FunctionNext (36 samples, 5.87%)</title><rect x="1105.3" y="405" width="69.3" height="15.0" fill="rgb(214,15,49)" rx="2" ry="2" />
+<text  x="1108.30" y="415.5" >Functio..</text>
+</g>
+<g >
+<title>BufferIsValid (1 samples, 0.16%)</title><rect x="333.4" y="373" width="1.9" height="15.0" fill="rgb(205,132,16)" rx="2" ry="2" />
+<text  x="336.39" y="383.5" ></text>
+</g>
+<g >
+<title>__memset_sse2_unaligned_erms (1 samples, 0.16%)</title><rect x="597.1" y="357" width="1.9" height="15.0" fill="rgb(223,30,10)" rx="2" ry="2" />
+<text  x="600.11" y="367.5" ></text>
+</g>
+<g >
+<title>fetch_att (2 samples, 0.33%)</title><rect x="959.0" y="325" width="3.9" height="15.0" fill="rgb(225,52,24)" rx="2" ry="2" />
+<text  x="962.00" y="335.5" ></text>
+</g>
+<g >
+<title>AllocSetDelete (4 samples, 0.65%)</title><rect x="11.9" y="501" width="7.7" height="15.0" fill="rgb(225,19,9)" rx="2" ry="2" />
+<text  x="14.92" y="511.5" ></text>
+</g>
+<g >
+<title>heap_compute_data_size (1 samples, 0.16%)</title><rect x="56.2" y="405" width="1.9" height="15.0" fill="rgb(208,16,5)" rx="2" ry="2" />
+<text  x="59.20" y="415.5" ></text>
+</g>
+<g >
+<title>pg_atomic_exchange_u64 (2 samples, 0.33%)</title><rect x="729.9" y="373" width="3.9" height="15.0" fill="rgb(237,80,46)" rx="2" ry="2" />
+<text  x="732.93" y="383.5" ></text>
+</g>
+<g >
+<title>pfree (5 samples, 0.82%)</title><rect x="46.6" y="389" width="9.6" height="15.0" fill="rgb(252,79,29)" rx="2" ry="2" />
+<text  x="49.57" y="399.5" ></text>
+</g>
+<g >
+<title>BufferIsValid (1 samples, 0.16%)</title><rect x="225.6" y="421" width="1.9" height="15.0" fill="rgb(235,99,40)" rx="2" ry="2" />
+<text  x="228.60" y="431.5" ></text>
+</g>
+<g >
+<title>RelationGetBufferForTuple (165 samples, 26.92%)</title><rect x="281.4" y="421" width="317.6" height="15.0" fill="rgb(249,161,1)" rx="2" ry="2" />
+<text  x="284.42" y="431.5" >RelationGetBufferForTuple</text>
+</g>
+<g >
+<title>BufTableHashCode (14 samples, 2.28%)</title><rect x="393.1" y="293" width="26.9" height="15.0" fill="rgb(214,167,29)" rx="2" ry="2" />
+<text  x="396.07" y="303.5" >B..</text>
+</g>
+<g >
+<title>BufferIsValid (1 samples, 0.16%)</title><rect x="602.9" y="357" width="1.9" height="15.0" fill="rgb(205,71,54)" rx="2" ry="2" />
+<text  x="605.89" y="367.5" ></text>
+</g>
+<g >
+<title>exec_simple_query (610 samples, 99.51%)</title><rect x="11.9" y="645" width="1174.3" height="15.0" fill="rgb(218,53,43)" rx="2" ry="2" />
+<text  x="14.92" y="655.5" >exec_simple_query</text>
+</g>
+<g >
+<title>readtup_heap (1 samples, 0.16%)</title><rect x="1026.4" y="389" width="1.9" height="15.0" fill="rgb(211,70,21)" rx="2" ry="2" />
+<text  x="1029.38" y="399.5" ></text>
+</g>
+<g >
+<title>smgrzeroextend (25 samples, 4.08%)</title><rect x="549.0" y="341" width="48.1" height="15.0" fill="rgb(211,52,27)" rx="2" ry="2" />
+<text  x="551.99" y="351.5" >smgr..</text>
+</g>
+<g >
+<title>pg_comp_crc32c_sse42 (8 samples, 1.31%)</title><rect x="770.4" y="389" width="15.4" height="15.0" fill="rgb(218,47,51)" rx="2" ry="2" />
+<text  x="773.36" y="399.5" ></text>
+</g>
+<g >
+<title>pg_ultoa_n (3 samples, 0.49%)</title><rect x="934.0" y="357" width="5.8" height="15.0" fill="rgb(217,10,34)" rx="2" ry="2" />
+<text  x="936.98" y="367.5" ></text>
+</g>
+<g >
+<title>vma_alloc_folio (2 samples, 0.33%)</title><rect x="1145.7" y="197" width="3.9" height="15.0" fill="rgb(237,183,20)" rx="2" ry="2" />
+<text  x="1148.73" y="207.5" ></text>
+</g>
+<g >
+<title>asm_exc_page_fault (1 samples, 0.16%)</title><rect x="1188.1" y="757" width="1.9" height="15.0" fill="rgb(215,81,3)" rx="2" ry="2" />
+<text  x="1191.08" y="767.5" ></text>
+</g>
+<g >
+<title>DatumGetCString (1 samples, 0.16%)</title><rect x="916.7" y="389" width="1.9" height="15.0" fill="rgb(214,185,40)" rx="2" ry="2" />
+<text  x="919.66" y="399.5" ></text>
+</g>
+<g >
+<title>file_write_and_wait_range (1 samples, 0.16%)</title><rect x="1184.2" y="421" width="2.0" height="15.0" fill="rgb(228,139,29)" rx="2" ry="2" />
+<text  x="1187.23" y="431.5" ></text>
+</g>
+<g >
+<title>__memmove_ssse3 (1 samples, 0.16%)</title><rect x="616.4" y="405" width="1.9" height="15.0" fill="rgb(254,227,37)" rx="2" ry="2" />
+<text  x="619.36" y="415.5" ></text>
+</g>
+<g >
+<title>get_page_from_freelist (1 samples, 0.16%)</title><rect x="1188.1" y="629" width="1.9" height="15.0" fill="rgb(234,34,24)" rx="2" ry="2" />
+<text  x="1191.08" y="639.5" ></text>
+</g>
+<g >
+<title>XLogBeginInsert (2 samples, 0.33%)</title><rect x="187.1" y="437" width="3.8" height="15.0" fill="rgb(252,204,32)" rx="2" ry="2" />
+<text  x="190.10" y="447.5" ></text>
+</g>
+<g >
+<title>CommitTransactionCommand (2 samples, 0.33%)</title><rect x="1182.3" y="613" width="3.9" height="15.0" fill="rgb(228,9,4)" rx="2" ry="2" />
+<text  x="1185.30" y="623.5" ></text>
+</g>
+<g >
+<title>CheckForSerializableConflictIn (1 samples, 0.16%)</title><rect x="169.8" y="437" width="1.9" height="15.0" fill="rgb(224,111,16)" rx="2" ry="2" />
+<text  x="172.77" y="447.5" ></text>
+</g>
+<g >
+<title>BufferGetBlockNumber (2 samples, 0.33%)</title><rect x="601.0" y="405" width="3.8" height="15.0" fill="rgb(221,47,24)" rx="2" ry="2" />
+<text  x="603.96" y="415.5" ></text>
+</g>
+<g >
+<title>MemoryContextDelete (4 samples, 0.65%)</title><rect x="11.9" y="533" width="7.7" height="15.0" fill="rgb(238,71,50)" rx="2" ry="2" />
+<text  x="14.92" y="543.5" ></text>
+</g>
+<g >
+<title>ExecClearTuple (5 samples, 0.82%)</title><rect x="858.9" y="421" width="9.6" height="15.0" fill="rgb(231,37,13)" rx="2" ry="2" />
+<text  x="861.91" y="431.5" ></text>
+</g>
+<g >
+<title>startup_hacks (610 samples, 99.51%)</title><rect x="11.9" y="757" width="1174.3" height="15.0" fill="rgb(238,69,41)" rx="2" ry="2" />
+<text  x="14.92" y="767.5" >startup_hacks</text>
+</g>
+<g >
+<title>__folio_alloc (1 samples, 0.16%)</title><rect x="1188.1" y="661" width="1.9" height="15.0" fill="rgb(230,107,9)" rx="2" ry="2" />
+<text  x="1191.08" y="671.5" ></text>
+</g>
+<g >
+<title>do_user_addr_fault (1 samples, 0.16%)</title><rect x="1188.1" y="725" width="1.9" height="15.0" fill="rgb(231,56,18)" rx="2" ry="2" />
+<text  x="1191.08" y="735.5" ></text>
+</g>
+<g >
+<title>list_free (2 samples, 0.33%)</title><rect x="1174.6" y="485" width="3.9" height="15.0" fill="rgb(253,32,33)" rx="2" ry="2" />
+<text  x="1177.60" y="495.5" ></text>
+</g>
+<g >
+<title>GetPrivateRefCountEntry (3 samples, 0.49%)</title><rect x="244.8" y="389" width="5.8" height="15.0" fill="rgb(215,102,7)" rx="2" ry="2" />
+<text  x="247.85" y="399.5" ></text>
+</g>
+<g >
+<title>fill_val (10 samples, 1.63%)</title><rect x="106.2" y="373" width="19.3" height="15.0" fill="rgb(233,71,4)" rx="2" ry="2" />
+<text  x="109.25" y="383.5" ></text>
+</g>
+<g >
+<title>pg_atomic_sub_fetch_u32_impl (2 samples, 0.33%)</title><rect x="456.6" y="261" width="3.8" height="15.0" fill="rgb(237,119,15)" rx="2" ry="2" />
+<text  x="459.59" y="271.5" ></text>
+</g>
+<g >
+<title>FileWrite (3 samples, 0.49%)</title><rect x="1155.4" y="277" width="5.7" height="15.0" fill="rgb(233,177,53)" rx="2" ry="2" />
+<text  x="1158.35" y="287.5" ></text>
+</g>
+<g >
+<title>ExecutePlan (604 samples, 98.53%)</title><rect x="19.6" y="549" width="1162.7" height="15.0" fill="rgb(239,21,19)" rx="2" ry="2" />
+<text  x="22.62" y="559.5" >ExecutePlan</text>
+</g>
+<g >
+<title>LockAcquireExtended (1 samples, 0.16%)</title><rect x="539.4" y="309" width="1.9" height="15.0" fill="rgb(247,38,8)" rx="2" ry="2" />
+<text  x="542.36" y="319.5" ></text>
+</g>
+<g >
+<title>fsm_set_and_search (1 samples, 0.16%)</title><rect x="531.7" y="389" width="1.9" height="15.0" fill="rgb(244,117,21)" rx="2" ry="2" />
+<text  x="534.66" y="399.5" ></text>
+</g>
+<g >
+<title>generate_series_step_int4 (7 samples, 1.14%)</title><rect x="1105.3" y="357" width="13.5" height="15.0" fill="rgb(235,43,8)" rx="2" ry="2" />
+<text  x="1108.30" y="367.5" ></text>
+</g>
+<g >
+<title>palloc (3 samples, 0.49%)</title><rect x="924.4" y="373" width="5.7" height="15.0" fill="rgb(227,21,23)" rx="2" ry="2" />
+<text  x="927.36" y="383.5" ></text>
+</g>
+<g >
+<title>tag_hash (12 samples, 1.96%)</title><rect x="396.9" y="261" width="23.1" height="15.0" fill="rgb(242,104,51)" rx="2" ry="2" />
+<text  x="399.92" y="271.5" >t..</text>
+</g>
+<g >
+<title>heap_form_tuple (35 samples, 5.71%)</title><rect x="60.0" y="405" width="67.4" height="15.0" fill="rgb(248,105,0)" rx="2" ry="2" />
+<text  x="63.05" y="415.5" >heap_fo..</text>
+</g>
+<g >
+<title>__folio_alloc (2 samples, 0.33%)</title><rect x="1145.7" y="181" width="3.9" height="15.0" fill="rgb(210,14,8)" rx="2" ry="2" />
+<text  x="1148.73" y="191.5" ></text>
+</g>
+<g >
+<title>tts_minimal_store_tuple (8 samples, 1.31%)</title><rect x="1011.0" y="373" width="15.4" height="15.0" fill="rgb(219,40,39)" rx="2" ry="2" />
+<text  x="1013.98" y="383.5" ></text>
+</g>
+<g >
+<title>BufTableHashCode (1 samples, 0.16%)</title><rect x="537.4" y="309" width="2.0" height="15.0" fill="rgb(216,94,38)" rx="2" ry="2" />
+<text  x="540.44" y="319.5" ></text>
+</g>
+<g >
+<title>castNodeImpl (2 samples, 0.33%)</title><rect x="1101.5" y="453" width="3.8" height="15.0" fill="rgb(212,133,17)" rx="2" ry="2" />
+<text  x="1104.45" y="463.5" ></text>
+</g>
+<g >
+<title>GetVictimBuffer (2 samples, 0.33%)</title><rect x="535.5" y="341" width="3.9" height="15.0" fill="rgb(207,38,49)" rx="2" ry="2" />
+<text  x="538.51" y="351.5" ></text>
+</g>
+<g >
+<title>MakeExpandedObjectReadOnlyInternal (1 samples, 0.16%)</title><rect x="991.7" y="405" width="2.0" height="15.0" fill="rgb(212,193,44)" rx="2" ry="2" />
+<text  x="994.73" y="415.5" ></text>
+</g>
+<g >
+<title>generate_series_int4 (7 samples, 1.14%)</title><rect x="1105.3" y="373" width="13.5" height="15.0" fill="rgb(206,182,38)" rx="2" ry="2" />
+<text  x="1108.30" y="383.5" ></text>
+</g>
+<g >
+<title>BufferIsValid (2 samples, 0.33%)</title><rect x="298.7" y="405" width="3.9" height="15.0" fill="rgb(246,212,7)" rx="2" ry="2" />
+<text  x="301.74" y="415.5" ></text>
+</g>
+<g >
+<title>pg_atomic_read_u32_impl (1 samples, 0.16%)</title><rect x="491.2" y="277" width="2.0" height="15.0" fill="rgb(206,116,40)" rx="2" ry="2" />
+<text  x="494.24" y="287.5" ></text>
+</g>
+<g >
+<title>pgstat_count_heap_insert (1 samples, 0.16%)</title><rect x="845.4" y="437" width="2.0" height="15.0" fill="rgb(211,228,40)" rx="2" ry="2" />
+<text  x="848.43" y="447.5" ></text>
+</g>
+<g >
+<title>vfs_write (21 samples, 3.43%)</title><rect x="549.0" y="197" width="40.4" height="15.0" fill="rgb(243,153,22)" rx="2" ry="2" />
+<text  x="551.99" y="207.5" >vfs..</text>
+</g>
+<g >
+<title>GetMemoryChunkMethodID (1 samples, 0.16%)</title><rect x="54.3" y="373" width="1.9" height="15.0" fill="rgb(223,56,22)" rx="2" ry="2" />
+<text  x="57.27" y="383.5" ></text>
+</g>
+<g >
+<title>int4out (9 samples, 1.47%)</title><rect x="922.4" y="389" width="17.4" height="15.0" fill="rgb(249,112,42)" rx="2" ry="2" />
+<text  x="925.43" y="399.5" ></text>
+</g>
+<g >
+<title>pg_atomic_read_u32 (1 samples, 0.16%)</title><rect x="454.7" y="277" width="1.9" height="15.0" fill="rgb(238,185,22)" rx="2" ry="2" />
+<text  x="457.67" y="287.5" ></text>
+</g>
+<g >
+<title>BufFileWrite (2 samples, 0.33%)</title><rect x="1168.8" y="325" width="3.9" height="15.0" fill="rgb(248,113,33)" rx="2" ry="2" />
+<text  x="1171.83" y="335.5" ></text>
+</g>
+<g >
+<title>FileRead (1 samples, 0.16%)</title><rect x="1061.0" y="309" width="2.0" height="15.0" fill="rgb(206,21,43)" rx="2" ry="2" />
+<text  x="1064.03" y="319.5" ></text>
+</g>
+<g >
+<title>XLogInsertAllowed (5 samples, 0.82%)</title><rect x="785.8" y="421" width="9.6" height="15.0" fill="rgb(222,216,40)" rx="2" ry="2" />
+<text  x="788.76" y="431.5" ></text>
+</g>
+<g >
+<title>CacheInvalidateHeapTuple (1 samples, 0.16%)</title><rect x="227.5" y="421" width="1.9" height="15.0" fill="rgb(220,31,11)" rx="2" ry="2" />
+<text  x="230.52" y="431.5" ></text>
+</g>
+<g >
+<title>XLogRecPtrToBytePos (2 samples, 0.33%)</title><rect x="706.8" y="373" width="3.9" height="15.0" fill="rgb(227,211,30)" rx="2" ry="2" />
+<text  x="709.84" y="383.5" ></text>
+</g>
+<g >
+<title>BufFileFlush (1 samples, 0.16%)</title><rect x="1059.1" y="325" width="1.9" height="15.0" fill="rgb(234,43,47)" rx="2" ry="2" />
+<text  x="1062.10" y="335.5" ></text>
+</g>
+<g >
+<title>__filemap_get_folio (1 samples, 0.16%)</title><rect x="1159.2" y="101" width="1.9" height="15.0" fill="rgb(218,57,49)" rx="2" ry="2" />
+<text  x="1162.20" y="111.5" ></text>
+</g>
+<g >
+<title>BlockIdSet (1 samples, 0.16%)</title><rect x="1016.8" y="325" width="1.9" height="15.0" fill="rgb(245,210,34)" rx="2" ry="2" />
+<text  x="1019.75" y="335.5" ></text>
+</g>
+<g >
+<title>PageGetHeapFreeSpace (2 samples, 0.33%)</title><rect x="267.9" y="421" width="3.9" height="15.0" fill="rgb(207,216,13)" rx="2" ry="2" />
+<text  x="270.94" y="431.5" ></text>
+</g>
+<g >
+<title>entry_SYSCALL_64_after_hwframe (1 samples, 0.16%)</title><rect x="1061.0" y="261" width="2.0" height="15.0" fill="rgb(233,173,29)" rx="2" ry="2" />
+<text  x="1064.03" y="271.5" ></text>
+</g>
+<g >
+<title>clear_page_erms (1 samples, 0.16%)</title><rect x="1147.7" y="133" width="1.9" height="15.0" fill="rgb(235,74,4)" rx="2" ry="2" />
+<text  x="1150.65" y="143.5" ></text>
+</g>
+<g >
+<title>entry_SYSCALL_64_after_hwframe (2 samples, 0.33%)</title><rect x="591.3" y="277" width="3.9" height="15.0" fill="rgb(244,13,29)" rx="2" ry="2" />
+<text  x="594.34" y="287.5" ></text>
+</g>
+<g >
+<title>pg_atomic_exchange_u64_impl (1 samples, 0.16%)</title><rect x="728.0" y="341" width="1.9" height="15.0" fill="rgb(211,61,36)" rx="2" ry="2" />
+<text  x="731.01" y="351.5" ></text>
+</g>
+<g >
+<title>entry_SYSCALL_64_after_hwframe (1 samples, 0.16%)</title><rect x="10.0" y="757" width="1.9" height="15.0" fill="rgb(209,200,11)" rx="2" ry="2" />
+<text  x="13.00" y="767.5" ></text>
+</g>
+<g >
+<title>NewPrivateRefCountEntry (1 samples, 0.16%)</title><rect x="483.5" y="277" width="2.0" height="15.0" fill="rgb(230,84,12)" rx="2" ry="2" />
+<text  x="486.54" y="287.5" ></text>
+</g>
+<g >
+<title>UnlockBufHdr (1 samples, 0.16%)</title><rect x="541.3" y="341" width="1.9" height="15.0" fill="rgb(223,177,32)" rx="2" ry="2" />
+<text  x="544.29" y="351.5" ></text>
+</g>
+<g >
+<title>FileReadV (1 samples, 0.16%)</title><rect x="1061.0" y="293" width="2.0" height="15.0" fill="rgb(208,21,45)" rx="2" ry="2" />
+<text  x="1064.03" y="303.5" ></text>
+</g>
+<g >
+<title>PageIsNew (1 samples, 0.16%)</title><rect x="529.7" y="357" width="2.0" height="15.0" fill="rgb(248,49,26)" rx="2" ry="2" />
+<text  x="532.74" y="367.5" ></text>
+</g>
+<g >
+<title>__memcmp_sse2 (1 samples, 0.16%)</title><rect x="421.9" y="277" width="2.0" height="15.0" fill="rgb(231,150,25)" rx="2" ry="2" />
+<text  x="424.94" y="287.5" ></text>
+</g>
+<g >
+<title>AllocSetReset (13 samples, 2.12%)</title><rect x="1074.5" y="405" width="25.0" height="15.0" fill="rgb(224,39,53)" rx="2" ry="2" />
+<text  x="1077.50" y="415.5" >A..</text>
+</g>
+<g >
+<title>llseek@GLIBC_2.2.5 (1 samples, 0.16%)</title><rect x="547.1" y="293" width="1.9" height="15.0" fill="rgb(251,129,14)" rx="2" ry="2" />
+<text  x="550.06" y="303.5" ></text>
+</g>
+<g >
+<title>pg_pwrite_zeros (22 samples, 3.59%)</title><rect x="549.0" y="293" width="42.3" height="15.0" fill="rgb(238,114,6)" rx="2" ry="2" />
+<text  x="551.99" y="303.5" >pg_..</text>
+</g>
+<g >
+<title>copy_user_enhanced_fast_string (1 samples, 0.16%)</title><rect x="549.0" y="133" width="1.9" height="15.0" fill="rgb(217,76,31)" rx="2" ry="2" />
+<text  x="551.99" y="143.5" ></text>
+</g>
+<g >
+<title>decimalLength32 (2 samples, 0.33%)</title><rect x="935.9" y="341" width="3.9" height="15.0" fill="rgb(205,126,26)" rx="2" ry="2" />
+<text  x="938.91" y="351.5" ></text>
+</g>
+<g >
+<title>AllocSetReset (1 samples, 0.16%)</title><rect x="1068.7" y="421" width="2.0" height="15.0" fill="rgb(245,26,54)" rx="2" ry="2" />
+<text  x="1071.73" y="431.5" ></text>
+</g>
+<g >
+<title>GetPrivateRefCountEntry (4 samples, 0.65%)</title><rect x="816.6" y="373" width="7.7" height="15.0" fill="rgb(207,122,19)" rx="2" ry="2" />
+<text  x="819.56" y="383.5" ></text>
+</g>
+<g >
+<title>get_hash_value (14 samples, 2.28%)</title><rect x="393.1" y="277" width="26.9" height="15.0" fill="rgb(247,160,19)" rx="2" ry="2" />
+<text  x="396.07" y="287.5" >g..</text>
+</g>
+<g >
+<title>heap_free_minimal_tuple (4 samples, 0.65%)</title><rect x="1018.7" y="341" width="7.7" height="15.0" fill="rgb(237,220,33)" rx="2" ry="2" />
+<text  x="1021.68" y="351.5" ></text>
+</g>
+<g >
+<title>ExecFunctionScan (130 samples, 21.21%)</title><rect x="855.1" y="469" width="250.2" height="15.0" fill="rgb(211,228,40)" rx="2" ry="2" />
+<text  x="858.06" y="479.5" >ExecFunctionScan</text>
+</g>
+<g >
+<title>BufferGetPage (4 samples, 0.65%)</title><rect x="216.0" y="421" width="7.7" height="15.0" fill="rgb(213,171,5)" rx="2" ry="2" />
+<text  x="218.97" y="431.5" ></text>
+</g>
+<g >
+<title>AllocSetReset (2 samples, 0.33%)</title><rect x="15.8" y="469" width="3.8" height="15.0" fill="rgb(213,128,0)" rx="2" ry="2" />
+<text  x="18.77" y="479.5" ></text>
+</g>
+<g >
+<title>WALInsertLockRelease (10 samples, 1.63%)</title><rect x="714.5" y="389" width="19.3" height="15.0" fill="rgb(211,31,28)" rx="2" ry="2" />
+<text  x="717.54" y="399.5" ></text>
+</g>
+<g >
+<title>BufferGetBlock (1 samples, 0.16%)</title><rect x="308.4" y="373" width="1.9" height="15.0" fill="rgb(212,192,6)" rx="2" ry="2" />
+<text  x="311.37" y="383.5" ></text>
+</g>
+<g >
+<title>do_syscall_64 (1 samples, 0.16%)</title><rect x="1061.0" y="245" width="2.0" height="15.0" fill="rgb(247,132,7)" rx="2" ry="2" />
+<text  x="1064.03" y="255.5" ></text>
+</g>
+<g >
+<title>entry_SYSCALL_64_after_hwframe (2 samples, 0.33%)</title><rect x="1157.3" y="229" width="3.8" height="15.0" fill="rgb(214,33,47)" rx="2" ry="2" />
+<text  x="1160.28" y="239.5" ></text>
+</g>
+<g >
+<title>GetPrivateRefCount (2 samples, 0.33%)</title><rect x="601.0" y="389" width="3.8" height="15.0" fill="rgb(220,87,42)" rx="2" ry="2" />
+<text  x="603.96" y="399.5" ></text>
+</g>
+<g >
+<title>BufferGetBlock (3 samples, 0.49%)</title><rect x="216.0" y="405" width="5.7" height="15.0" fill="rgb(236,50,44)" rx="2" ry="2" />
+<text  x="218.97" y="415.5" ></text>
+</g>
+<g >
+<title>heap_form_minimal_tuple (13 samples, 2.12%)</title><rect x="1124.6" y="357" width="25.0" height="15.0" fill="rgb(228,65,8)" rx="2" ry="2" />
+<text  x="1127.55" y="367.5" >h..</text>
+</g>
+<g >
+<title>ExecCopySlotHeapTuple (38 samples, 6.20%)</title><rect x="56.2" y="437" width="73.1" height="15.0" fill="rgb(249,210,5)" rx="2" ry="2" />
+<text  x="59.20" y="447.5" >ExecCopy..</text>
+</g>
+<g >
+<title>hash_search_with_hash_value (4 samples, 0.65%)</title><rect x="423.9" y="277" width="7.7" height="15.0" fill="rgb(218,112,1)" rx="2" ry="2" />
+<text  x="426.87" y="287.5" ></text>
+</g>
+<g >
+<title>XLogRegisterBuffer (22 samples, 3.59%)</title><rect x="799.2" y="421" width="42.4" height="15.0" fill="rgb(236,165,16)" rx="2" ry="2" />
+<text  x="802.23" y="431.5" >XLo..</text>
+</g>
+<g >
+<title>RelationAddBlocks (34 samples, 5.55%)</title><rect x="533.6" y="405" width="65.4" height="15.0" fill="rgb(245,36,14)" rx="2" ry="2" />
+<text  x="536.59" y="415.5" >Relatio..</text>
+</g>
+<g >
+<title>GetMemoryChunkMethodID (1 samples, 0.16%)</title><rect x="1024.5" y="309" width="1.9" height="15.0" fill="rgb(254,105,14)" rx="2" ry="2" />
+<text  x="1027.45" y="319.5" ></text>
+</g>
+<g >
+<title>tuplestore_gettuple (20 samples, 3.26%)</title><rect x="1030.2" y="389" width="38.5" height="15.0" fill="rgb(224,210,25)" rx="2" ry="2" />
+<text  x="1033.23" y="399.5" >tup..</text>
+</g>
+<g >
+<title>AllocSetGetChunkSpace (3 samples, 0.49%)</title><rect x="1045.6" y="357" width="5.8" height="15.0" fill="rgb(253,100,46)" rx="2" ry="2" />
+<text  x="1048.63" y="367.5" ></text>
+</g>
+<g >
+<title>mpage_process_page_bufs (1 samples, 0.16%)</title><rect x="1184.2" y="325" width="2.0" height="15.0" fill="rgb(205,163,47)" rx="2" ry="2" />
+<text  x="1187.23" y="335.5" ></text>
+</g>
+<g >
+<title>ExecProcNodeFirst (36 samples, 5.87%)</title><rect x="1105.3" y="469" width="69.3" height="15.0" fill="rgb(249,68,36)" rx="2" ry="2" />
+<text  x="1108.30" y="479.5" >ExecPro..</text>
+</g>
+<g >
+<title>LWLockAcquire (2 samples, 0.33%)</title><rect x="710.7" y="373" width="3.8" height="15.0" fill="rgb(247,166,37)" rx="2" ry="2" />
+<text  x="713.69" y="383.5" ></text>
+</g>
+<g >
+<title>ext4_buffered_write_iter (21 samples, 3.43%)</title><rect x="549.0" y="181" width="40.4" height="15.0" fill="rgb(250,184,46)" rx="2" ry="2" />
+<text  x="551.99" y="191.5" >ext..</text>
+</g>
+<g >
+<title>all (613 samples, 100%)</title><rect x="10.0" y="805" width="1180.0" height="15.0" fill="rgb(249,122,5)" rx="2" ry="2" />
+<text  x="13.00" y="815.5" ></text>
+</g>
+<g >
+<title>ext4_block_write_begin (1 samples, 0.16%)</title><rect x="1157.3" y="117" width="1.9" height="15.0" fill="rgb(212,155,11)" rx="2" ry="2" />
+<text  x="1160.28" y="127.5" ></text>
+</g>
+<g >
+<title>DatumGetPointer (1 samples, 0.16%)</title><rect x="92.8" y="373" width="1.9" height="15.0" fill="rgb(215,201,16)" rx="2" ry="2" />
+<text  x="95.77" y="383.5" ></text>
+</g>
+<g >
+<title>BufferGetPage (1 samples, 0.16%)</title><rect x="604.8" y="405" width="1.9" height="15.0" fill="rgb(237,206,46)" rx="2" ry="2" />
+<text  x="607.81" y="415.5" ></text>
+</g>
+<g >
+<title>LockBuffer (1 samples, 0.16%)</title><rect x="531.7" y="373" width="1.9" height="15.0" fill="rgb(244,223,22)" rx="2" ry="2" />
+<text  x="534.66" y="383.5" ></text>
+</g>
+<g >
+<title>palloc0 (8 samples, 1.31%)</title><rect x="1134.2" y="341" width="15.4" height="15.0" fill="rgb(250,156,42)" rx="2" ry="2" />
+<text  x="1137.18" y="351.5" ></text>
+</g>
+<g >
+<title>BackendStartup (610 samples, 99.51%)</title><rect x="11.9" y="709" width="1174.3" height="15.0" fill="rgb(205,200,31)" rx="2" ry="2" />
+<text  x="14.92" y="719.5" >BackendStartup</text>
+</g>
+<g >
+<title>AllocSetFree (1 samples, 0.16%)</title><rect x="1166.9" y="277" width="1.9" height="15.0" fill="rgb(233,136,4)" rx="2" ry="2" />
+<text  x="1169.90" y="287.5" ></text>
+</g>
+<g >
+<title>ExecStoreMinimalTuple (9 samples, 1.47%)</title><rect x="1009.1" y="389" width="17.3" height="15.0" fill="rgb(223,120,7)" rx="2" ry="2" />
+<text  x="1012.05" y="399.5" ></text>
+</g>
+<g >
+<title>tas (2 samples, 0.33%)</title><rect x="739.6" y="389" width="3.8" height="15.0" fill="rgb(222,215,28)" rx="2" ry="2" />
+<text  x="742.56" y="399.5" ></text>
+</g>
+<g >
+<title>GetPrivateRefCountEntry (1 samples, 0.16%)</title><rect x="533.6" y="357" width="1.9" height="15.0" fill="rgb(243,112,32)" rx="2" ry="2" />
+<text  x="536.59" y="367.5" ></text>
+</g>
+<g >
+<title>ExecutorRun (604 samples, 98.53%)</title><rect x="19.6" y="581" width="1162.7" height="15.0" fill="rgb(248,120,3)" rx="2" ry="2" />
+<text  x="22.62" y="591.5" >ExecutorRun</text>
+</g>
+<g >
+<title>ExecProcNode (167 samples, 27.24%)</title><rect x="853.1" y="485" width="321.5" height="15.0" fill="rgb(246,80,14)" rx="2" ry="2" />
+<text  x="856.13" y="495.5" >ExecProcNode</text>
+</g>
+<g >
+<title>llseek@GLIBC_2.2.5 (2 samples, 0.33%)</title><rect x="591.3" y="293" width="3.9" height="15.0" fill="rgb(215,50,22)" rx="2" ry="2" />
+<text  x="594.34" y="303.5" ></text>
+</g>
+<g >
+<title>pg_atomic_compare_exchange_u32 (2 samples, 0.33%)</title><rect x="487.4" y="277" width="3.8" height="15.0" fill="rgb(239,124,21)" rx="2" ry="2" />
+<text  x="490.39" y="287.5" ></text>
+</g>
+<g >
+<title>BufMappingPartitionLock (1 samples, 0.16%)</title><rect x="391.1" y="293" width="2.0" height="15.0" fill="rgb(239,48,17)" rx="2" ry="2" />
+<text  x="394.14" y="303.5" ></text>
+</g>
+<g >
+<title>GetMemoryChunkMethodID (1 samples, 0.16%)</title><rect x="1063.0" y="341" width="1.9" height="15.0" fill="rgb(235,170,17)" rx="2" ry="2" />
+<text  x="1065.95" y="351.5" ></text>
+</g>
+<g >
+<title>LWLockReleaseClearVar (8 samples, 1.31%)</title><rect x="714.5" y="373" width="15.4" height="15.0" fill="rgb(240,100,0)" rx="2" ry="2" />
+<text  x="717.54" y="383.5" ></text>
+</g>
+<g >
+<title>ExecScanFetch (36 samples, 5.87%)</title><rect x="1105.3" y="421" width="69.3" height="15.0" fill="rgb(246,33,43)" rx="2" ry="2" />
+<text  x="1108.30" y="431.5" >ExecSca..</text>
+</g>
+<g >
+<title>__rcu_read_unlock (1 samples, 0.16%)</title><rect x="10.0" y="597" width="1.9" height="15.0" fill="rgb(211,212,18)" rx="2" ry="2" />
+<text  x="13.00" y="607.5" ></text>
+</g>
+<g >
+<title>get_hash_value (1 samples, 0.16%)</title><rect x="495.1" y="293" width="1.9" height="15.0" fill="rgb(226,132,8)" rx="2" ry="2" />
+<text  x="498.09" y="303.5" ></text>
+</g>
+<g >
+<title>MemoryContextResetOnly (16 samples, 2.61%)</title><rect x="1070.7" y="421" width="30.8" height="15.0" fill="rgb(217,121,54)" rx="2" ry="2" />
+<text  x="1073.65" y="431.5" >Me..</text>
+</g>
+<g >
+<title>XLogInsertRecord (37 samples, 6.04%)</title><rect x="672.2" y="405" width="71.2" height="15.0" fill="rgb(219,186,23)" rx="2" ry="2" />
+<text  x="675.19" y="415.5" >XLogInse..</text>
+</g>
+<g >
+<title>BufTableLookup (5 samples, 0.82%)</title><rect x="421.9" y="293" width="9.7" height="15.0" fill="rgb(248,4,1)" rx="2" ry="2" />
+<text  x="424.94" y="303.5" ></text>
+</g>
+<g >
+<title>uncharge_folio (1 samples, 0.16%)</title><rect x="10.0" y="613" width="1.9" height="15.0" fill="rgb(233,103,47)" rx="2" ry="2" />
+<text  x="13.00" y="623.5" ></text>
+</g>
+<g >
+<title>LockRelease (2 samples, 0.33%)</title><rect x="543.2" y="325" width="3.9" height="15.0" fill="rgb(233,224,6)" rx="2" ry="2" />
+<text  x="546.21" y="335.5" ></text>
+</g>
+<g >
+<title>XLogRegisterBufData (2 samples, 0.33%)</title><rect x="795.4" y="421" width="3.8" height="15.0" fill="rgb(228,176,2)" rx="2" ry="2" />
+<text  x="798.38" y="431.5" ></text>
+</g>
+<g >
+<title>copy_page_from_iter_atomic (1 samples, 0.16%)</title><rect x="549.0" y="149" width="1.9" height="15.0" fill="rgb(219,161,28)" rx="2" ry="2" />
+<text  x="551.99" y="159.5" ></text>
+</g>
+<g >
+<title>BufferIsValid (1 samples, 0.16%)</title><rect x="248.7" y="373" width="1.9" height="15.0" fill="rgb(249,178,2)" rx="2" ry="2" />
+<text  x="251.69" y="383.5" ></text>
+</g>
+<g >
+<title>ReleaseBuffer (13 samples, 2.12%)</title><rect x="631.8" y="405" width="25.0" height="15.0" fill="rgb(253,76,42)" rx="2" ry="2" />
+<text  x="634.76" y="415.5" >R..</text>
+</g>
+<g >
+<title>ItemPointerSetInvalid (1 samples, 0.16%)</title><rect x="44.6" y="405" width="2.0" height="15.0" fill="rgb(248,139,35)" rx="2" ry="2" />
+<text  x="47.65" y="415.5" ></text>
+</g>
+<g >
+<title>ExecModifyTable (602 samples, 98.21%)</title><rect x="21.5" y="501" width="1158.9" height="15.0" fill="rgb(216,143,9)" rx="2" ry="2" />
+<text  x="24.55" y="511.5" >ExecModifyTable</text>
+</g>
+<g >
+<title>writetup_heap (3 samples, 0.49%)</title><rect x="1168.8" y="341" width="5.8" height="15.0" fill="rgb(212,45,27)" rx="2" ry="2" />
+<text  x="1171.83" y="351.5" ></text>
+</g>
+<g >
+<title>PageSetLSN (3 samples, 0.49%)</title><rect x="273.7" y="421" width="5.8" height="15.0" fill="rgb(220,49,19)" rx="2" ry="2" />
+<text  x="276.72" y="431.5" ></text>
+</g>
+<g >
+<title>pgstat_tracks_io_op (2 samples, 0.33%)</title><rect x="522.0" y="293" width="3.9" height="15.0" fill="rgb(226,204,14)" rx="2" ry="2" />
+<text  x="525.04" y="303.5" ></text>
+</g>
+<g >
+<title>pg_atomic_sub_fetch_u32 (1 samples, 0.16%)</title><rect x="595.2" y="245" width="1.9" height="15.0" fill="rgb(233,209,7)" rx="2" ry="2" />
+<text  x="598.19" y="255.5" ></text>
+</g>
+<g >
+<title>MemoryContextSwitchTo (4 samples, 0.65%)</title><rect x="129.3" y="437" width="7.7" height="15.0" fill="rgb(207,185,9)" rx="2" ry="2" />
+<text  x="132.35" y="447.5" ></text>
+</g>
+<g >
+<title>XLogInsert (66 samples, 10.77%)</title><rect x="658.7" y="421" width="127.1" height="15.0" fill="rgb(236,32,32)" rx="2" ry="2" />
+<text  x="661.71" y="431.5" >XLogInsert</text>
+</g>
+<g >
+<title>fsm_search (1 samples, 0.16%)</title><rect x="529.7" y="389" width="2.0" height="15.0" fill="rgb(207,155,28)" rx="2" ry="2" />
+<text  x="532.74" y="399.5" ></text>
+</g>
+<g >
+<title>LWLockAcquire (1 samples, 0.16%)</title><rect x="337.2" y="389" width="2.0" height="15.0" fill="rgb(241,144,32)" rx="2" ry="2" />
+<text  x="340.24" y="399.5" ></text>
+</g>
+<g >
+<title>ExecFetchSlotHeapTuple (4 samples, 0.65%)</title><rect x="171.7" y="437" width="7.7" height="15.0" fill="rgb(230,103,27)" rx="2" ry="2" />
+<text  x="174.70" y="447.5" ></text>
+</g>
+<g >
+<title>LWLockHeldByMeInMode (1 samples, 0.16%)</title><rect x="832.0" y="389" width="1.9" height="15.0" fill="rgb(221,226,26)" rx="2" ry="2" />
+<text  x="834.96" y="399.5" ></text>
+</g>
+<g >
+<title>BufFileWrite (3 samples, 0.49%)</title><rect x="1155.4" y="309" width="5.7" height="15.0" fill="rgb(222,45,51)" rx="2" ry="2" />
+<text  x="1158.35" y="319.5" ></text>
+</g>
+<g >
+<title>GetPrivateRefCountEntry (2 samples, 0.33%)</title><rect x="649.1" y="357" width="3.8" height="15.0" fill="rgb(226,151,34)" rx="2" ry="2" />
+<text  x="652.09" y="367.5" ></text>
+</g>
+<g >
+<title>GetPrivateRefCount (1 samples, 0.16%)</title><rect x="837.7" y="389" width="2.0" height="15.0" fill="rgb(244,158,14)" rx="2" ry="2" />
+<text  x="840.73" y="399.5" ></text>
+</g>
+<g >
+<title>XLogWrite (2 samples, 0.33%)</title><rect x="1182.3" y="533" width="3.9" height="15.0" fill="rgb(226,158,20)" rx="2" ry="2" />
+<text  x="1185.30" y="543.5" ></text>
+</g>
+<g >
+<title>filemap_get_pages (1 samples, 0.16%)</title><rect x="1061.0" y="181" width="2.0" height="15.0" fill="rgb(208,201,53)" rx="2" ry="2" />
+<text  x="1064.03" y="191.5" ></text>
+</g>
+<g >
+<title>PageIsNew (1 samples, 0.16%)</title><rect x="271.8" y="421" width="1.9" height="15.0" fill="rgb(212,142,51)" rx="2" ry="2" />
+<text  x="274.79" y="431.5" ></text>
+</g>
+<g >
+<title>MemoryChunkIsExternal (2 samples, 0.33%)</title><rect x="11.9" y="469" width="3.9" height="15.0" fill="rgb(240,51,35)" rx="2" ry="2" />
+<text  x="14.92" y="479.5" ></text>
+</g>
+<g >
+<title>rwsem_down_write_slowpath (1 samples, 0.16%)</title><rect x="552.8" y="101" width="2.0" height="15.0" fill="rgb(221,4,33)" rx="2" ry="2" />
+<text  x="555.84" y="111.5" ></text>
+</g>
+<g >
+<title>get_page_from_freelist (1 samples, 0.16%)</title><rect x="1159.2" y="53" width="1.9" height="15.0" fill="rgb(233,161,43)" rx="2" ry="2" />
+<text  x="1162.20" y="63.5" ></text>
+</g>
+<g >
+<title>MarkBufferDirty (12 samples, 1.96%)</title><rect x="239.1" y="421" width="23.1" height="15.0" fill="rgb(222,57,42)" rx="2" ry="2" />
+<text  x="242.07" y="431.5" >M..</text>
+</g>
+<g >
+<title>BufferIsExclusiveLocked (3 samples, 0.49%)</title><rect x="833.9" y="405" width="5.8" height="15.0" fill="rgb(239,4,24)" rx="2" ry="2" />
+<text  x="836.88" y="415.5" ></text>
+</g>
+<g >
+<title>pg_atomic_read_u32 (3 samples, 0.49%)</title><rect x="448.9" y="261" width="5.8" height="15.0" fill="rgb(254,44,36)" rx="2" ry="2" />
+<text  x="451.89" y="271.5" ></text>
+</g>
+<g >
+<title>tts_buffer_heap_get_heap_tuple (2 samples, 0.33%)</title><rect x="175.5" y="421" width="3.9" height="15.0" fill="rgb(248,213,34)" rx="2" ry="2" />
+<text  x="178.55" y="431.5" ></text>
+</g>
+<g >
+<title>LWLockHeldByMe (1 samples, 0.16%)</title><rect x="652.9" y="357" width="2.0" height="15.0" fill="rgb(250,144,42)" rx="2" ry="2" />
+<text  x="655.94" y="367.5" ></text>
+</g>
+<g >
+<title>LockRelationForExtension (1 samples, 0.16%)</title><rect x="539.4" y="341" width="1.9" height="15.0" fill="rgb(216,40,17)" rx="2" ry="2" />
+<text  x="542.36" y="351.5" ></text>
+</g>
+</g>
+</svg>
