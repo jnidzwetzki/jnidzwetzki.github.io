@@ -1,7 +1,7 @@
 ---
 layout: post
 title: >
-    Analyzing PostgreSQL Performance Problems Using Flame Graphs
+    Analyzing PostgreSQL Performance Using Flame Graphs
 tags: [PostgreSQL, Performance]
 author: jan
 excerpt_separator: <!--more-->
@@ -16,7 +16,7 @@ This blog post explores the fundamentals of flame graphs and offers a few practi
 
 The content presented in this blog post is based on material found in other articles or [blog posts](https://www.brendangregg.com/flamegraphs.html), as well as in Brendan Gregg’s excellent book on [system performance](https://www.brendangregg.com/linuxperf.html). Over the years, I have collected a number of commands in my lab notebook that I typically use when diagnosing PostgreSQL-related performance problems. I have shared these commands in several emails over the years, so I decided to write a whole blog post on this topic.
 
-# Flame Graph
+# Flame Graphs
 
 Flame graphs are based on data captured by a profiler. They aggregate call stacks to make it easier to see where a program spends most of its processing time. Without aggregation, it is difficult to see the big picture in the thousands (or more) of call stacks that a profiler collects.
 
