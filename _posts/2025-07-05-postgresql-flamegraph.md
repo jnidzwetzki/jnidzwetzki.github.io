@@ -99,7 +99,7 @@ perf script flamegraph -a -F 111 -p 2112031 sleep 60
 
 This command unifies all the manual commands we have used so far. It collects the call stacks of the PostgreSQL backend process with PID `2112031` for 60 seconds, and then generates a flame graph afterward.
 
-Unfortunately, this method does not work out-of-the-box with PostgreSQL. 
+Unfortunately, this method does not work out-of-the-box on Debian based distributions. 
 
 ```bash
 Flame Graph template /usr/share/d3-flame-graph/d3-flamegraph-base.html does not exist. Please install the js-d3-flame-graph (RPM) or libjs-d3-flame-graph (deb) package, specify an existing flame graph template (--template PATH) or another output format (--format FORMAT).
@@ -141,7 +141,7 @@ Differential flame graphs are used to compare two different profiler runs. Usual
 Using a differential flame graph makes the differences between the runs more obvious. Otherwise, the width of the bars has to be compared, which is a hard task. To create a differential flame graph, the `.folded` files of the two runs need to be created first. Afterward, the script `difffolded.pl` from the `FlameGraph` tool can be used to create a differential flame graph:
 
 ```bash
-~/FlameGraph/difffolded.pl data.folded data2.folded | ~/fg/flamegraph.pl > diff.svg
+~/FlameGraph/difffolded.pl data.folded data2.folded | ~/FlameGraph/flamegraph.pl > diff.svg
 ```
 
 The resulting SVG file will clearly highlight the differences between the two profiler runs. For example:
