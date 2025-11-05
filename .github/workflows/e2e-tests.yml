@@ -31,9 +31,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'npm'
-          cache-dependency-path: .github/tests/package-lock.json
+          node-version: 'lts/*'
         
       - name: Build Jekyll site
         run: |
@@ -45,7 +43,7 @@ jobs:
       - name: Install test dependencies
         run: |
           cd .github/tests
-          npm ci
+          npm i
           
       - name: Install Playwright browsers
         run: |
@@ -88,14 +86,12 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'npm'
-          cache-dependency-path: .github/tests/package-lock.json
+          node-version: 'lts/*'
           
       - name: Install test dependencies
         run: |
           cd .github/tests
-          npm ci
+          npm i
           
       - name: Run unit tests
         run: |
