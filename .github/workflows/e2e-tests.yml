@@ -25,7 +25,7 @@ jobs:
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: '3.1'
+          ruby-version: '3.4'
           bundler-cache: true
           
       - name: Setup Node.js
@@ -34,9 +34,6 @@ jobs:
           node-version: '20'
           cache: 'npm'
           cache-dependency-path: .github/tests/package-lock.json
-          
-      - name: Install Ruby dependencies
-        run: bundle install
         
       - name: Build Jekyll site
         run: |
