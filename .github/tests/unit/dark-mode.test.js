@@ -148,6 +148,12 @@ describe('Dark Mode', () => {
 
   describe('bootstrapTheme()', () => {
     test('should set light mode by default when no preference', () => {
+      window.matchMedia = jest.fn().mockReturnValue({
+        matches: false,
+        media: '(prefers-color-scheme: none)',
+        addEventListener: jest.fn(),
+      });
+      
       bootstrapTheme();
       expect(currentTheme()).toBe('light');
       expect(document.documentElement.getAttribute('data-theme')).toBe('light');
@@ -205,6 +211,12 @@ describe('Dark Mode', () => {
 
   describe('Theme persistence', () => {
     test('should persist theme across page loads', () => {
+      window.matchMedia = jest.fn().mockReturnValue({
+        matches: false,
+        media: '(prefers-color-scheme: none)',
+        addEventListener: jest.fn(),
+      });
+      
       setMode('dark');
       expect(localStorage.getItem('theme')).toBe('dark');
       
