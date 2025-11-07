@@ -1,41 +1,65 @@
 #archive,
 #categories {
-  .archive-clouds,
-  .category-clouds {
-    margin: 30px 0 30px;
+  .category-list {
+    width: 100%;
+    padding-bottom: $padding-x-small;
 
-    li {
-      background-color: var(--link);
-      display: inline-block;
-      margin-bottom: 10px;
-      margin-right: 3px;
-      padding: 0 15px;
-      border-radius: 20px;
-      color: var(--header-text);
+    a.button {
+      margin: 0.1em;
+      padding: 0.2em 0.4em;
+      font-size: 0.9em;
+      background: var(--link);
+      border: 1px solid var(--link);
+      color: var(--background);
+      transition: background-color 0.1s ease, color 0.1s ease, border-color 0.1s ease;
+
+      &:hover {
+        background: transparent;
+        border: 1px solid var(--link);
+        color: var(--link);
+
+        .category-count {
+          background-color: var(--link);
+          color: var(--header-text);
+        }
+      }
+    }
+
+    p {
+      margin: 0;
+      padding: 0 0.2em 0 0;
+      display: flex;
+      align-items: center;
+      gap: 0.4em;
+    }
+
+    .category-count {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background-color: var(--header-text);
+      color: var(--link);
+      border-radius: 50%;
+      min-width: 1.5em;
+      height: 1.5em;
+      padding: 0.2em;
+      font-size: 0.85em;
       font-weight: 600;
-      font-size: 0.8rem;
-      line-height: 35px;
-      letter-spacing: -0.03rem;
-
-      .category-number {
-        vertical-align: super;
-        font-size: 0.625rem;
-      }
-
-      .p {
-        opacity: 1;
-      }
+      line-height: 1;
+      transition: background-color 0.1s ease, color 0.1s ease;
     }
 
-    li:hover {
-      background-color: var(--header-background) !important;
-      color: var(--header-text);
-    }
+    ul {
+      text-align: center;
+      list-style: none;
 
-    .archive-anchor:hover,
-    .category-anchor:hover {
-      text-decoration: none !important;
-      filter: none;
+      li, div {
+        display: inline;
+      }
+
+      div.meta {
+        margin-right: 0.5em;
+      }
     }
   }
 
@@ -50,9 +74,26 @@
     .items {
       padding-left: $padding-medium;
 
-      .item {
+      .item-wrapper {
         position: relative;
         margin: 25px 0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 15px;
+      }
+
+      .category-post-link {
+        flex: 1;
+        min-width: 0;
+        text-decoration: none;
+      }
+
+      .item {
+        .item-content {
+          flex: 1;
+          min-width: 0;
+        }
 
         .meta {
           color: var(--meta);
@@ -65,7 +106,32 @@
         }
       }
 
-      .item::before {
+      .item-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 5px;
+        align-items: center;
+        justify-content: flex-end;
+
+        .tag-link {
+          text-decoration: none;
+        }
+
+        .tag {
+          background-color: var(--selection);
+          color: var(--text);
+          padding: 3px 10px;
+          border-radius: 12px;
+          font-size: 0.75rem;
+          font-weight: 500;
+          white-space: nowrap;
+          transition: background-color 0.2s ease, color 0.2s ease, border 0.2s ease;
+          cursor: pointer;
+          border: 1px solid transparent;
+        }
+      }
+
+      .item-wrapper::before {
         content: "";
         position: absolute;
         left: -5%;
@@ -75,17 +141,28 @@
         height: 100%;
       }
 
-      .archive-post-link:hover,
+      .item-wrapper:hover::before {
+        background-color: var(--link);
+      }
+
       .category-post-link:hover {
         text-decoration: none;
 
         .meta, .title {
           color: var(--header-background);
         }
+      }
 
-        .item::before {
-          background-color: var(--link);
-        }
+      .item-wrapper:hover .tag {
+        background-color: var(--link);
+        color: var(--header-text);
+        border-color: transparent;
+      }
+
+      .item-wrapper:hover .tag:hover {
+        background-color: var(--page-background);
+        color: var(--link);
+        border-color: var(--link);
       }
     }
   }
