@@ -1,8 +1,5 @@
 const { test, expect } = require('@playwright/test');
 
-/**
- * Navigation and routing tests for Type-on-Strap theme
- */
 test.describe('Navigation and Routing', () => {
   test('should load home page successfully', async ({ page }) => {
     await page.goto('/');
@@ -11,7 +8,6 @@ test.describe('Navigation and Routing', () => {
 
   test('should navigate to about page', async ({ page }) => {
     await page.goto('/');
-    // Use navbar link specifically
     await page.click('nav a[href*="about"], .navbar a[href*="about"]');
     await expect(page).toHaveURL(/about/);
     await expect(page.locator('h1, h2')).toContainText(/About|Welcome/i);
@@ -37,7 +33,6 @@ test.describe('Navigation and Routing', () => {
   });
 
   test('should navigate to categories page', async ({ page }) => {
-    // Categories page exists but has no navbar link - navigate directly
     await page.goto('/categories');
     await expect(page).toHaveURL(/categories/);
     await expect(page.locator('body')).toBeVisible();
@@ -57,7 +52,7 @@ test.describe('Navigation and Routing', () => {
 
   test('should have working navbar on all pages', async ({ page }) => {
     const pages = ['/', '/about', '/blog', '/portfolio'];
-    
+
     for (const url of pages) {
       await page.goto(url);
       const navbar = page.locator('nav, .navbar');
@@ -67,7 +62,7 @@ test.describe('Navigation and Routing', () => {
 
   test('should have working footer on all pages', async ({ page }) => {
     const pages = ['/', '/about', '/blog', '/portfolio'];
-    
+
     for (const url of pages) {
       await page.goto(url);
       const footer = page.locator('footer');
@@ -82,10 +77,10 @@ test.describe('Navigation and Routing', () => {
 
   test('should have responsive navbar on mobile', async ({ page, isMobile }) => {
     test.skip(!isMobile, 'Mobile-only test');
-    
+
     await page.goto('/');
     const hamburger = page.locator('.navbar-toggler, .menu-toggle, button[aria-label*="menu" i]');
-    
+
     if (await hamburger.isVisible()) {
       await hamburger.click();
       const menu = page.locator('.navbar-collapse, .menu');
@@ -93,4 +88,3 @@ test.describe('Navigation and Routing', () => {
     }
   });
 });
-

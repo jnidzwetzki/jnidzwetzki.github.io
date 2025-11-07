@@ -5,10 +5,10 @@
 
 describe('Dark Mode', () => {
   let setMode, themeToggle, currentTheme, bootstrapTheme;
-  
+
   beforeEach(() => {
     localStorage.clear();
-    
+
     document.body.innerHTML = `
       <html>
         <head></head>
@@ -17,14 +17,14 @@ describe('Dark Mode', () => {
         </body>
       </html>
     `;
-    
+
     global.darkBtn = 'Dark';
     global.lightBtn = 'Light';
     global.isAutoTheme = true;
-    
+
     const themeButton = {
       'light': `<i class="fas fa-adjust" aria-hidden="true"></i><span class="navbar-label-with-icon"> ${global.darkBtn}</span>`,
-      'dark': `<i class="fas fa-adjust fa-rotate-180" aria-hidden="true"></i><span class="navbar-label-with-icon"> ${global.lightBtn}</span>`
+      'dark': `<i class="fas fa-adjust fa-rotate-180" aria-hidden="true"></i><span class="navbar-label-with-icon"> ${global.lightBtn}</span>`,
     };
 
     /**
@@ -153,7 +153,7 @@ describe('Dark Mode', () => {
         media: '(prefers-color-scheme: none)',
         addEventListener: jest.fn(),
       });
-      
+
       bootstrapTheme();
       expect(currentTheme()).toBe('light');
       expect(document.documentElement.getAttribute('data-theme')).toBe('light');
@@ -168,15 +168,15 @@ describe('Dark Mode', () => {
 
     test('should respect browser preference for dark mode', () => {
       localStorage.clear();
-      
+
       window.matchMedia = jest.fn().mockImplementation(query => ({
         matches: query === '(prefers-color-scheme: dark)',
         media: query,
         addEventListener: jest.fn(),
       }));
-      
+
       bootstrapTheme();
-      
+
       expect(window.matchMedia).toHaveBeenCalledWith('(prefers-color-scheme: dark)');
       expect(currentTheme()).toBe('dark');
       expect(document.documentElement.getAttribute('data-theme')).toBe('dark');
@@ -184,15 +184,15 @@ describe('Dark Mode', () => {
 
     test('should default to light mode when browser prefers light', () => {
       localStorage.clear();
-      
+
       window.matchMedia = jest.fn().mockReturnValue({
         matches: false,
         media: '(prefers-color-scheme: dark)',
         addEventListener: jest.fn(),
       });
-      
+
       bootstrapTheme();
-      
+
       expect(currentTheme()).toBe('light');
       expect(document.documentElement.getAttribute('data-theme')).toBe('light');
     });
@@ -200,10 +200,10 @@ describe('Dark Mode', () => {
     test('should not set theme when isAutoTheme is false', () => {
       localStorage.clear();
       document.documentElement.removeAttribute('data-theme');
-      
+
       global.isAutoTheme = false;
       bootstrapTheme();
-      
+
       expect(localStorage.getItem('theme')).toBeNull();
       expect(document.documentElement.getAttribute('data-theme')).toBeNull();
     });
@@ -216,12 +216,12 @@ describe('Dark Mode', () => {
         media: '(prefers-color-scheme: none)',
         addEventListener: jest.fn(),
       });
-      
+
       setMode('dark');
       expect(localStorage.getItem('theme')).toBe('dark');
-      
+
       document.documentElement.removeAttribute('data-theme');
-      
+
       bootstrapTheme();
       expect(document.documentElement.getAttribute('data-theme')).toBe('dark');
     });
@@ -231,7 +231,7 @@ describe('Dark Mode', () => {
       themeToggle();
       themeToggle();
       themeToggle();
-      
+
       expect(localStorage.getItem('theme')).toBe('dark');
       expect(document.documentElement.getAttribute('data-theme')).toBe('dark');
     });

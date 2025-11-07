@@ -1,8 +1,5 @@
 const { test, expect } = require('@playwright/test');
 
-/**
- * Gallery functionality tests for Type-on-Strap theme
- */
 test.describe('Gallery Functionality', () => {
   test('should display gallery page', async ({ page }) => {
     await page.goto('/gallery');
@@ -11,25 +8,23 @@ test.describe('Gallery Functionality', () => {
 
   test('should display gallery images', async ({ page }) => {
     await page.goto('/gallery');
-    
-    // Check for gallery images
+
     const images = page.locator('.gallery img, .gallery-item img, img[class*="gallery"]');
     const count = await images.count();
-    
+
     if (count > 0) {
       expect(count).toBeGreaterThan(0);
-      
-      // First image should be visible
+
       await expect(images.first()).toBeVisible();
     }
   });
 
   test('should have valid image sources', async ({ page }) => {
     await page.goto('/gallery');
-    
+
     const images = page.locator('.gallery img, .gallery-item img, img[class*="gallery"]');
     const count = await images.count();
-    
+
     if (count > 0) {
       const firstImage = images.first();
       const src = await firstImage.getAttribute('src');
@@ -40,26 +35,24 @@ test.describe('Gallery Functionality', () => {
 
   test('should have image alt text', async ({ page }) => {
     await page.goto('/gallery');
-    
+
     const images = page.locator('.gallery img, .gallery-item img');
     const count = await images.count();
-    
+
     if (count > 0) {
       const firstImage = images.first();
       const alt = await firstImage.getAttribute('alt');
-      // Alt text should exist (can be empty string for decorative images)
       expect(alt).toBeDefined();
     }
   });
 
   test('should have responsive gallery layout', async ({ page }) => {
     await page.goto('/gallery');
-    
+
     const images = page.locator('.gallery img, .gallery-item img');
     const count = await images.count();
-    
+
     if (count > 0) {
-      // Check multiple images are visible
       for (let i = 0; i < Math.min(count, 3); i++) {
         await expect(images.nth(i)).toBeVisible();
       }
@@ -68,37 +61,33 @@ test.describe('Gallery Functionality', () => {
 
   test('should load images progressively', async ({ page }) => {
     await page.goto('/gallery');
-    
+
     const images = page.locator('.gallery img, .gallery-item img');
     const count = await images.count();
-    
+
     if (count > 0) {
-      // Wait for first image to load
       const firstImage = images.first();
       await expect(firstImage).toBeVisible();
-      
-      // Check if image has loaded (naturalWidth > 0 means loaded)
+
       const isLoaded = await firstImage.evaluate((img) => {
         return img.complete && img.naturalWidth > 0;
       });
-      
+
       expect(isLoaded).toBe(true);
     }
   });
 
   test('should have gallery grid layout', async ({ page }) => {
     await page.goto('/gallery');
-    
+
     const gallery = page.locator('.gallery, [class*="gallery"]').first();
-    
+
     if (await gallery.isVisible()) {
-      // Gallery container should be visible
       await expect(gallery).toBeVisible();
-      
-      // Should contain images
+
       const images = gallery.locator('img');
       const count = await images.count();
-      
+
       if (count > 0) {
         expect(count).toBeGreaterThan(0);
       }
@@ -107,15 +96,14 @@ test.describe('Gallery Functionality', () => {
 
   test('should handle image lazy loading', async ({ page }) => {
     await page.goto('/gallery');
-    
+
     const images = page.locator('.gallery img, .gallery-item img');
     const count = await images.count();
-    
+
     if (count > 0) {
       const firstImage = images.first();
       const loading = await firstImage.getAttribute('loading');
-      
-      // If lazy loading is used, check it's set correctly
+
       if (loading) {
         expect(['lazy', 'eager']).toContain(loading);
       }
@@ -124,15 +112,14 @@ test.describe('Gallery Functionality', () => {
 
   test('should display gallery on mobile', async ({ page, isMobile }) => {
     test.skip(!isMobile, 'Mobile-only test');
-    
+
     await page.goto('/gallery');
-    
+
     const images = page.locator('.gallery img, .gallery-item img');
     const count = await images.count();
-    
+
     if (count > 0) {
       await expect(images.first()).toBeVisible();
     }
   });
 });
-
