@@ -6,17 +6,9 @@ layout: page
     <div id="categories">
         <section class="bg"></section>
         <div class="category-list">
-            <ul>
-                {% if site.categories.size == 1 %}
-                    <li class="meta">Category</li>
-                {% else %}
-                    <li class="meta">Categories</li>
-                {% endif %}
-
+            <p class="category-links">
                 {% for category in site.categories %}
-                    <li><a class="button" href="#{{ category | first | cgi_escape }}">
-                        <p>{{ category | first }} <span class="category-count">{{ category | last | size }}</span></p>
-                    </a></li>
+                    <a href="#{{ category | first | cgi_escape }}" class="category-link">{{ category | first }}</a> {{ category | last | size }}{% unless forloop.last %}<span class="separator"> / </span>{% endunless %}
                 {% endfor %}
 
                 {% assign uncategorized_count = 0 %}
@@ -26,11 +18,10 @@ layout: page
                     {% endif %}
                 {% endfor %}
                 {% if uncategorized_count > 0 %}
-                    <li><a class="button" href="#uncategorized">
-                        <p>Uncategorized <span class="category-count">{{ uncategorized_count }}</span></p>
-                    </a></li>
+                    <span class="separator"> / </span>
+                    <a href="#uncategorized" class="category-link">Uncategorized</a> {{ uncategorized_count }}
                 {% endif %}
-            </ul>
+            </p>
         </div>
         <div class="category-groups">
             {% for category in site.categories %}

@@ -3,63 +3,27 @@
   .category-list {
     width: 100%;
     padding-bottom: $padding-x-small;
+    text-align: center;
 
-    a.button {
-      margin: 0.1em;
-      padding: 0.2em 0.4em;
+    .category-links {
+      margin: 30px 0;
+      color: var(--meta);
       font-size: 0.9em;
-      background: var(--link);
-      border: 1px solid var(--link);
-      color: var(--background);
-      transition: background-color 0.1s ease, color 0.1s ease, border-color 0.1s ease;
+    }
+
+    .category-link {
+      color: var(--meta);
+      text-decoration: underline;
+      transition: color 0.2s ease;
 
       &:hover {
-        background: transparent;
-        border: 1px solid var(--link);
         color: var(--link);
-
-        .category-count {
-          background-color: var(--link);
-          color: var(--header-text);
-        }
+        text-decoration: underline;
       }
     }
 
-    p {
-      margin: 0;
-      padding: 0 0.2em 0 0;
-      display: flex;
-      align-items: center;
-      gap: 0.4em;
-    }
-
-    .category-count {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      background-color: var(--header-text);
-      color: var(--link);
-      border-radius: 50%;
-      min-width: 1.5em;
-      height: 1.5em;
-      padding: 0.2em;
-      font-size: 0.85em;
-      font-weight: 600;
-      line-height: 1;
-      transition: background-color 0.1s ease, color 0.1s ease;
-    }
-
-    ul {
-      text-align: center;
-      list-style: none;
-
-      li, div {
-        display: inline;
-      }
-
-      div.meta {
-        margin-right: 0.5em;
-      }
+    .separator {
+      color: var(--meta);
     }
   }
 
