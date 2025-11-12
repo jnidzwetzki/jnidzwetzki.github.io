@@ -4,6 +4,9 @@ test.describe('Portfolio Functionality', () => {
   test('should display portfolio page', async ({ page }) => {
     await page.goto('/portfolio');
     await expect(page.locator('body')).toBeVisible();
+    
+    const pageHeading = page.locator('h1').first();
+    await expect(pageHeading).toBeVisible();
   });
 
   test('should display portfolio items', async ({ page }) => {
@@ -19,12 +22,11 @@ test.describe('Portfolio Functionality', () => {
 
     const firstItem = page.locator('.portfolio-item a, article a, .card a').first();
 
-    if (await firstItem.isVisible()) {
-      await firstItem.click();
+    await expect(firstItem).toBeVisible();
+    await firstItem.click();
 
-      await expect(page.locator('body')).toBeVisible();
-      expect(page.url()).toContain('portfolio');
-    }
+    await expect(page.locator('body')).toBeVisible();
+    expect(page.url()).toContain('portfolio');
   });
 
   test('should have portfolio item images', async ({ page }) => {
@@ -33,20 +35,20 @@ test.describe('Portfolio Functionality', () => {
     const images = page.locator('.portfolio-item img, article img, .card img');
     const count = await images.count();
 
-    if (count > 0) {
-      const firstImage = images.first();
+    expect(count).toBeGreaterThan(0);
+    
+    const firstImage = images.first();
 
-      const src = await firstImage.getAttribute('src');
-      expect(src).toBeTruthy();
-      expect(src).toMatch(/\.(jpg|jpeg|png|gif|webp|svg)/i);
+    const src = await firstImage.getAttribute('src');
+    expect(src).toBeTruthy();
+    expect(src).toMatch(/\.(jpg|jpeg|png|gif|webp|svg)/i);
 
-      await firstImage.evaluate((img) => {
-        return img.complete || new Promise((resolve) => {
-          img.onload = resolve;
-          img.onerror = resolve;
-        });
+    await firstImage.evaluate((img) => {
+      return img.complete || new Promise((resolve) => {
+        img.onload = resolve;
+        img.onerror = resolve;
       });
-    }
+    });
   });
 
   test('should have portfolio item titles', async ({ page }) => {
@@ -55,11 +57,11 @@ test.describe('Portfolio Functionality', () => {
     const items = page.locator('.portfolio-item, article, .card');
     const firstItem = items.first();
 
-    if (await firstItem.isVisible()) {
-      const title = firstItem.locator('h1, h2, h3, h4, .title');
-      const titleCount = await title.count();
-      expect(titleCount).toBeGreaterThan(0);
-    }
+    await expect(firstItem).toBeVisible();
+    
+    const title = firstItem.locator('h1, h2, h3, h4, .title');
+    const titleCount = await title.count();
+    expect(titleCount).toBeGreaterThan(0);
   });
 
   test('should have portfolio item descriptions', async ({ page }) => {
@@ -68,10 +70,10 @@ test.describe('Portfolio Functionality', () => {
     const items = page.locator('.portfolio-item, article, .card');
     const firstItem = items.first();
 
-    if (await firstItem.isVisible()) {
-      const text = await firstItem.textContent();
-      expect(text?.length).toBeGreaterThan(10);
-    }
+    await expect(firstItem).toBeVisible();
+    
+    const text = await firstItem.textContent();
+    expect(text?.length).toBeGreaterThan(10);
   });
 
   test('should have responsive portfolio grid', async ({ page, isMobile }) => {
@@ -91,13 +93,12 @@ test.describe('Portfolio Functionality', () => {
 
     const firstItem = page.locator('.portfolio-item a, article a, .card a').first();
 
-    if (await firstItem.isVisible()) {
-      await firstItem.click();
+    await expect(firstItem).toBeVisible();
+    await firstItem.click();
 
-      await page.goBack();
+    await page.goBack();
 
-      await expect(page).toHaveURL(/portfolio/);
-    }
+    await expect(page).toHaveURL(/portfolio/);
   });
 
   test('should have portfolio metadata', async ({ page }) => {
@@ -105,10 +106,13 @@ test.describe('Portfolio Functionality', () => {
 
     const firstItem = page.locator('.portfolio-item a, article a, .card a').first();
 
-    if (await firstItem.isVisible()) {
-      await firstItem.click();
+    await expect(firstItem).toBeVisible();
+    await firstItem.click();
 
-      await expect(page.locator('body')).toBeVisible();
-    }
+    await expect(page.locator('body')).toBeVisible();
+    
+    // Verify the detail page has actual content
+    const content = page.locator('article, .post-content, main').first();
+    await expect(content).toBeVisible();
   });
 });
