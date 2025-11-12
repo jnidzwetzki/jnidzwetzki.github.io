@@ -81,10 +81,10 @@ test.describe('Navigation and Routing', () => {
     await page.goto('/');
     const hamburger = page.locator('.navbar-toggler, .menu-toggle, button[aria-label*="menu" i]');
 
-    if (await hamburger.isVisible()) {
-      await hamburger.click();
-      const menu = page.locator('.navbar-collapse, .menu');
-      await expect(menu).toBeVisible();
-    }
+    await expect(hamburger).toBeVisible();
+    await hamburger.click();
+    
+    const menu = page.locator('.navbar-collapse, .menu');
+    await expect(menu).toBeVisible();
   });
 });

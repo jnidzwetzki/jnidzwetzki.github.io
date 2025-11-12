@@ -71,19 +71,10 @@ test.describe('Search Functionality', () => {
     await searchInput.fill('xyzabc123notfound999');
     await page.waitForTimeout(1000);
 
-    // Verify no results message or empty results container
     const resultItems = page.locator('#results-container li, .search-results li, [id*="result"] li');
     const itemCount = await resultItems.count();
     
-    // For "no results" scenario, we expect 0 items OR a "no results" message
-    if (itemCount === 0) {
-      // Verify the page still rendered properly
-      await expect(page.locator('body')).toBeVisible();
-    } else {
-      // If there are items, they might be "no results found" messages
-      const noResultsText = page.locator(':has-text("No result"), :has-text("No matches"), :has-text("nothing found")');
-      expect(await noResultsText.count()).toBeGreaterThan(0);
-    }
+    expect(itemCount).toBe(0);
   });
 
   test('should search case-insensitively', async ({ page }) => {

@@ -48,18 +48,11 @@ test.describe('Blog Functionality', () => {
     await page.goto('/tags');
 
     const tag = page.locator('a[href*="tags"]').first();
-    const tagExists = await tag.count() > 0;
-    
-    if (!tagExists) {
-      await expect(page.locator('body')).toBeVisible();
-      return;
-    }
-    
     await expect(tag).toBeVisible();
+    
     await tag.click();
 
     await expect(page.locator('body')).toBeVisible();
-    
     expect(page.url()).toContain('tag');
   });
 
@@ -67,18 +60,11 @@ test.describe('Blog Functionality', () => {
     await page.goto('/categories');
 
     const category = page.locator('a[href*="categories"], .category').first();
-    const categoryExists = await category.count() > 0;
-    
-    if (!categoryExists) {
-      await expect(page.locator('body')).toBeVisible();
-      return;
-    }
-    
     await expect(category).toBeVisible();
+    
     await category.click();
 
     await expect(page.locator('body')).toBeVisible();
-    
     expect(page.url()).toMatch(/categories|category/);
   });
 
@@ -106,26 +92,17 @@ test.describe('Blog Functionality', () => {
   });
 
   /**
-   * @note Not all posts contain code blocks, so we conditionally check if they exist.
+   * @note Tests a specific post known to have code blocks with syntax highlighting.
    */
   test('should have syntax highlighting in code blocks', async ({ page }) => {
-    await page.goto('/blog');
-
-    const posts = page.locator('article a, .post a, .blog-post a');
-    const count = await posts.count();
-
-    expect(count).toBeGreaterThan(0);
-    
-    await posts.first().click();
+    await page.goto('/2014/08/08/Markup-Syntax-Highlighting');
 
     const codeBlocks = page.locator('pre code, .highlight');
-    const codeBlockCount = await codeBlocks.count();
+    expect(await codeBlocks.count()).toBeGreaterThan(0);
     
-    if (codeBlockCount > 0) {
-      const codeBlock = codeBlocks.first();
-      const className = await codeBlock.getAttribute('class');
-      expect(className).toBeTruthy();
-    }
+    const codeBlock = codeBlocks.first();
+    const className = await codeBlock.getAttribute('class');
+    expect(className).toBeTruthy();
   });
 
   test('should have share buttons on posts', async ({ page }) => {

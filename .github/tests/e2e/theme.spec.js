@@ -223,16 +223,11 @@ test.describe('Dark Mode Initialization', () => {
     await page.waitForTimeout(300);
     const initialTheme = await page.getAttribute('html', 'data-theme');
 
-    const blogLink = page.locator('a[href*="blog"], a[href*="posts"]').first();
-    const blogLinkExists = await blogLink.count() > 0;
-    
-    if (blogLinkExists) {
-      await blogLink.click();
-      await page.waitForTimeout(500);
+    await page.goto('/about');
+    await page.waitForTimeout(500);
 
-      const themeAfterNav = await page.getAttribute('html', 'data-theme');
-      expect(themeAfterNav).toBe(initialTheme);
-    }
+    const themeAfterNav = await page.getAttribute('html', 'data-theme');
+    expect(themeAfterNav).toBe(initialTheme);
   });
 
   test('should have correct button text based on theme', async ({ page }) => {
