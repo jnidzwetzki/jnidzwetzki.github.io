@@ -3,10 +3,10 @@ layout: page
 ---
 
 <!-- Html Elements for Search -->
-<input type="text" id="search-input" placeholder="Enter keywords..." class="search-bar" autofocus>
+<input type="text" id="search-input" placeholder="Enter keywords..." class="search-bar" data-testid="search-input" autofocus>
 <br>
 <br>
-<ul id="results-container"></ul>
+<ul id="results-container" data-testid="search-results-container"></ul>
 
 <section>
     <script type="text/javascript">
@@ -14,7 +14,7 @@ layout: page
             searchInput: document.getElementById('search-input'),
             resultsContainer: document.getElementById('results-container'),
             json: '{{ "/assets/data/search.liquid" | relative_url }}',
-            searchResultTemplate: '<div class="search-title"><a href="{url}"><h3> {title}</h3></a><div class="meta">{date} <div class="right"><i class="fas fa-tag"></i> {tags}</div></div><p>{excerpt}</p></div><hr> ',
+            searchResultTemplate: '<div class="search-title" data-testid="search-result-item"><a href="{url}" data-testid="search-result-link"><h3> {title}</h3></a><div class="meta">{date} <div class="right"><i class="fas fa-tag"></i> {tags}</div></div><p>{excerpt}</p></div><hr> ',
             noResultsText: '{{ site.data.language.str_no_result_found | default: "No result found" }}',
             limit: 10,
             strategy: 'wildcard',
