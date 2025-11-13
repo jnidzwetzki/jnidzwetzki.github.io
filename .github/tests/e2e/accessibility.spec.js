@@ -32,7 +32,7 @@ test.describe('Accessibility', () => {
   test('should have keyboard navigable navbar', async ({ page }) => {
     await page.goto('/');
 
-    const navLinks = page.locator('nav a, .navbar a');
+    const navLinks = page.locator('nav a:not(#pull), .navbar a:not(#pull)');
     const count = await navLinks.count();
 
     expect(count).toBeGreaterThan(0);
@@ -134,17 +134,12 @@ test.describe('Accessibility', () => {
   test('should have focusable interactive elements', async ({ page }) => {
     await page.goto('/');
 
-    const buttons = page.locator('button, a');
-    const count = await buttons.count();
-
-    expect(count).toBeGreaterThan(0);
+    const buttons = page.locator('button:visible, a:visible').first();
     
-    const firstButton = buttons.first();
-    await firstButton.focus();
-
-    await expect(firstButton).toBeVisible();
+    await expect(buttons).toBeVisible();
+    await buttons.focus();
     
-    const isFocused = await firstButton.evaluate(el => el === document.activeElement);
+    const isFocused = await buttons.evaluate(el => el === document.activeElement);
     expect(isFocused).toBe(true);
   });
 

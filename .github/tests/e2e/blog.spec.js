@@ -77,7 +77,7 @@ test.describe('Blog Functionality', () => {
   });
 
   test('should have blog pagination', async ({ page }) => {
-    await page.goto('/blog');
+    await page.goto('/');
 
     await expect(page.locator('body')).toBeVisible();
     
@@ -88,7 +88,7 @@ test.describe('Blog Functionality', () => {
   });
 
   test('should display post excerpts on blog page', async ({ page }) => {
-    await page.goto('/blog');
+    await page.goto('/');
 
     const posts = page.locator('[data-testid="blog-post-teaser"]');
     const firstPost = posts.first();
@@ -103,7 +103,7 @@ test.describe('Blog Functionality', () => {
    * @note Tests a specific post known to have code blocks with syntax highlighting.
    */
   test('should have syntax highlighting in code blocks', async ({ page }) => {
-    await page.goto('/2014/08/08/Markup-Syntax-Highlighting');
+    await page.goto('/syntax/2014/08/08/Markup-Syntax-Highlighting');
 
     const codeBlocks = page.locator('pre code, .highlight');
     expect(await codeBlocks.count()).toBeGreaterThan(0);

@@ -6,14 +6,14 @@ test.describe('Search Functionality', () => {
     await expect(page.locator('body')).toBeVisible();
     
     // Verify search-specific elements exist
-    const searchInput = page.locator('[data-testid="search-input"]');
+    const searchInput = page.locator('#search-input');
     await expect(searchInput).toBeVisible();
   });
 
   test('should have search input field', async ({ page }) => {
     await page.goto('/search');
 
-    const searchInput = page.locator('[data-testid="search-input"]');
+    const searchInput = page.locator('#search-input');
     await expect(searchInput).toBeVisible();
     
     // Verify it's actually a functional input
@@ -24,7 +24,7 @@ test.describe('Search Functionality', () => {
   test('should allow typing in search field', async ({ page }) => {
     await page.goto('/search');
 
-    const searchInput = page.locator('[data-testid="search-input"]');
+    const searchInput = page.locator('#search-input');
 
     await expect(searchInput).toBeVisible();
     await searchInput.fill('test');
@@ -35,7 +35,7 @@ test.describe('Search Functionality', () => {
   test('should display search results', async ({ page }) => {
     await page.goto('/search');
 
-    const searchInput = page.locator('[data-testid="search-input"]');
+    const searchInput = page.locator('#search-input');
 
     await expect(searchInput).toBeVisible();
     await searchInput.fill('blog');
@@ -51,7 +51,7 @@ test.describe('Search Functionality', () => {
   test('should clear search results', async ({ page }) => {
     await page.goto('/search');
 
-    const searchInput = page.locator('[data-testid="search-input"]');
+    const searchInput = page.locator('#search-input');
 
     await expect(searchInput).toBeVisible();
     await searchInput.fill('test');
@@ -65,7 +65,7 @@ test.describe('Search Functionality', () => {
   test('should handle no results gracefully', async ({ page }) => {
     await page.goto('/search');
 
-    const searchInput = page.locator('[data-testid="search-input"]');
+    const searchInput = page.locator('#search-input');
 
     await expect(searchInput).toBeVisible();
     await searchInput.fill('xyzabc123notfound999');
@@ -80,7 +80,7 @@ test.describe('Search Functionality', () => {
   test('should search case-insensitively', async ({ page }) => {
     await page.goto('/search', { waitUntil: 'networkidle' });
 
-    const searchInput = page.locator('[data-testid="search-input"]');
+    const searchInput = page.locator('#search-input');
 
     await expect(searchInput).toBeVisible();
     await searchInput.fill('POST');
@@ -94,7 +94,7 @@ test.describe('Search Functionality', () => {
   test('should highlight search terms in results', async ({ page }) => {
     await page.goto('/search', { waitUntil: 'networkidle' });
 
-    const searchInput = page.locator('[data-testid="search-input"]');
+    const searchInput = page.locator('#search-input');
 
     await expect(searchInput).toBeVisible();
     await searchInput.fill('mode');
@@ -112,7 +112,7 @@ test.describe('Search Functionality', () => {
   test('should have search result links', async ({ page }) => {
     await page.goto('/search', { waitUntil: 'networkidle' });
 
-    const searchInput = page.locator('[data-testid="search-input"]');
+    const searchInput = page.locator('#search-input');
 
     await expect(searchInput).toBeVisible();
     await searchInput.fill('blog');
@@ -161,7 +161,7 @@ test.describe('Search Functionality', () => {
 
     await page.goto('/search');
 
-    const searchInput = page.locator('[data-testid="search-input"]');
+    const searchInput = page.locator('#search-input');
 
     await expect(searchInput).toBeVisible();
     await searchInput.fill('test');
