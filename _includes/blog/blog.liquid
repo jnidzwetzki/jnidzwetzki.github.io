@@ -1,9 +1,9 @@
-<div class="posts">
+<div class="posts" data-testid="blog-posts">
     {% unless paginator.posts %}
     <article><section class="post-content"><p>There are no blog posts</p></section></article>
     {% endunless %}
     {% for post in paginator.posts %}
-    <div class="post-teaser">
+    <div class="post-teaser" data-testid="blog-post-teaser">
         {% if post.thumbnail %}
         <div class="post-img">
             <a aria-label="{{ post.title }}" href="{{ post.url | relative_url }}">
@@ -14,7 +14,7 @@
         <span>
           <header>
             <h1>
-              <a aria-label="{{ post.title }}" class="post-link" href="{{ post.url | relative_url }}">
+              <a aria-label="{{ post.title }}" class="post-link" data-testid="blog-post-link" href="{{ post.url | relative_url }}">
                 {{ post.title }}
               </a>
             </h1>

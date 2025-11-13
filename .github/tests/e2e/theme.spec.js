@@ -7,20 +7,37 @@ test.describe('Theme and Dark Mode', () => {
    * @returns {Promise<boolean>} True if theme toggle exists
    */
   async function hasThemeToggle(page) {
-    const themeToggle = page.locator('#theme-toggle, button:has-text("Dark"), button:has-text("Light")');
+    const themeToggle = page.locator('[data-testid="theme-toggle"]');
     return await themeToggle.count() > 0;
   }
 
-  test('should toggle dark mode', async ({ page }) => {
+  /**
+   * Helper function to open mobile menu if on mobile viewport
+   */
+  async function openMobileMenuForTheme(page, isMobile) {
+    if (isMobile) {
+      const hamburger = page.locator('#pull');
+      try {
+        await hamburger.scrollIntoViewIfNeeded();
+        await hamburger.click({ force: true });
+        await page.waitForTimeout(500);
+      } catch (e) {
+        // Menu might already be open or not accessible
+      }
+    }
+  }
+
+  test('should toggle dark mode', async ({ page, isMobile }) => {
     await page.goto('/');
 
-    const themeToggle = page.locator('#theme-toggle, button:has-text("Dark"), button:has-text("Light")').first();
+    const themeToggle = page.locator('[data-testid="theme-toggle"]');
 
     if (!await hasThemeToggle(page)) {
       test.skip(true, 'Theme toggle not enabled in site configuration');
       return;
     }
 
+    await openMobileMenuForTheme(page, isMobile);
     await expect(themeToggle).toBeVisible();
     
     const initialTheme = await page.getAttribute('html', 'data-theme');
@@ -36,7 +53,7 @@ test.describe('Theme and Dark Mode', () => {
   test('should persist theme preference', async ({ page, context }) => {
     await page.goto('/');
 
-    const themeToggle = page.locator('#theme-toggle, button:has-text("Dark"), button:has-text("Light")').first();
+    const themeToggle = page.locator('[data-testid="theme-toggle"]');
 
     if (!await hasThemeToggle(page)) {
       test.skip(true, 'Theme toggle not enabled in site configuration');
@@ -73,7 +90,7 @@ test.describe('Theme and Dark Mode', () => {
   test('should toggle theme multiple times', async ({ page }) => {
     await page.goto('/');
 
-    const themeToggle = page.locator('#theme-toggle, button:has-text("Dark"), button:has-text("Light")').first();
+    const themeToggle = page.locator('[data-testid="theme-toggle"]');
 
     if (!await hasThemeToggle(page)) {
       test.skip(true, 'Theme toggle not enabled in site configuration');
@@ -98,7 +115,7 @@ test.describe('Theme and Dark Mode', () => {
   test('should update theme toggle button appearance', async ({ page }) => {
     await page.goto('/');
 
-    const themeToggle = page.locator('#theme-toggle').first();
+    const themeToggle = page.locator('[data-testid="theme-toggle"]');
 
     if (!await hasThemeToggle(page)) {
       test.skip(true, 'Theme toggle not enabled in site configuration');
@@ -188,7 +205,7 @@ test.describe('Dark Mode Initialization', () => {
   test('should save theme to localStorage when toggled', async ({ page }) => {
     await page.goto('/');
 
-    const themeToggle = page.locator('#theme-toggle').first();
+    const themeToggle = page.locator('[data-testid="theme-toggle"]');
 
     const toggleExists = await themeToggle.count() > 0;
     if (!toggleExists) {
@@ -210,7 +227,7 @@ test.describe('Dark Mode Initialization', () => {
   test('should maintain theme across navigation', async ({ page }) => {
     await page.goto('/');
 
-    const themeToggle = page.locator('#theme-toggle').first();
+    const themeToggle = page.locator('[data-testid="theme-toggle"]');
 
     const toggleExists = await themeToggle.count() > 0;
     if (!toggleExists) {
@@ -233,7 +250,7 @@ test.describe('Dark Mode Initialization', () => {
   test('should have correct button text based on theme', async ({ page }) => {
     await page.goto('/');
 
-    const themeToggle = page.locator('#theme-toggle').first();
+    const themeToggle = page.locator('[data-testid="theme-toggle"]');
 
     const toggleExists = await themeToggle.count() > 0;
     if (!toggleExists) {

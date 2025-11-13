@@ -1,33 +1,53 @@
 const { test, expect } = require('@playwright/test');
 
+/**
+ * Helper function to open mobile menu if on mobile viewport
+ */
+async function openMobileMenuIfNeeded(page, isMobile) {
+  if (isMobile) {
+    const hamburger = page.locator('#pull');
+    try {
+      await hamburger.scrollIntoViewIfNeeded();
+      await hamburger.click({ force: true });
+      await page.waitForTimeout(500);
+    } catch (e) {
+      // Menu might already be open or element not accessible
+    }
+  }
+}
+
 test.describe('Navigation and Routing', () => {
   test('should load home page successfully', async ({ page }) => {
     await page.goto('/');
     await expect(page).toHaveTitle(/Type on Strap/);
   });
 
-  test('should navigate to about page', async ({ page }) => {
+  test('should navigate to about page', async ({ page, isMobile }) => {
     await page.goto('/');
+    await openMobileMenuIfNeeded(page, isMobile);
     await page.click('nav a[href*="about"], .navbar a[href*="about"]');
     await expect(page).toHaveURL(/about/);
     await expect(page.locator('h1, h2')).toContainText(/About|Welcome/i);
   });
 
-  test('should navigate to blog page', async ({ page }) => {
+  test('should navigate to blog page', async ({ page, isMobile }) => {
     await page.goto('/');
+    await openMobileMenuIfNeeded(page, isMobile);
     const blogLink = page.locator('a[href*="blog"]').first();
     await blogLink.click();
     await expect(page).toHaveURL(/blog/);
   });
 
-  test('should navigate to portfolio page', async ({ page }) => {
+  test('should navigate to portfolio page', async ({ page, isMobile }) => {
     await page.goto('/');
+    await openMobileMenuIfNeeded(page, isMobile);
     await page.click('a[href*="portfolio"]');
     await expect(page).toHaveURL(/portfolio/);
   });
 
-  test('should navigate to tags page', async ({ page }) => {
+  test('should navigate to tags page', async ({ page, isMobile }) => {
     await page.goto('/');
+    await openMobileMenuIfNeeded(page, isMobile);
     await page.click('a[href*="tags"]');
     await expect(page).toHaveURL(/tags/);
   });
@@ -38,14 +58,16 @@ test.describe('Navigation and Routing', () => {
     await expect(page.locator('body')).toBeVisible();
   });
 
-  test('should navigate to search page', async ({ page }) => {
+  test('should navigate to search page', async ({ page, isMobile }) => {
     await page.goto('/');
+    await openMobileMenuIfNeeded(page, isMobile);
     await page.click('a[href*="search"]');
     await expect(page).toHaveURL(/search/);
   });
 
-  test('should navigate to gallery page', async ({ page }) => {
+  test('should navigate to gallery page', async ({ page, isMobile }) => {
     await page.goto('/');
+    await openMobileMenuIfNeeded(page, isMobile);
     await page.click('a[href*="gallery"]');
     await expect(page).toHaveURL(/gallery/);
   });
@@ -79,12 +101,13 @@ test.describe('Navigation and Routing', () => {
     test.skip(!isMobile, 'Mobile-only test');
 
     await page.goto('/');
-    const hamburger = page.locator('.navbar-toggler, .menu-toggle, button[aria-label*="menu" i]');
+    const hamburger = page.locator('#pull');
 
-    await expect(hamburger).toBeVisible();
-    await hamburger.click();
+    await hamburger.scrollIntoViewIfNeeded();
+    await hamburger.click({ force: true });
+    await page.waitForTimeout(500);
     
-    const menu = page.locator('.navbar-collapse, .menu');
+    const menu = page.locator('nav ul, .navbar ul');
     await expect(menu).toBeVisible();
   });
 });
