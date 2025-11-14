@@ -15,7 +15,7 @@ test.describe('Blog Functionality', () => {
     const firstPost = page.locator('[data-testid="blog-post-link"]').first();
     await firstPost.click();
 
-    await expect(page.locator('article, .post-content, main').first()).toBeVisible();
+    await expect(page.locator('article')).toBeVisible();
   });
 
   test('should have post metadata', async ({ page }) => {
@@ -24,7 +24,7 @@ test.describe('Blog Functionality', () => {
     const firstPost = page.locator('[data-testid="blog-post-link"]').first();
     await firstPost.click();
 
-    const article = page.locator('article, .post-content, main').first();
+    const article = page.locator('article');
     await expect(article).toBeVisible();
     
     const articleText = await article.textContent();
@@ -37,7 +37,7 @@ test.describe('Blog Functionality', () => {
     const firstPost = page.locator('.post-teaser header h1 a, article header h1 a, .banner h1 a').first();
     await firstPost.click();
 
-    const article = page.locator('article, .post-content, main').first();
+    const article = page.locator('article');
     await expect(article).toBeVisible();
     
     const navLinks = page.locator('.post-nav, .pagination, nav a');
@@ -119,7 +119,7 @@ test.describe('Blog Functionality', () => {
     const firstPost = page.locator('.post-teaser header h1 a, article header h1 a, .banner h1 a').first();
     await firstPost.click();
 
-    const article = page.locator('article, main');
+    const article = page.locator('article');
     await expect(article).toBeVisible();
     
     const articleText = await article.textContent();
