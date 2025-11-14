@@ -1,6 +1,6 @@
 const { test, expect } = require('@playwright/test');
 
-test.describe('Blog Functionality', () => {
+test.describe('Blog Functionality @desktop', () => {
   test('should display blog posts', async ({ page }) => {
     await page.goto('/');
 

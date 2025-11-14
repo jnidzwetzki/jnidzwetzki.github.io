@@ -1,18 +1,7 @@
 const { test, expect } = require('@playwright/test');
+const { checkGalleryHasImages } = require('./helpers');
 
-/**
- * Helper function to check if gallery has images and skip test if not
- */
-async function checkGalleryHasImages(page) {
-  const images = page.locator('.gallery img, .gallery-item img, img[class*="gallery"]');
-  const count = await images.count();
-  if (count === 0) {
-    test.skip(true, 'Gallery has no images configured');
-  }
-  return { images, count };
-}
-
-test.describe('Gallery Functionality', () => {
+test.describe('Gallery Functionality @desktop', () => {
   test('should display gallery page', async ({ page }) => {
     await page.goto('/gallery');
     await expect(page.locator('body')).toBeVisible();

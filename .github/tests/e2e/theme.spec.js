@@ -1,15 +1,5 @@
 const { test, expect } = require('@playwright/test');
-const { openMobileMenu } = require('./helpers');
-
-/**
- * Helper function to check if theme toggle is available on the page.
- * @param {import('@playwright/test').Page} page - Playwright page object
- * @returns {Promise<boolean>} True if theme toggle exists
- */
-async function hasThemeToggle(page) {
-  const themeToggle = page.locator('#theme-toggle');
-  return await themeToggle.count() > 0;
-}
+const { openMobileMenu, hasThemeToggle } = require('./helpers');
 
 test.describe('Theme and Dark Mode @desktop', () => {
 

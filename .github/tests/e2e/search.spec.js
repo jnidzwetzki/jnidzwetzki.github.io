@@ -1,6 +1,6 @@
 const { test, expect } = require('@playwright/test');
 
-test.describe('Search Functionality', () => {
+test.describe('Search Functionality @desktop', () => {
   test('should display search page', async ({ page }) => {
     await page.goto('/search');
     await expect(page.locator('body')).toBeVisible();
