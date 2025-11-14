@@ -1,33 +1,19 @@
 const { test, expect } = require('@playwright/test');
+const { openMobileMenu } = require('./helpers');
 
-test.describe('Theme and Dark Mode', () => {
-  /**
-   * Helper function to check if theme toggle is available on the page.
-   * @param {import('@playwright/test').Page} page - Playwright page object
-   * @returns {Promise<boolean>} True if theme toggle exists
-   */
-  async function hasThemeToggle(page) {
-    const themeToggle = page.locator('#theme-toggle');
-    return await themeToggle.count() > 0;
-  }
+/**
+ * Helper function to check if theme toggle is available on the page.
+ * @param {import('@playwright/test').Page} page - Playwright page object
+ * @returns {Promise<boolean>} True if theme toggle exists
+ */
+async function hasThemeToggle(page) {
+  const themeToggle = page.locator('#theme-toggle');
+  return await themeToggle.count() > 0;
+}
 
-  /**
-   * Helper function to open mobile menu if on mobile viewport
-   */
-  async function openMobileMenuForTheme(page, isMobile) {
-    if (isMobile) {
-      const hamburger = page.locator('#pull');
-      try {
-        await hamburger.scrollIntoViewIfNeeded();
-        await hamburger.click({ force: true });
-        await page.waitForTimeout(500);
-      } catch (e) {
-        // Menu might already be open or not accessible
-      }
-    }
-  }
+test.describe('Theme and Dark Mode @desktop', () => {
 
-  test('should toggle dark mode', async ({ page, isMobile }) => {
+  test('should toggle dark mode', async ({ page }) => {
     await page.goto('/');
 
     const themeToggle = page.locator('#theme-toggle');
@@ -37,7 +23,6 @@ test.describe('Theme and Dark Mode', () => {
       return;
     }
 
-    await openMobileMenuForTheme(page, isMobile);
     await expect(themeToggle).toBeVisible();
     
     const initialTheme = await page.getAttribute('html', 'data-theme');
@@ -134,7 +119,7 @@ test.describe('Theme and Dark Mode', () => {
   });
 });
 
-test.describe('Dark Mode Initialization', () => {
+test.describe('Dark Mode Initialization @desktop', () => {
   test('should default to light mode when no preference or localStorage', async ({ page, context }) => {
     await context.clearCookies();
     await page.goto('/');
@@ -275,5 +260,105 @@ test.describe('Dark Mode Initialization', () => {
 
     buttonText = await themeToggle.textContent();
     expect(buttonText.toLowerCase()).toContain('light');
+  });
+});
+
+// Mobile-specific theme tests
+test.describe('Theme and Dark Mode @mobile', () => {
+
+  test('should toggle dark mode', async ({ page }) => {
+    await page.goto('/');
+    await openMobileMenu(page);
+
+    const themeToggle = page.locator('#theme-toggle');
+
+    if (!await hasThemeToggle(page)) {
+      test.skip(true, 'Theme toggle not enabled in site configuration');
+      return;
+    }
+
+    await expect(themeToggle).toBeVisible();
+    
+    const initialTheme = await page.getAttribute('html', 'data-theme');
+
+    await themeToggle.click();
+
+    await page.waitForTimeout(500);
+
+    const newTheme = await page.getAttribute('html', 'data-theme');
+    expect(newTheme).not.toBe(initialTheme);
+  });
+
+  test('should persist theme preference', async ({ page, context }) => {
+    await page.goto('/');
+    await openMobileMenu(page);
+
+    const themeToggle = page.locator('#theme-toggle');
+
+    if (!await hasThemeToggle(page)) {
+      test.skip(true, 'Theme toggle not enabled in site configuration');
+      return;
+    }
+
+    await expect(themeToggle).toBeVisible();
+    await themeToggle.click();
+    await page.waitForTimeout(500);
+    const theme = await page.getAttribute('html', 'data-theme');
+
+    const newPage = await context.newPage();
+    await newPage.goto('/');
+    await newPage.waitForTimeout(500);
+
+    const persistedTheme = await newPage.getAttribute('html', 'data-theme');
+    expect(persistedTheme).toBe(theme);
+
+    await newPage.close();
+  });
+
+  test('should toggle theme multiple times', async ({ page }) => {
+    await page.goto('/');
+    await openMobileMenu(page);
+
+    const themeToggle = page.locator('#theme-toggle');
+
+    if (!await hasThemeToggle(page)) {
+      test.skip(true, 'Theme toggle not enabled in site configuration');
+      return;
+    }
+
+    await expect(themeToggle).toBeVisible();
+    
+    const themes = [];
+
+    for (let i = 0; i < 3; i++) {
+      await themeToggle.click();
+      await page.waitForTimeout(300);
+      themes.push(await page.getAttribute('html', 'data-theme'));
+    }
+
+    expect(themes[0]).toBe(themes[2]);
+    expect(themes[0]).not.toBe(themes[1]);
+  });
+
+  test('should update theme toggle button appearance', async ({ page }) => {
+    await page.goto('/');
+    await openMobileMenu(page);
+
+    const themeToggle = page.locator('#theme-toggle');
+
+    if (!await hasThemeToggle(page)) {
+      test.skip(true, 'Theme toggle not enabled in site configuration');
+      return;
+    }
+
+    await expect(themeToggle).toBeVisible();
+    
+    const initialHtml = await themeToggle.innerHTML();
+
+    await themeToggle.click();
+    await page.waitForTimeout(300);
+
+    const newHtml = await themeToggle.innerHTML();
+    expect(newHtml).not.toBe(initialHtml);
   });
 });

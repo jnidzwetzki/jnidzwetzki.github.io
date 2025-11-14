@@ -1,6 +1,7 @@
 const { test, expect } = require('@playwright/test');
+const { openMobileMenu } = require('./helpers');
 
-test.describe('Accessibility', () => {
+test.describe('Accessibility @desktop', () => {
   test('should have proper heading hierarchy on home page', async ({ page }) => {
     await page.goto('/');
 
@@ -33,14 +34,14 @@ test.describe('Accessibility', () => {
     await page.goto('/');
 
     const navLinks = page.locator('nav a:not(#pull), .navbar a:not(#pull)');
-    const count = await navLinks.count();
+    const visibleLinks = navLinks.filter({ hasText: /.+/ });
+    const count = await visibleLinks.count();
 
     expect(count).toBeGreaterThan(0);
     
-    await navLinks.first().focus();
-
-    const firstLink = navLinks.first();
+    const firstLink = visibleLinks.first();
     await expect(firstLink).toBeVisible();
+    await firstLink.focus();
   });
 
   test('should have proper link text (no "click here")', async ({ page }) => {
@@ -153,5 +154,23 @@ test.describe('Accessibility', () => {
     const mainCount = await main.count();
 
     expect(navCount).toBeGreaterThan(0);
+  });
+});
+
+// Mobile-specific accessibility tests
+test.describe('Accessibility @mobile', () => {
+  test('should have keyboard navigable navbar', async ({ page }) => {
+    await page.goto('/');
+    await openMobileMenu(page);
+
+    const navLinks = page.locator('nav a:not(#pull), .navbar a:not(#pull)');
+    const visibleLinks = navLinks.filter({ hasText: /.+/ });
+    const count = await visibleLinks.count();
+
+    expect(count).toBeGreaterThan(0);
+    
+    const firstLink = visibleLinks.first();
+    await expect(firstLink).toBeVisible();
+    await firstLink.focus();
   });
 });
