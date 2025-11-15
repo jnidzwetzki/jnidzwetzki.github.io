@@ -10,9 +10,9 @@
   <body>
     {% capture _navbar %}{% include default/navbar.liquid %}{% endcapture %}
     {{ _navbar | split: " " | join: " "}}
-    <div class="content">
+    <main class="content">
       {{ content }}
-    </div>
+    </main>
     {% capture _footer %}{% include default/footer.liquid %}{% endcapture %}
     {{ _footer | split: " " | join: " "}}
   </body>

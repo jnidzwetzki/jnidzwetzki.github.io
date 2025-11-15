@@ -1,6 +1,7 @@
 const { test, expect } = require('@playwright/test');
+const { openMobileMenu } = require('./helpers');
 
-test.describe('Navigation and Routing', () => {
+test.describe('Navigation and Routing @desktop', () => {
   test('should load home page successfully', async ({ page }) => {
     await page.goto('/');
     await expect(page).toHaveTitle(/Type on Strap/);
@@ -75,16 +76,51 @@ test.describe('Navigation and Routing', () => {
     expect(response?.status()).toBe(404);
   });
 
-  test('should have responsive navbar on mobile', async ({ page, isMobile }) => {
-    test.skip(!isMobile, 'Mobile-only test');
+});
 
+// Mobile-specific navigation tests
+test.describe('Navigation and Routing @mobile', () => {
+  test('should navigate to about page', async ({ page }) => {
     await page.goto('/');
-    const hamburger = page.locator('.navbar-toggler, .menu-toggle, button[aria-label*="menu" i]');
+    await openMobileMenu(page);
+    await page.click('nav a[href*="about"], .navbar a[href*="about"]');
+    await expect(page).toHaveURL(/about/);
+    await expect(page.locator('h1, h2')).toContainText(/About|Welcome/i);
+  });
 
-    if (await hamburger.isVisible()) {
-      await hamburger.click();
-      const menu = page.locator('.navbar-collapse, .menu');
-      await expect(menu).toBeVisible();
-    }
+  test('should navigate to portfolio page', async ({ page }) => {
+    await page.goto('/');
+    await openMobileMenu(page);
+    await page.click('a[href*="portfolio"]');
+    await expect(page).toHaveURL(/portfolio/);
+  });
+
+  test('should navigate to tags page', async ({ page }) => {
+    await page.goto('/');
+    await openMobileMenu(page);
+    await page.click('a[href*="tags"]');
+    await expect(page).toHaveURL(/tags/);
+  });
+
+  test('should navigate to search page', async ({ page }) => {
+    await page.goto('/');
+    await openMobileMenu(page);
+    await page.click('a[href*="search"]');
+    await expect(page).toHaveURL(/search/);
+  });
+
+  test('should navigate to gallery page', async ({ page }) => {
+    await page.goto('/');
+    await openMobileMenu(page);
+    await page.click('a[href*="gallery"]');
+    await expect(page).toHaveURL(/gallery/);
+  });
+
+  test('should have responsive navbar on mobile', async ({ page }) => {
+    await page.goto('/');
+    await openMobileMenu(page);
+    
+    const menu = page.locator('nav ul, .navbar ul');
+    await expect(menu).toBeVisible();
   });
 });

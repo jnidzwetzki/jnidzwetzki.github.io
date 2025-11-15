@@ -27,23 +27,33 @@ module.exports = defineConfig({
     {
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] },
+      grep: /@desktop/,
+      grepInvert: /@mobile/,
     },
     {
       name: 'firefox',
       use: { ...devices['Desktop Firefox'] },
+      grep: /@desktop/,
+      grepInvert: /@mobile/,
     },
     {
       name: 'webkit',
       use: { ...devices['Desktop Safari'] },
+      grep: /@desktop/,
+      grepInvert: /@mobile/,
     },
     // Mobile tests
     {
       name: 'mobile-chrome',
       use: { ...devices['Pixel 5'] },
+      grep: /@mobile/,
+      grepInvert: /@desktop/,
     },
     {
       name: 'mobile-safari',
       use: { ...devices['iPhone 12'] },
+      grep: /@mobile/,
+      grepInvert: /@desktop/,
     },
   ],
   webServer: {

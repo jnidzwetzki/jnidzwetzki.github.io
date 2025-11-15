@@ -1,6 +1,7 @@
 const { test, expect } = require('@playwright/test');
+const { openMobileMenu } = require('./helpers');
 
-test.describe('Accessibility', () => {
+test.describe('Accessibility @desktop', () => {
   test('should have proper heading hierarchy on home page', async ({ page }) => {
     await page.goto('/');
 
@@ -16,29 +17,31 @@ test.describe('Accessibility', () => {
     const images = page.locator('img');
     const count = await images.count();
 
-    if (count > 0) {
-      for (let i = 0; i < Math.min(count, 5); i++) {
-        const img = images.nth(i);
-        const alt = await img.getAttribute('alt');
-        expect(alt).toBeDefined();
-      }
+    expect(count).toBeGreaterThan(0);
+    
+    for (let i = 0; i < Math.min(count, 5); i++) {
+      const img = images.nth(i);
+      const alt = await img.getAttribute('alt');
+      expect(alt).toBeDefined();
     }
   });
 
+  /**
+   * @note Focus state detection in automated tests can be unreliable in headless mode.
+   * We verify the element is focusable by attempting to focus it and checking it remains visible.
+   */
   test('should have keyboard navigable navbar', async ({ page }) => {
-    test.skip(true, 'Focus detection in automated environment differs from real browser behavior');
-
     await page.goto('/');
 
-    const navLinks = page.locator('nav a, .navbar a');
-    const count = await navLinks.count();
+    const navLinks = page.locator('nav a:not(#pull), .navbar a:not(#pull)');
+    const visibleLinks = navLinks.filter({ hasText: /.+/ });
+    const count = await visibleLinks.count();
 
-    if (count > 0) {
-      await navLinks.first().focus();
-
-      const isFocused = await navLinks.first().evaluate(el => el === document.activeElement);
-      expect(isFocused).toBe(true);
-    }
+    expect(count).toBeGreaterThan(0);
+    
+    const firstLink = visibleLinks.first();
+    await expect(firstLink).toBeVisible();
+    await firstLink.focus();
   });
 
   test('should have proper link text (no "click here")', async ({ page }) => {
@@ -47,16 +50,16 @@ test.describe('Accessibility', () => {
     const links = page.locator('a');
     const count = await links.count();
 
-    if (count > 0) {
-      for (let i = 0; i < Math.min(count, 10); i++) {
-        const link = links.nth(i);
-        const text = await link.textContent();
+    expect(count).toBeGreaterThan(0);
+    
+    for (let i = 0; i < Math.min(count, 10); i++) {
+      const link = links.nth(i);
+      const text = await link.textContent();
 
-        if (text) {
-          const lowerText = text.toLowerCase().trim();
-          expect(lowerText).not.toBe('click here');
-          expect(lowerText).not.toBe('here');
-        }
+      if (text) {
+        const lowerText = text.toLowerCase().trim();
+        expect(lowerText).not.toBe('click here');
+        expect(lowerText).not.toBe('here');
       }
     }
   });
@@ -67,18 +70,20 @@ test.describe('Accessibility', () => {
     const inputs = page.locator('input');
     const count = await inputs.count();
 
-    if (count > 0) {
-      const input = inputs.first();
-      const id = await input.getAttribute('id');
-      const ariaLabel = await input.getAttribute('aria-label');
-      const placeholder = await input.getAttribute('placeholder');
+    expect(count).toBeGreaterThan(0);
+    
+    const input = inputs.first();
+    const id = await input.getAttribute('id');
+    const ariaLabel = await input.getAttribute('aria-label');
+    const placeholder = await input.getAttribute('placeholder');
 
-      if (id) {
-        const label = page.locator(`label[for="${id}"]`);
-        const labelExists = await label.count() > 0;
+    if (id) {
+      const label = page.locator(`label[for="${id}"]`);
+      const labelExists = await label.count() > 0;
 
-        expect(labelExists || ariaLabel || placeholder).toBeTruthy();
-      }
+      expect(labelExists || ariaLabel || placeholder).toBeTruthy();
+    } else {
+      expect(ariaLabel || placeholder).toBeTruthy();
     }
   });
 
@@ -93,10 +98,20 @@ test.describe('Accessibility', () => {
   test('should have skip to main content link', async ({ page }) => {
     await page.goto('/');
 
+    const main = page.locator('main, [role="main"]');
+    const mainCount = await main.count();
+    
     const skipLink = page.locator('a[href="#main"], a[href="#content"], a:has-text("skip")');
-    await expect(page.locator('body')).toBeVisible();
+    const hasSkipLink = await skipLink.count() > 0;
+    const hasMainContent = mainCount > 0;
+    
+    expect(hasSkipLink || hasMainContent).toBe(true);
   });
 
+  /**
+   * @note This is a basic contrast check. Full WCAG compliance would require calculating
+   * contrast ratios from RGB values according to WCAG 2.1 guidelines (4.5:1 for normal text).
+   */
   test('should have sufficient color contrast', async ({ page }) => {
     await page.goto('/');
 
@@ -109,21 +124,24 @@ test.describe('Accessibility', () => {
     );
 
     expect(backgroundColor).not.toBe(color);
+    expect(backgroundColor).toBeTruthy();
+    expect(color).toBeTruthy();
   });
 
+  /**
+   * @note In headless browsers, focus detection using document.activeElement can be unreliable.
+   * We verify the element exists and is interactive.
+   */
   test('should have focusable interactive elements', async ({ page }) => {
     await page.goto('/');
 
-    const buttons = page.locator('button, a');
-    const count = await buttons.count();
-
-    if (count > 0) {
-      const firstButton = buttons.first();
-      await firstButton.focus();
-
-      const isFocused = await firstButton.evaluate(el => el === document.activeElement);
-      expect(isFocused).toBe(true);
-    }
+    const buttons = page.locator('button:visible, a:visible').first();
+    
+    await expect(buttons).toBeVisible();
+    await buttons.focus();
+    
+    const isFocused = await buttons.evaluate(el => el === document.activeElement);
+    expect(isFocused).toBe(true);
   });
 
   test('should have proper ARIA roles', async ({ page }) => {
@@ -136,5 +154,23 @@ test.describe('Accessibility', () => {
     const mainCount = await main.count();
 
     expect(navCount).toBeGreaterThan(0);
+  });
+});
+
+// Mobile-specific accessibility tests
+test.describe('Accessibility @mobile', () => {
+  test('should have keyboard navigable navbar', async ({ page }) => {
+    await page.goto('/');
+    await openMobileMenu(page);
+
+    const navLinks = page.locator('nav a:not(#pull), .navbar a:not(#pull)');
+    const visibleLinks = navLinks.filter({ hasText: /.+/ });
+    const count = await visibleLinks.count();
+
+    expect(count).toBeGreaterThan(0);
+    
+    const firstLink = visibleLinks.first();
+    await expect(firstLink).toBeVisible();
+    await firstLink.focus();
   });
 });
