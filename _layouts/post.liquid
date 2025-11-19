@@ -22,9 +22,16 @@ layout: default
     <!-- Social media shares -->
     {% include social/share_buttons.liquid %}
 
-    <!-- Tag list -->
-    {% capture tag_list %}{{ page.tags | join: "|" }}{% endcapture %}
-    {% include default/tags_list.liquid tags=tag_list %}
+    <!-- Category and Tag list -->
+    <div class="tag-category-container">
+        <!-- Category list -->
+        {% capture category_list %}{{ page.categories | join: "|" }}{% endcapture %}
+        {% include default/category_list.liquid categories=category_list %}
+
+        <!-- Tag list -->
+        {% capture tag_list %}{{ page.tags | join: "|" }}{% endcapture %}
+        {% include default/tags_list.liquid tags=tag_list %}
+    </div>
 
 </article>
 
