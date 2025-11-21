@@ -10,7 +10,6 @@ const uglify = require('gulp-uglify-es').default;
 const less = require('gulp-less');
 const cleanCSS = require('gulp-clean-css');
 const replace = require('gulp-replace');
-const webp = require('gulp-webp');
 const fs = require('fs');
 
 // Use it gulp post -n <title of the post>
@@ -29,7 +28,7 @@ gulp.task('post', function (callback) {
   fs.writeFile(__dirname + '/../_posts/' + filename, content, callback);
 });
 
-gulp.task('js', function minijs() {
+gulp.task('js-main', function minijs() {
   return gulp.src(['js/partials/**.js'])
     .pipe(concat('main.min.js'))
     .pipe(uglify())
@@ -38,6 +37,18 @@ gulp.task('js', function minijs() {
     })
     .pipe(gulp.dest("js/"))
 });
+
+gulp.task('comments-js', function miniCommentsJs() {
+  return gulp.src(['js/comments-lazy-load.js'])
+    .pipe(uglify())
+    .on('error', (err) => {
+      console.log(err.toString())
+    })
+    .pipe(concat('comments-lazy-load.min.js'))
+    .pipe(gulp.dest("js/"))
+});
+
+gulp.task('js', gulp.parallel('js-main', 'comments-js'));
 
 gulp.task("img", async function imging() {
   const { default: imagemin } = await import('gulp-imagemin');
@@ -98,15 +109,17 @@ gulp.task('thumbnails-all', async function () {
       .pipe(gulp.dest('img/thumbnails'))
 });
 
-gulp.task('webp', () =>
-  gulp.src('img/**/*.{png,svg,jpg,jpeg,gif}')
+gulp.task('webp', async () => {
+  const { default: webp } = await import('gulp-webp');
+  
+  return gulp.src('img/**/*.{png,svg,jpg,jpeg,gif}')
     .pipe(webp({
       quality: 85,
       preset: 'photo',
       method: 6
     }))
     .pipe(gulp.dest('img'))
-);
+});
 
 gulp.task('css', function minicss() {
   return gulp.src('css/vendor/bootstrap-iso.css')
