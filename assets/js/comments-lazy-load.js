@@ -63,5 +63,61 @@
     document.body.appendChild(mainScript);
   });
 
+  // Disqus loader
+  createLazyLoader('disqus_thread', function(container) {
+    const shortname = container.getAttribute('data-shortname');
+    if (!shortname) {
+      console.error('Disqus shortname not provided');
+      return;
+    }
+
+    window.disqus_shortname = shortname;
+    
+    const script = document.createElement('script');
+    script.type = 'text/javascript';
+    script.async = true;
+    script.src = '//' + shortname + '.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(script);
+  });
+
+  // Giscus loader
+  createLazyLoader('giscus_thread', function(container) {
+    const script = document.createElement('script');
+    script.src = 'https://giscus.app/client.js';
+    script.async = true;
+    script.crossOrigin = 'anonymous';
+    
+    // Transfer all data attributes from the container to the script
+    const attributes = container.attributes;
+    for (let i = 0; i < attributes.length; i++) {
+      const attr = attributes[i];
+      if (attr.name.startsWith('data-') && attr.name !== 'data-lazy-load') {
+        script.setAttribute(attr.name, attr.value);
+      }
+    }
+    
+    container.appendChild(script);
+  });
+
+  // Utterances loader
+  createLazyLoader('utterances_thread', function(container) {
+    const script = document.createElement('script');
+    script.src = 'https://utteranc.es/client.js';
+    script.async = true;
+    script.crossOrigin = 'anonymous';
+    
+    // Transfer data attributes to script attributes (Utterances doesn't use 'data-' prefix)
+    const repo = container.getAttribute('data-repo');
+    const issueTerm = container.getAttribute('data-issue-term');
+    const theme = container.getAttribute('data-theme');
+    const label = container.getAttribute('data-label');
+    
+    if (repo) script.setAttribute('repo', repo);
+    if (issueTerm) script.setAttribute('issue-term', issueTerm);
+    if (theme) script.setAttribute('theme', theme);
+    if (label) script.setAttribute('label', label);
+    
+    container.appendChild(script);
+  });
 })();
 
