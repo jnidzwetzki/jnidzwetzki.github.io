@@ -5,9 +5,9 @@
   data-page-url="{{ page.url | absolute_url }}"
   data-page-title="{{ page.title }}"
   data-theme="{{ site.color_theme }}"
+  data-lazy-load="true"
+  {% if site.data.comments.cusdis.lang or site.data.language.cusdis_lang %}
+  data-lang="{% if site.data.comments.cusdis.lang %}{{ site.data.comments.cusdis.lang }}{% else %}{{ site.data.language.cusdis_lang }}{% endif %}"
+  {% endif %}
 ></div>
-
-{% if site.data.comments.cusdis.lang or site.data.language.cusdis_lang %}
-<script defer src="https://cusdis.com/js/widget/lang/{% if site.data.comments.cusdis.lang %}{{ site.data.comments.cusdis.lang }}{% else %}{{ site.data.language.cusdis_lang }}{% endif %}.js"></script>
-{% endif %}
-<script defer src="https://cusdis.com/js/cusdis.es.js"></script>
+<script defer src="{{ '/assets/js/comments-lazy-load.min.js' | relative_url }}"></script>
