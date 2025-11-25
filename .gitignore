@@ -43,4 +43,4 @@ jekyll-theme-type-on-strap.gemspec
 *copy.md
 test/*
 /type-on-strap*/*
-test-results/.last-run.json
+test-results/*
