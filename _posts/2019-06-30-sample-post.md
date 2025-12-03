@@ -4,7 +4,7 @@ title: Sample post
 tags: [A Tag, Katex]
 last_modified: "2025-05-30"
 excerpt_separator: <!--more-->
-categories: Demo
+categories: Example
 ---
 
 Consectetur adipiscing elit. Donec a diam lectus. Sed sit amet ipsum mauris. Maecenas congue ligula ac quam viverra nec consectetur ante hendrerit. Donec et mollis dolor. 
