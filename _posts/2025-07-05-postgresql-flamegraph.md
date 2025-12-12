@@ -135,6 +135,20 @@ Several types of flame graphs exist. In addition to the standard flame graph, th
 ### On-CPU / Off-CPU Flame Graphs
 Usually, the flame graphs show the time spent in the code while the CPU is executing it. However, sometimes it is also useful to see how much time a process spends waiting for resources (e.g., I/O operations). In this case, off-CPU flame graphs can be used. The profiler also adds the time to the call stacks when the process is not running on the CPU. 
 
+An off-CPU flame graph can be taken by using the `offcputime` binary. For example:
+
+```bash
+sudo offcputime-bpfcc -df -p 12345 > out.stacks
+```
+
+The parameter `-d` means that these should be a _delimiter between kernel/user stacks_, `-f` produces the needed _folded_ format. `12345` must be replaced with the process ID of the process to be observed.
+
+Afterward, the output can be processed as follows:
+
+```bash
+~/FlameGraph/flamegraph.pl --color=io --title="Off-CPU Time Flame Graph" --countname=us < out.stacks > out.svg
+```
+
 ### Differential Flame Graphs
 Differential flame graphs are used to compare two different profiler runs. Usually, the first run is a baseline run, which is used to compare the second run (e.g., after a potential performance improvement). 
 
@@ -155,3 +169,4 @@ Functions marked in red are slower in the second run, while functions marked in 
 This blog post provides an overview of how to create flame graphs for PostgreSQL (and other applications) using the `perf` tool and the `FlameGraph` tool. I frequently use flame graphs to gain insight into a program's performance characteristics, identify potential bottlenecks, and find functions that are worth optimizing.
 
 The methods presented work well with C or Rust code. If you want to profile a Java application, I highly recommend using the [async-profiler](https://github.com/async-profiler/async-profiler) tool, which is optimized for Java applications and provides similar functionality.
+
