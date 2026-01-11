@@ -4,7 +4,7 @@ title: Imprint
 permalink: /imprint/
 feature-img: "assets/img/pexels/travel.jpeg"
 tags: [Page]
-order: 10
+position: 3
 ---
 
 # Imprint / Impressum

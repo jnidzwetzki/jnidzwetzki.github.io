@@ -4,7 +4,7 @@ title: Privacy policy
 permalink: /privacypolicy/
 feature-img: "assets/img/pexels/travel.jpeg"
 tags: [Page]
-order: 11
+position: 3
 ---
 
 # Datenschutzerklärung
