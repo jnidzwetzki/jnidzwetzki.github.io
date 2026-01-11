@@ -4,7 +4,7 @@ title: About Me
 permalink: /about/
 feature-img: "assets/img/pexels/travel.jpeg"
 tags: [Page]
-order: 1
+position: 2
 ---
 
 ### Hi there 👋
@@ -46,8 +46,9 @@ For more details, visit my [LinkedIn](https://www.linkedin.com/in/jnidzwetzki) p
 * Transactions and parallelism
 * Economics, financial markets, and algorithmic trading systems
 
-# Selected Publications
+# Selected Publications and Talks
 
+* Handling Time-Series Data in a Relational DBMS: Challenges and Solution - [Keynote at GvDB 2024](https://ceur-ws.org/Vol-3710/invited2.pdf)
 * BBoxDB: A Distributed Key-Bounding-Box-Value Store - [My PhD Thesis](https://ub-deposit.fernuni-hagen.de/receive/mir_mods_00001836)
 * BBoxDB Streams: Scalable Processing of Multi-Dimensional Data Streams - [Distributed and Parallel Databases 2022](https://doi.org/10.1007/s10619-022-07408-8)
 * BBoxDB Streams: Scalable Processing of Multi-Dimensional Data Streams - [Technical Report 2021](https://ub-deposit.fernuni-hagen.de/receive/mir_mods_00001727)
