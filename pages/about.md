@@ -11,17 +11,9 @@ position: 2
 
 I'm Jan, a software developer and computer scientist ([Dr. rer. nat.](https://www.fernuni-hagen.de/universitaet/stimmen/nidzwetzki.shtml)) specializing in distributed databases and distributed systems. Based in Hamburg, Germany, I have over 20 years of experience in IT, having worked as a system administrator, network administrator, software developer, and CTO. Currently, I am a software engineer focused on developing a tenant-aware, distributed, and storage/compute-decoupled version of PostgreSQL.
 
-- 🎨 My current side project is the [Query Plan Explorer](https://jnidzwetzki.github.io/planexplorer/), a tool that helps users understand when the PostgreSQL optimizer switches from one plan to another and how accurate the tuple estimations are. The software iterates over a one- or two-dimensional search space and plans the given query for each parameter combination. The output is a "drawing" that visualizes results such as the chosen plan, estimated and actual returned tuples, and the mismatch between these values. This project explores the intersection of art and query optimizer insights.
-
-- 🔭 My PhD project is [BBoxDB](https://bboxdb.org), a distributed key-bounding-box-value database. BBoxDB is a NoSQL database for multi-dimensional data, implemented from scratch (see [full paper](https://link.springer.com/article/10.1007/s10619-019-07275-w)). With BBoxDB Streams, the software can also process multi-dimensional data streams and execute continuous queries (e.g., continuous range queries and continuous spatial joins, see the [full paper](https://link.springer.com/article/10.1007/s10619-022-07408-8)).
-
-- 🌱 I also maintain the [SECONDO](https://secondo-database.github.io) database, an extensible database management system developed at the University of Hagen. SECONDO can be extended with _Algebra Modules_ that implement custom data models and operators, focusing on spatial and spatio-temporal data. I also developed [Distributed SECONDO](https://secondo-database.github.io/DSecondo/DSECONDO-Website/index.html), a [distributed version](https://link.springer.com/chapter/10.1007/978-3-319-22363-6_28) of SECONDO.
-
 - 📚 I am the author of [Entwicklung eines skalierbaren und verteilten Datenbanksystems](https://www.springer.com/de/book/9783658124434), a book based on my master's thesis. This work was recognized as outstanding and published by Springer.
 
 - 💬 I have spoken at international conferences ([SSTD](http://sstd2015.org/), [IEEE BigData](http://cse.ucdenver.edu/~BSD2019/), [CIKM](https://www.cikm2018.units.it/), [EDBT](https://edbticdt2021.cs.ucy.ac.cy/), ...) about databases and have published several peer-reviewed scientific papers. Check out my [Demo Paper](https://ieeexplore.ieee.org/document/9005999), which won the IEEE Best Demo and Short Paper Award at [BSD2019](http://cse.ucdenver.edu/~BSD2019/). You can also read my recent EDBT [Paper](https://edbt2021proceedings.github.io/docs/p170.pdf), available as an open-access publication.
-
-- 🤔 I’m looking for contributors to my [PostgreSQL Lock Tracer](https://github.com/jnidzwetzki/pg-lock-tracer) project, a collection of tools designed to provide deep insights into PostgreSQL's locking activities and help troubleshoot performance-related issues.
 
 - 📫 Contact: jnidzwetzki@gmx.de
 
