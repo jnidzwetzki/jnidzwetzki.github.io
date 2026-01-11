@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!--
-    Type on Strap jekyll theme v2.4.12
+    Type on Strap jekyll theme v2.4.13
     Theme free for personal and commercial use under the MIT license
     https://github.com/sylhare/Type-on-Strap/blob/master/LICENSE
 -->
@@ -10,9 +10,9 @@
   <body>
     {% capture _navbar %}{% include default/navbar.liquid %}{% endcapture %}
     {{ _navbar | split: " " | join: " "}}
-    <div class="content">
+    <main class="content">
       {{ content }}
-    </div>
+    </main>
     {% capture _footer %}{% include default/footer.liquid %}{% endcapture %}
     {{ _footer | split: " " | join: " "}}
   </body>

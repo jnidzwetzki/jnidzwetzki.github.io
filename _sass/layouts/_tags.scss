@@ -1,6 +1,17 @@
-.tag-list {
+.tag-category-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 1em;
   width: 100%;
   padding-bottom: $padding-x-small;
+}
+
+.tag-list,
+.category-list {
+  flex: 0 1 auto;
+  padding-bottom: 0;
 
   a.button {
     margin: 0.1em;

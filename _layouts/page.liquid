@@ -23,8 +23,14 @@ layout: default
         </div>
         {% endif %}
     </section>
-    <!-- Tag list for portfolio -->
-    {% capture tag_list %}{{ page.tags | join: "|" }}{% endcapture %}
-    {% capture _tags %}{% include default/tags_list.liquid tags=tag_list %}{% endcapture %}
-    {{ _tags | split: " " | join: " " }}
+    <!-- Category and Tag list -->
+    <div class="tag-category-container">
+        <!-- Category list -->
+        {% capture category_list %}{{ page.categories | join: "|" }}{% endcapture %}
+        {% include default/category_list.liquid categories=category_list %}
+
+        <!-- Tag list for portfolio -->
+        {% capture tag_list %}{{ page.tags | join: "|" }}{% endcapture %}
+        {% include default/tags_list.liquid tags=tag_list %}
+    </div>
 </article>

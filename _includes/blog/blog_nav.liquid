@@ -1,5 +1,5 @@
 {% if paginator.total_pages > 1 %}
-<div class="pagination">
+<div class="pagination" data-testid="blog-pagination">
     <div class="previous">
         
         {% if paginator.previous_page and paginator.previous_page != 1%}
