@@ -13,23 +13,22 @@ I'm Jan, a software developer and computer scientist ([Dr. rer. nat.](https://ww
 
 - 📚 I am the author of [Entwicklung eines skalierbaren und verteilten Datenbanksystems](https://www.springer.com/de/book/9783658124434), a book based on my master's thesis. This work was recognized as outstanding and published by Springer.
 
-- 💬 I have spoken at international conferences ([SSTD](http://sstd2015.org/), [IEEE BigData](http://cse.ucdenver.edu/~BSD2019/), [CIKM](https://www.cikm2018.units.it/), [EDBT](https://edbticdt2021.cs.ucy.ac.cy/), ...) about databases and have published several peer-reviewed scientific papers. Check out my [Demo Paper](https://ieeexplore.ieee.org/document/9005999), which won the IEEE Best Demo and Short Paper Award at [BSD2019](http://cse.ucdenver.edu/~BSD2019/). You can also read my recent EDBT [Paper](https://edbt2021proceedings.github.io/docs/p170.pdf), available as an open-access publication.
+- 💬 I have presented at international conferences ([SSTD](http://sstd2015.org/), [IEEE BigData](http://cse.ucdenver.edu/~BSD2019/), [CIKM](https://www.cikm2018.units.it/), [EDBT](https://edbticdt2021.cs.ucy.ac.cy/), ...) and published several peer-reviewed papers. See my [Demo Paper](https://ieeexplore.ieee.org/document/9005999), which won the IEEE Best Demo and Short Paper Award at [BSD2019](http://cse.ucdenver.edu/~BSD2019/), and my recent EDBT [paper](https://edbt2021proceedings.github.io/docs/p170.pdf), which is available open access.
 
 - 📫 Contact: jnidzwetzki@gmx.de
 
-- ⚡ Fun fact: My first Linux distribution was SuSE 6.1 (Kernel 2.2.6), which I installed in 1999. My first computer was a Pentium 1 with 100 MHz and 16 MB RAM running Windows 95.
-
+- ⚡ Fun fact: My first Linux distribution was SuSE 6.1 (Kernel 2.2.6), which I installed in 1999. My first computer was a Pentium 1 with a 100 MHz CPU and 16 MB RAM running Windows 95.
 ## Short Curriculum Vitae
 
-Since 2024 I am working for [Nile](https://www.thenile.dev/) and building a tenant-aware, distributed, and storage/compute-decoupled version of PostgreSQL. I am focusing on query routing, planner improvements, and storage decoupling.
+Since 2024 I have been working at [Nile](https://www.thenile.dev/), building a tenant-aware, distributed, storage/compute‑decoupled version of PostgreSQL. My work focuses on query routing, planner improvements, and storage decoupling.
 
-From 2022 to 2024, I worked for [Timescale](http://timescale.com/) as a Software Engineer on database internals, [contributing](https://github.com/timescale/timescaledb/commits?author=jnidzwetzki) to the development of TimescaleDB, a time-series extension for PostgreSQL. I contributed to various planner improvements, added distributed join support to the multi-node version, improved continuous aggregates, and implemented the first version of the [SIMD accelerated](https://github.com/timescale/timescaledb/commit/a094f175eb7c98173c78f557880ccd2d89b791f8) queries.
+From 2022 to 2024 I worked at [Timescale](http://timescale.com/) as a software engineer on database internals, [contributing](https://github.com/timescale/timescaledb/commits?author=jnidzwetzki) to TimescaleDB (a time-series extension for PostgreSQL). My work there included planner improvements, adding distributed join support to the multi-node version, improving continuous aggregates, and implementing the first [SIMD accelerated](https://github.com/timescale/timescaledb/commit/a094f175eb7c98173c78f557880ccd2d89b791f8) functions.
 
-From 2009 to 2022, I studied part-time at FernUniversität in Hagen. In 2012, I earned a Bachelor of Science in Computer Science, followed by a Master of Science in Computer Science in 2014, focusing on Operating Systems, Distributed, and Cooperative Systems. In 2022, I received a Dr. rer. nat. (PhD equivalent) in Computer Science with a [thesis](https://ub-deposit.fernuni-hagen.de/receive/mir_mods_00001836) on distributed databases. During that time I focussed on databases internals and created [BBoxDB](/portfolio/bboxdb), a distributed key-bounding-box-value store for multi-dimensional data, [Distributed SECONDO](/portfolio/distributed-secondo), and contributed to the [SECONDO](/portfolio/secondo) extensible database system.
+From 2009 to 2022 I studied part-time at FernUniversität in Hagen. I earned a Bachelor of Science in Computer Science in 2012 and a Master of Science in Computer Science in 2014, focusing on operating systems, distributed, and cooperative systems; my master's thesis was [recognized](https://www.springer.com/de/book/9783658124434) as one of the best of the year by Springer. In 2022 I received a [Dr. rer. nat.](https://www.fernuni-hagen.de/universitaet/stimmen/nidzwetzki.shtml) in Computer Science for a [thesis](https://ub-deposit.fernuni-hagen.de/receive/mir_mods_00001836) on distributed databases, which was awarded [best PhD thesis](https://www.fernuni-hagen.de/universitaet/themen/dies-academicus-2022-abstracts.shtml) of the year of the Faculty of Mathematics and Computer Science. During that time I focused on database internals and created [BBoxDB](/portfolio/bboxdb), a distributed key-bounding-box-value store for multi-dimensional data, developed [Distributed SECONDO](/portfolio/distributed-secondo), and contributed to the [SECONDO](/portfolio/secondo) extensible database system.
 
-From 2002 to 2005, I completed an apprenticeship as an IT specialist for system integration. Between 2006 and 2009, I attended a technical computer science course at the DAA Technical College while working full-time, graduating in 2009 as a Staatlich geprüfter Informatiker (Certified Computer Scientist).
+From 2002 to 2005 I completed an apprenticeship as an IT specialist for system integration. Between 2006 and 2009 I attended a technical computer science course at the DAA Technical College while working full-time, graduating in 2009 as a Staatlich geprüfter Informatiker (State-Certified Computer Scientist).
 
-For more details, visit my [LinkedIn](https://www.linkedin.com/in/jnidzwetzki) profile.
+For more details, see my [LinkedIn](https://www.linkedin.com/in/jnidzwetzki) profile.
 
 # My Interests
 
