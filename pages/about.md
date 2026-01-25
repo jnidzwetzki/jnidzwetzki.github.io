@@ -9,9 +9,9 @@ position: 2
 
 ### Hi there 👋
 
-I'm Jan, a software developer and computer scientist ([Dr. rer. nat.](https://www.fernuni-hagen.de/universitaet/stimmen/nidzwetzki.shtml)) specializing in distributed databases and distributed systems. Based in Hamburg, Germany, I have over 20 years of experience in IT, having worked as a system administrator, network administrator, software developer, and CTO. Currently, I am a software engineer focused on developing a tenant-aware, distributed, and storage/compute-decoupled version of PostgreSQL.
+I'm Jan, a software developer and computer scientist ([Dr. rer. nat.](https://www.fernuni-hagen.de/universitaet/stimmen/nidzwetzki.shtml)) specialized in (distributed) databases. I am based in Hamburg, Germany, and have over 20 years of industry experience. 
 
-- 📚 I am the author of [Entwicklung eines skalierbaren und verteilten Datenbanksystems](https://www.springer.com/de/book/9783658124434), a book based on my master's thesis. This work was recognized as outstanding and published by Springer.
+- 👨‍🔧 My background includes roles as a system administrator, network administrator, software developer, and CTO. In recent years, I have focused primarily on (distributed) databases. Currently, I work as a software engineer, developing a tenant-aware, distributed, and storage/compute-decoupled version of PostgreSQL.
 
 - 💬 I have presented at international conferences ([SSTD](http://sstd2015.org/), [IEEE BigData](http://cse.ucdenver.edu/~BSD2019/), [CIKM](https://www.cikm2018.units.it/), [EDBT](https://edbticdt2021.cs.ucy.ac.cy/), ...) and published several peer-reviewed papers. See my [Demo Paper](https://ieeexplore.ieee.org/document/9005999), which won the IEEE Best Demo and Short Paper Award at [BSD2019](http://cse.ucdenver.edu/~BSD2019/), and my recent EDBT [paper](https://edbt2021proceedings.github.io/docs/p170.pdf), which is available open access.
 
