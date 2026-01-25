@@ -21,11 +21,13 @@ I'm Jan, a software developer and computer scientist ([Dr. rer. nat.](https://ww
 
 ## Short Curriculum Vitae
 
+Since 2024 I am working for [Nile](https://www.thenile.dev/) and building a tenant-aware, distributed, and storage/compute-decoupled version of PostgreSQL. I am focusing on query routing, planner improvements, and storage decoupling.
+
+From 2022 to 2024, I worked for [Timescale](http://timescale.com/) as a Software Engineer on database internals, [contributing](https://github.com/timescale/timescaledb/commits?author=jnidzwetzki) to the development of TimescaleDB, a time-series extension for PostgreSQL. I contributed to various planner improvements, added distributed join support to the multi-node version, improved continuous aggregates, and implemented the first version of the [SIMD accelerated](https://github.com/timescale/timescaledb/commit/a094f175eb7c98173c78f557880ccd2d89b791f8) queries.
+
+From 2009 to 2022, I studied part-time at FernUniversität in Hagen. In 2012, I earned a Bachelor of Science in Computer Science, followed by a Master of Science in Computer Science in 2014, focusing on Operating Systems, Distributed, and Cooperative Systems. In 2022, I received a Dr. rer. nat. (PhD equivalent) in Computer Science with a [thesis](https://ub-deposit.fernuni-hagen.de/receive/mir_mods_00001836) on distributed databases. During that time I focussed on databases internals and created [BBoxDB](/portfolio/bboxdb), a distributed key-bounding-box-value store for multi-dimensional data, [Distributed SECONDO](/portfolio/distributed-secondo), and contributed to the [SECONDO](/portfolio/secondo) extensible database system.
+
 From 2002 to 2005, I completed an apprenticeship as an IT specialist for system integration. Between 2006 and 2009, I attended a technical computer science course at the DAA Technical College while working full-time, graduating in 2009 as a Staatlich geprüfter Informatiker (Certified Computer Scientist).
-
-From 2009 to 2022, I studied part-time at FernUniversität in Hagen. In 2012, I earned a Bachelor of Science in Computer Science, followed by a Master of Science in Computer Science in 2014, focusing on Operating Systems, Distributed, and Cooperative Systems. In 2022, I received a Dr. rer. nat. (PhD equivalent) in Computer Science with a [thesis](https://ub-deposit.fernuni-hagen.de/receive/mir_mods_00001836) on distributed databases.
-
-Between 2012 and 2014, I worked as a student assistant (part-time) at the Chair of Cooperative Systems, assisting with courses on Operating Systems, Distributed Systems, and Computational Geometry. From 2020 to 2022, I served as a research assistant (part-time) at the Chair of Databases for New Applications, where I maintained the SECONDO database kernel.
 
 For more details, visit my [LinkedIn](https://www.linkedin.com/in/jnidzwetzki) profile.
 
