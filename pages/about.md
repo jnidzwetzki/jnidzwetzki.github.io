@@ -18,6 +18,7 @@ I'm Jan, a software developer and computer scientist ([Dr. rer. nat.](https://ww
 - 📫 Contact: jnidzwetzki@gmx.de
 
 - ⚡ Fun fact: My first Linux distribution was SuSE 6.1 (Kernel 2.2.6), which I installed in 1999. My first computer was a Pentium 1 with a 100 MHz CPU and 16 MB RAM running Windows 95.
+
 ## Short Curriculum Vitae
 
 Since 2024 I have been working at [Nile](https://www.thenile.dev/), building a tenant-aware, distributed, storage/compute‑decoupled version of PostgreSQL. My work focuses on query routing, planner improvements, and storage decoupling.
