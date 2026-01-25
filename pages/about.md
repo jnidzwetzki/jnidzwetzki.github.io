@@ -17,7 +17,7 @@ I'm Jan, a software developer and computer scientist ([Dr. rer. nat.](https://ww
 
 - 📫 Contact: jnidzwetzki@gmx.de
 
-- ⚡ Fun fact: My first Linux distribution was SuSE 6.1 (Kernel 2.2.6), which I installed in 1999. My first computer was a Pentium 1 with a 100 MHz CPU and 16 MB RAM running Windows 95.
+- ⚡ Fun fact: My first Linux distribution was SuSE 6.1 (Kernel 2.2.6), which I installed in 1999. My first computer contained a 100 MHz Pentium 1 CPU and 16 MB RAM running Windows 95.
 
 ## Short Curriculum Vitae
 
