@@ -56,3 +56,13 @@
     text-decoration: none;
   }
 }
+
+.search-highlight {
+  background-color: rgba(255, 221, 76, 0.5);
+  padding: 2px 4px;
+  border-radius: 3px;
+}
+
+[data-theme="dark"] .search-highlight {
+  background-color: rgba(167, 139, 250, 0.5);  /* #a78bfa - violet with blue undertones */
+}

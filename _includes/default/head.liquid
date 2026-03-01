@@ -40,18 +40,18 @@
     <script defer src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
     {% endif %}
 
-    <!-- KaTeX 0.16.25 -->
+    <!-- KaTeX 0.16.28 -->
     {% if site.katex or site.theme_settings.katex %}
     <script defer src="{{ '/assets/js/vendor/katex.min.js' | relative_url }}"></script>
     <script defer src="{{ '/assets/js/vendor/katex.auto-render.min.js' | relative_url }}" onload="renderMathInElement(document.body);"></script>
     {% endif %}
 
-    <!-- Mermaid 11.12.0 -->
+    <!-- Mermaid 11.12.2 -->
     {% if site.mermaid %}
     <script defer src="{{ '/assets/js/vendor/mermaid.min.js' | relative_url }}"></script>
     {% endif %}
 
-    <!-- Simple Jekyll Search 1.10.0 -->
+    <!-- Simple Jekyll Search 2.1.1 -->
     <script src="{{ '/assets/js/vendor/simple-jekyll-search.min.js' | relative_url }}" type="text/javascript"></script>
 
     <!-- Google Analytics / Cookie Consent -->
