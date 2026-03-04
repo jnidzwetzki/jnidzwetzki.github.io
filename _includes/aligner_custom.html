@@ -1,0 +1,38 @@
+{% assign images = include.images | split: ',' %}
+
+{% if include.column == "auto" %}
+{% assign column = 100.0 | divided_by: images.size %}
+{% elsif include.column > 0 %}
+{% assign column = 100.0 | divided_by: include.column %}
+{% endif %}
+
+
+<figure class="row">
+    {% for image in images %}
+    {% assign style_attr = "" %}
+    {% if column %}
+      {% assign style_attr = "flex: 0 0 " | append: column | append: "%" %}
+    {% endif %}
+    <div class="column" {% if style_attr != "" %}style="{{ style_attr }}"{% endif %}>
+        {% assign should_link = false %}
+        {% if include.link == true or include.link == "true" %}
+          {% assign should_link = true %}
+        {% endif %}
+        {% if should_link %}
+          <a href="{{ image | prepend: 'assets/img/' | relative_url }}" target="_blank" rel="noopener">
+        {% endif %}
+            <img {% if images.size== 1 %}class="single" {% endif %}
+                 src="{{ image | prepend: 'assets/img/' | relative_url }}"
+                 alt="{{ image | prepend: '/' | split: '/' | last }}">
+        {% if should_link %}
+          </a>
+        {% endif %}
+    </div>
+    {% endfor %}
+    {% if include.caption %}
+    {% endif %}
+    <figcaption class="caption-style">{{ include.caption }}</figcaption>
+</figure>
+
+
+{% assign column = false %}
