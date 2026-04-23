@@ -24,7 +24,7 @@ The PostgreSQL implementation of spinlocks is mainly in `src/include/storage/s_l
 * `SpinLockRelease`: Releases a spinlock.
 * `SpinLockFree`: Checks if a spinlock is free.
 
-_Note:_ `SpinLockAcquire` can also [raise a `FATAL` error](https://github.com/postgres/postgres/blob/7467041cde9ed1966cb3ea18da8ac119b462c2e4/src/backend/storage/lmgr/s_lock.c#L89) if the lock cannot be acquired within a certain time limit. In that case, the server terminates, performs recovery on restart, and becomes available again once recovery finishes.
+_Note:_ `SpinLockAcquire` can also [raise a `PANIC` error](https://github.com/postgres/postgres/blob/7467041cde9ed1966cb3ea18da8ac119b462c2e4/src/backend/storage/lmgr/s_lock.c#L89) if the lock cannot be acquired within a certain time limit. In that case, the server terminates, performs recovery on restart, and becomes available again once recovery finishes.
 
 ## Using Spinlocks
 To use a spinlock, it must first be initialized using `SpinLockInit`.
