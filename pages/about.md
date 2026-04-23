@@ -42,6 +42,7 @@ For more details, see my [LinkedIn](https://www.linkedin.com/in/jnidzwetzki) pro
 
 # Selected Publications and Talks
 
+* Profiling PostgreSQL: perf, Flame Graphs, and eBPF Tools in Practice - [PostgreSQL conference Germany 2026](https://www.postgresql.eu/events/pgconfde2026/schedule/session/7538-profiling-postgresql-perf-flame-graphs-and-ebpf-tools-in-practice/)
 * Handling Time-Series Data in a Relational DBMS: Challenges and Solution - [Keynote at GvDB 2024](https://ceur-ws.org/Vol-3710/invited2.pdf)
 * BBoxDB: A Distributed Key-Bounding-Box-Value Store - [My PhD Thesis](https://ub-deposit.fernuni-hagen.de/receive/mir_mods_00001836)
 * BBoxDB Streams: Scalable Processing of Multi-Dimensional Data Streams - [Distributed and Parallel Databases 2022](https://doi.org/10.1007/s10619-022-07408-8)
