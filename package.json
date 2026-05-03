@@ -1,0 +1,63 @@
+{
+  "name": "type-on-strap-helper",
+  "version": "2.5.1",
+  "description": "CLI utilities for the Type on Strap jekyll theme",
+  "scripts": {
+    "post": "tsx .github/cli/src/post.ts",
+    "compress": "tsx .github/cli/src/images.ts compress",
+    "thumbnails": "tsx .github/cli/src/images.ts thumbnails",
+    "thumbnails-all": "tsx .github/cli/src/images.ts thumbnails-all",
+    "webp": "tsx .github/cli/src/images.ts webp",
+    "build:js": "tsx .github/cli/src/build.ts",
+    "build": "tsx .github/cli/src/build.ts",
+    "release": "tsx .github/cli/src/release.ts",
+    "update:katex": "tsx .github/cli/src/update/katex.ts",
+    "update:mermaid": "tsx .github/cli/src/update/mermaid.ts",
+    "update:search": "tsx .github/cli/src/update/jekyll-search.ts",
+    "validate": "tsx .github/cli/src/validators/index.ts",
+    "validate:katex": "tsx .github/cli/src/validators/katex.ts",
+    "validate:mermaid": "tsx .github/cli/src/validators/mermaid.ts",
+    "validate:fa": "tsx .github/cli/src/validators/font-awesome.ts",
+    "validate:search": "tsx .github/cli/src/validators/jekyll-search.ts",
+    "test": "jest --config .github/cli/jest.config.ts --selectProjects unit",
+    "test:browser": "jest --config .github/cli/jest.config.ts --selectProjects browser",
+    "test:integration": "jest --config .github/cli/jest.config.ts --selectProjects integration",
+    "test:e2e": "playwright test --config .github/cli/playwright.config.ts",
+    "test:all": "jest --config .github/cli/jest.config.ts",
+    "playwright:install": "playwright install --with-deps",
+    "server": "http-server _site -p 4000 -c-1",
+    "typecheck": "tsc --noEmit --project .github/cli/tsconfig.json"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sylhare/Type-on-Strap.git"
+  },
+  "keywords": [
+    "jekyll"
+  ],
+  "author": "sylhare",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Sylhare/Type-on-Strap/issues"
+  },
+  "homepage": "https://github.com/sylhare/Type-on-Strap#readme",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.48.0",
+    "@types/jest": "^30.0.0",
+    "@types/node": "^20.0.0",
+    "esbuild": "^0.25.0",
+    "glob": "^11.0.0",
+    "http-server": "^14.1.1",
+    "jest": "^30.0.0",
+    "jest-environment-jsdom": "^30.0.0",
+    "js-yaml": "^4.1.0",
+    "sharp": "^0.33.0",
+    "ts-jest": "^29.4.9",
+    "ts-node": "^10.9.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.6.0"
+  }
+}
