@@ -7,7 +7,7 @@ author: jan
 excerpt_separator: <!--more-->
 ---
 
-Hardware breakpoints can trigger eBPF programs when specific memory addresses are accessed, leveraging CPU hardware support for low overhead. By utilizing these hardware breakpoints, we can efficiently monitor PostgreSQL's internal variable updates, such as transaction ID generation and OID assignment. In this post, we will discuss what hardware breakpoints are, whether they have less overhead than uprobes, and how to answer questions like "How many transactions are being executed per second?" or "Which backend is using the most OIDs?" with bpftrace.
+Hardware breakpoints can trigger eBPF programs when specific memory addresses are accessed, leveraging CPU hardware support for low overhead. By utilizing these hardware breakpoints, we can efficiently monitor PostgreSQL's internal variable updates, such as transaction ID generation and OID assignment. In this post, we will discuss what hardware breakpoints are, whether they have less overhead than uprobes, and how to answer questions like "How many transactions are being executed per second?" or "Which backend is consuming the most OIDs?" with bpftrace.
 
 <!--more-->
 
@@ -173,7 +173,7 @@ The output of the `bpftrace` command shows the process ID, command name, and the
 [OID Event] PID: 117447 | comm: postgres   | next oid: 57542
 ```
 
-To monitor which backend is using the most OIDs, we can use an eBPF program that counts the number of times the hardware breakpoint is triggered for each backend process. The `interval:s:5` probe prints the contents of the `@count` map every five seconds and then clears the map for the next interval:
+To monitor which backend is consuming the most OIDs, we can use an eBPF program that counts the number of times the hardware breakpoint is triggered for each backend process. The `interval:s:5` probe prints the contents of the `@count` map every five seconds and then clears the map for the next interval:
 
 ```bash
 sudo bpftrace -e '
@@ -201,7 +201,7 @@ The output of the above `bpftrace` command will show the number of times the har
 21:47:45: @count[673992, postgres]: 18
 ```
 
-That means that the process with ID 519125 triggered the hardware breakpoint 6 times in the five-second interval starting at 21:47:25 and 6 times in the next five-second interval. The process with ID 673992 triggered the hardware breakpoint 6 times in the five-second interval starting at 21:47:35 and 18 times in the next five-second interval, which indicates that it is using more OIDs than the process with ID 519125.
+That means that the process with ID 519125 triggered the hardware breakpoint 6 times in the five-second interval starting at 21:47:25 and 6 times in the next five-second interval. The process with ID 673992 triggered the hardware breakpoint 6 times in the five-second interval starting at 21:47:35 and 18 times in the next five-second interval, which indicates that it is consuming more OIDs than the process with ID 519125.
 
 # Benchmarking Hardware Breakpoints vs Uprobes
 
