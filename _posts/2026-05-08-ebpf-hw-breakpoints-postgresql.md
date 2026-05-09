@@ -229,7 +229,6 @@ int main() {
     double elapsed;
     double dummy_math = 0.0;
 
-    printf("Heavy Performance Test started...\n");
     printf("Target address for watchpoint: %p\n", (void*)&target_var);
     printf("Symbol for uprobe: trace_target_func\n\n");
 
