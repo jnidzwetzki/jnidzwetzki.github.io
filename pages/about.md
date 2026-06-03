@@ -42,7 +42,7 @@ For more details, see my [LinkedIn](https://www.linkedin.com/in/jnidzwetzki) pro
 
 # Selected Publications and Talks
 
-* Large Language Models, Agents, and the MCP in Database Development - [Datenbank-Spektrum](https://rdcu.be/fl2Ez)
+* Large Language Models, Agents, and the MCP in Database Development - [Datenbank-Spektrum 2026](https://rdcu.be/fl2Ez)
 * Unfair by design: eBPF-based scheduling of mixed database workloads - [Pre-print on arxiv.org](https://arxiv.org/abs/2605.02377) (co-author)
 * Profiling PostgreSQL: perf, Flame Graphs, and eBPF Tools in Practice - [PostgreSQL conference Germany 2026](https://www.postgresql.eu/events/pgconfde2026/schedule/session/7538-profiling-postgresql-perf-flame-graphs-and-ebpf-tools-in-practice/) / [Slides](https://www.postgresql.eu/events/pgconfde2026/sessions/session/7538/slides/858/pg_conf_ger_2026.pdf)
 * Handling Time-Series Data in a Relational DBMS: Challenges and Solution - [Keynote at GvDB 2024](https://ceur-ws.org/Vol-3710/invited2.pdf)
