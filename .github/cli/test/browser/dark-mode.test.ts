@@ -1,106 +1,105 @@
-describe('Dark Mode', () => {
-  let setMode: (theme: string) => void;
-  let themeToggle: () => void;
-  let currentTheme: () => string | null;
-  let bootstrapTheme: () => void;
+import fs from 'node:fs';
+import * as path from 'node:path';
 
+const SRC = fs.readFileSync(
+  path.join(__dirname, '../../../../assets/js/partials/dark-mode.js'),
+  'utf8',
+);
+
+interface DarkModeApi {
+  currentTheme: () => string | null;
+  setMode: (theme: string) => void;
+  themeToggle: () => void;
+  bootstrapTheme: () => void;
+}
+
+function loadDarkMode(): DarkModeApi {
+  (0, eval)(SRC);
+  const w = window as unknown as DarkModeApi;
+  return {
+    currentTheme: w.currentTheme,
+    setMode: w.setMode,
+    themeToggle: w.themeToggle,
+    bootstrapTheme: w.bootstrapTheme,
+  };
+}
+
+function mockMatchMedia(prefersDark: boolean) {
+  (window as any).matchMedia = jest.fn().mockImplementation((query: string) => ({
+    matches: prefersDark && query === '(prefers-color-scheme: dark)',
+    media: query,
+    addEventListener: jest.fn(),
+  }));
+}
+
+describe('Dark Mode', () => {
   beforeEach(() => {
     localStorage.clear();
+    document.documentElement.removeAttribute('data-theme');
+    document.body.innerHTML = '<button id="theme-toggle"></button>';
+    mockMatchMedia(false);
+    (global as any).darkBtn = 'Dark';
+    (global as any).lightBtn = 'Light';
+    (global as any).isAutoTheme = false;
+  });
 
-    document.body.innerHTML = `
-      <html>
-        <head></head>
-        <body>
-          <button id="theme-toggle"></button>
-        </body>
-      </html>
-    `;
-
-    (global as Record<string, unknown>).darkBtn = 'Dark';
-    (global as Record<string, unknown>).lightBtn = 'Light';
-    (global as Record<string, unknown>).isAutoTheme = true;
-
-    const themeButton: Record<string, string> = {
-      'light': `<i class="fas fa-adjust" aria-hidden="true"></i><span class="navbar-label-with-icon"> ${(global as Record<string, unknown>).darkBtn}</span>`,
-      'dark': `<i class="fas fa-adjust fa-rotate-180" aria-hidden="true"></i><span class="navbar-label-with-icon"> ${(global as Record<string, unknown>).lightBtn}</span>`,
-    };
-
-    currentTheme = () => localStorage.getItem('theme');
-
-    setMode = (theme: string) => {
-      document.documentElement.setAttribute('data-theme', theme);
-      localStorage.setItem('theme', theme);
-      const toggle = document.getElementById('theme-toggle');
-      if (toggle) {
-        toggle.innerHTML = themeButton[theme];
-      }
-    };
-
-    themeToggle = () => {
-      const sessionPrefers = currentTheme();
-      if (sessionPrefers === 'light') {
-        setMode('dark');
-      } else {
-        setMode('light');
-      }
-    };
-
-    bootstrapTheme = () => {
-      if ((global as Record<string, unknown>).isAutoTheme) {
-        if (!currentTheme()) {
-          const browserPrefersDark = window.matchMedia('(prefers-color-scheme: dark)');
-          if (browserPrefersDark.matches) localStorage.setItem('theme', 'dark');
-        }
-        const sessionPrefers = currentTheme();
-        setMode(sessionPrefers ? sessionPrefers : 'light');
-      }
-    };
+  afterEach(() => {
+    delete (global as any).darkBtn;
+    delete (global as any).lightBtn;
+    delete (global as any).isAutoTheme;
   });
 
   describe('currentTheme()', () => {
     test('should return null when no theme is set', () => {
+      const { currentTheme } = loadDarkMode();
       expect(currentTheme()).toBeNull();
     });
 
     test('should return theme from localStorage', () => {
       localStorage.setItem('theme', 'dark');
+      const { currentTheme } = loadDarkMode();
       expect(currentTheme()).toEqual('dark');
     });
   });
 
   describe('setMode()', () => {
     test('should set data-theme attribute on document', () => {
+      const { setMode } = loadDarkMode();
       setMode('dark');
       expect(document.documentElement.getAttribute('data-theme')).toEqual('dark');
     });
 
     test('should save theme to localStorage', () => {
+      const { setMode } = loadDarkMode();
       setMode('dark');
       expect(localStorage.getItem('theme')).toEqual('dark');
     });
 
     test('should update theme toggle button innerHTML', () => {
-      const toggle = document.getElementById('theme-toggle');
+      const { setMode } = loadDarkMode();
       setMode('dark');
+      const toggle = document.getElementById('theme-toggle');
       expect(toggle!.innerHTML).toContain('Light');
       expect(toggle!.innerHTML).toContain('fa-rotate-180');
     });
 
     test('should handle light mode correctly', () => {
+      const { setMode } = loadDarkMode();
       setMode('light');
       expect(document.documentElement.getAttribute('data-theme')).toEqual('light');
-      const toggle = document.getElementById('theme-toggle');
-      expect(toggle!.innerHTML).toContain('Dark');
+      expect(document.getElementById('theme-toggle')!.innerHTML).toContain('Dark');
     });
 
     test('should not error if toggle button does not exist', () => {
       document.getElementById('theme-toggle')!.remove();
+      const { setMode } = loadDarkMode();
       expect(() => setMode('dark')).not.toThrow();
     });
   });
 
   describe('themeToggle()', () => {
     test('should toggle from light to dark', () => {
+      const { setMode, themeToggle, currentTheme } = loadDarkMode();
       setMode('light');
       themeToggle();
       expect(currentTheme()).toEqual('dark');
@@ -108,6 +107,7 @@ describe('Dark Mode', () => {
     });
 
     test('should toggle from dark to light', () => {
+      const { setMode, themeToggle, currentTheme } = loadDarkMode();
       setMode('dark');
       themeToggle();
       expect(currentTheme()).toEqual('light');
@@ -115,11 +115,13 @@ describe('Dark Mode', () => {
     });
 
     test('should default to light when no theme is set', () => {
+      const { themeToggle, currentTheme } = loadDarkMode();
       themeToggle();
       expect(currentTheme()).toEqual('light');
     });
 
     test('should toggle multiple times correctly', () => {
+      const { setMode, themeToggle, currentTheme } = loadDarkMode();
       setMode('light');
       themeToggle();
       expect(currentTheme()).toEqual('dark');
@@ -130,93 +132,55 @@ describe('Dark Mode', () => {
     });
   });
 
-  describe('bootstrapTheme()', () => {
+  describe('bootstrapTheme() (runs on load)', () => {
     test('should set light mode by default when no preference', () => {
-      (window as any).matchMedia = jest.fn().mockReturnValue({
-        matches: false,
-        media: '(prefers-color-scheme: none)',
-        addEventListener: jest.fn(),
-      });
-
-      bootstrapTheme();
-      expect(currentTheme()).toEqual('light');
+      (global as any).isAutoTheme = true;
+      mockMatchMedia(false);
+      loadDarkMode();
       expect(document.documentElement.getAttribute('data-theme')).toEqual('light');
     });
 
     test('should respect existing localStorage theme', () => {
       localStorage.setItem('theme', 'dark');
-      bootstrapTheme();
-      expect(currentTheme()).toEqual('dark');
+      (global as any).isAutoTheme = true;
+      loadDarkMode();
       expect(document.documentElement.getAttribute('data-theme')).toEqual('dark');
     });
 
     test('should respect browser preference for dark mode', () => {
-      localStorage.clear();
-
-      (window as any).matchMedia = jest.fn().mockImplementation((query: string) => ({
-        matches: query === '(prefers-color-scheme: dark)',
-        media: query,
-        addEventListener: jest.fn(),
-      }));
-
-      bootstrapTheme();
-
+      (global as any).isAutoTheme = true;
+      mockMatchMedia(true);
+      loadDarkMode();
       expect(window.matchMedia).toHaveBeenCalledWith('(prefers-color-scheme: dark)');
-      expect(currentTheme()).toEqual('dark');
       expect(document.documentElement.getAttribute('data-theme')).toEqual('dark');
     });
 
-    test('should default to light mode when browser prefers light', () => {
-      localStorage.clear();
-
-      (window as any).matchMedia = jest.fn().mockReturnValue({
-        matches: false,
-        media: '(prefers-color-scheme: dark)',
-        addEventListener: jest.fn(),
-      });
-
-      bootstrapTheme();
-
-      expect(currentTheme()).toEqual('light');
-      expect(document.documentElement.getAttribute('data-theme')).toEqual('light');
-    });
-
     test('should not set theme when isAutoTheme is false', () => {
-      localStorage.clear();
-      document.documentElement.removeAttribute('data-theme');
-
-      (global as Record<string, unknown>).isAutoTheme = false;
-      bootstrapTheme();
-
+      (global as any).isAutoTheme = false;
+      loadDarkMode();
       expect(localStorage.getItem('theme')).toBeNull();
       expect(document.documentElement.getAttribute('data-theme')).toBeNull();
     });
   });
 
-  describe('Theme persistence', () => {
-    test('should persist theme across page loads', () => {
-      (window as any).matchMedia = jest.fn().mockReturnValue({
-        matches: false,
-        media: '(prefers-color-scheme: none)',
-        addEventListener: jest.fn(),
-      });
+  describe('fallback when head globals are absent', () => {
+    test('should not throw and use default labels when darkBtn/lightBtn are undefined', () => {
+      delete (global as any).darkBtn;
+      delete (global as any).lightBtn;
 
-      setMode('dark');
-      expect(localStorage.getItem('theme')).toEqual('dark');
+      let api: DarkModeApi;
+      expect(() => { api = loadDarkMode(); }).not.toThrow();
 
-      document.documentElement.removeAttribute('data-theme');
-
-      bootstrapTheme();
-      expect(document.documentElement.getAttribute('data-theme')).toEqual('dark');
+      api!.setMode('dark');
+      expect(document.getElementById('theme-toggle')!.innerHTML).toContain('Light');
+      api!.setMode('light');
+      expect(document.getElementById('theme-toggle')!.innerHTML).toContain('Dark');
     });
 
-    test('should maintain theme through multiple toggles', () => {
-      setMode('light');
-      themeToggle();
-      themeToggle();
-      themeToggle();
-
-      expect(localStorage.getItem('theme')).toEqual('dark');
+    test('should default isAutoTheme to true when it is undefined', () => {
+      delete (global as any).isAutoTheme;
+      mockMatchMedia(true);
+      loadDarkMode();
       expect(document.documentElement.getAttribute('data-theme')).toEqual('dark');
     });
   });
