@@ -15,15 +15,17 @@
 @import 'base/variables';
 
 /* External */
-// CSS from external sources
-@import 'external/reset';
+// CSS from external sources. normalize.css goes in @layer reset (below Bootstrap, together
+// with the global `*` reset in base/global) so Bootstrap components render correctly.
+@layer reset {
+  @import 'external/reset';
+}
 @import 'external/font-awesome';
 @import 'external/pacifico';
 @import 'external/katex';
 @import 'external/source-sans-pro';
 
 /* Base */
-// For general CSS in the theme
 @import 'base/global';
 @import 'base/highlight';
 @import 'base/utility';

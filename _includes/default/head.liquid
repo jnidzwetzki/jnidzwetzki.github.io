@@ -19,7 +19,9 @@
     <script defer src="{{ '/assets/js/main.min.js' | relative_url }}"></script>
 
     {% if page.bootstrap %}
-    <!-- Bootstrap 4.6.2 CSS CDN - loaded in a @layer so theme styles always take precedence -->
+    <!-- Layer order: theme reset < bootstrap < unlayered theme, so Bootstrap components render while the theme (colours/dark mode) still wins -->
+    <style>@layer reset, bootstrap;</style>
+    <!-- Bootstrap 4.6.2 CSS from the CDN, slotted into the bootstrap layer -->
     <style>@import url("https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css") layer(bootstrap);</style>
     {% endif %}
 
