@@ -47,11 +47,16 @@ export async function updateKatex(version: string): Promise<void> {
     logger.info(`Cloning KaTeX v${version}...`);
     execSync(`git clone --depth 1 --branch v${version} https://github.com/KaTeX/KaTeX.git ${tmp}`, { stdio: 'inherit' });
 
-    logger.info('\nInstalling dependencies...');
-    execSync('yarn install --frozen-lockfile', { cwd: tmp, stdio: 'inherit' });
+    const clonedPkg = JSON.parse(fs.readFileSync(path.join(tmp, 'package.json'), 'utf8'));
+    const packageManager: string = clonedPkg.packageManager ?? 'yarn';
+    const isPnpm = packageManager.startsWith('pnpm');
+    const runner = isPnpm ? 'corepack pnpm' : 'yarn';
+
+    logger.info(`\nInstalling dependencies (${packageManager})...`);
+    execSync(`${runner} install --frozen-lockfile`, { cwd: tmp, stdio: 'inherit' });
 
     logger.info('\nBuilding KaTeX (USE_TTF=false)...');
-    execSync('yarn build', {
+    execSync(`${runner} run build`, {
       cwd: tmp,
       stdio: 'inherit',
       env: { ...process.env, USE_TTF: 'false' },
