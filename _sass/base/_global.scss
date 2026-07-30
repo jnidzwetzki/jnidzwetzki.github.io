@@ -221,9 +221,7 @@ hr {
   margin: 1em 0;
 }
 
-// :not(.btn) so links styled as Bootstrap buttons (e.g. .btn-info) keep Bootstrap's own
-// text colour instead of the theme link colour.
-a:not(.btn) {
+a:where(:not(.btn)) {
   color: var(--link);
   text-decoration: none;
 }
