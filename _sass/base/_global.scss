@@ -1,7 +1,12 @@
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+// The global reset lives in @layer reset (paired with normalize in type-on-strap.scss) so
+// that on `bootstrap: true` pages Bootstrap components aren't flattened by `* { padding: 0 }`.
+// Everything else stays unlayered, so the theme's styling still wins over Bootstrap.
+@layer reset {
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
 }
 
 figure {
@@ -216,7 +221,7 @@ hr {
   margin: 1em 0;
 }
 
-a {
+a:where(:not(.btn)) {
   color: var(--link);
   text-decoration: none;
 }
