@@ -11,7 +11,9 @@ position: 2
 
 I'm Jan, a software developer and computer scientist ([Dr. rer. nat.](https://www.fernuni-hagen.de/universitaet/stimmen/nidzwetzki.shtml)) specialized in (distributed) databases. I am based in Hamburg, Germany, and have over 20 years of industry experience. 
 
-- 👨‍🔧 My background spans system administration, network administration, software development, and a CTO role, before I focused in recent years on (distributed) databases — see my CV below for my current role.
+- 👨‍🔧 My professional background spans system administration, network administration, software development, and a CTO role, before I focused in recent years on (distributed) databases - see my CV below.
+
+- 👨‍🎓 In my academic career, I worked mostly on databases for multi-dimensional data (e.g., spatial and spatio-temporal). I still maintain the [SECONDO](/portfolio/secondo) database kernel, a research prototype of an extensible database system that can handle various data types like relational data or moving objects data. I also developed [BBoxDB](/portfolio/bboxdb), a distributed key-bounding-box-value store. I occasionally supervise bachelor's and master's theses or publish papers (see below).
 
 - 💬 I have presented at international conferences ([SSTD](http://sstd2015.org/), [IEEE BigData](http://cse.ucdenver.edu/~BSD2019/), [CIKM](https://www.cikm2018.units.it/), [EDBT](https://edbticdt2021.cs.ucy.ac.cy/), ...) and published several peer-reviewed papers. See my [Demo Paper](https://ieeexplore.ieee.org/document/9005999), which won the IEEE Best Demo and Short Paper Award at [BSD2019](http://cse.ucdenver.edu/~BSD2019/), and my recent EDBT [paper](https://edbt2021proceedings.github.io/docs/p170.pdf), which is available open access.
 
@@ -23,7 +25,7 @@ I'm Jan, a software developer and computer scientist ([Dr. rer. nat.](https://ww
 
 - **2026–present — Software Engineer, [PlanetScale](https://planetscale.com/)** — Working on PostgreSQL internals (internal and community work).
 
-- **2024–2026 — Founding Engineer, [Nile](https://www.thenile.dev/)** — Helped to build a tenant-aware, distributed, storage/compute-decoupled version of PostgreSQL; focused on query routing, planner improvements, and storage decoupling.
+- **2024–2026 — Founding Engineer, [Nile](https://www.thenile.dev/)** — Helped to build a tenant-aware, distributed, storage/compute-decoupled version of PostgreSQL; focused on query routing, planner improvements, and compute/storage decoupling using WAL decoding.
 
 - **2022–2024 — Software Engineer, [Timescale](http://timescale.com/)** — Worked on PostgreSQL database internals, [contributing](https://github.com/timescale/timescaledb/commits?author=jnidzwetzki) to TimescaleDB (a time-series extension for PostgreSQL), including planner improvements, distributed join support for the multi-node version, improved continuous aggregates, and the first [SIMD-accelerated](https://github.com/timescale/timescaledb/commit/a094f175eb7c98173c78f557880ccd2d89b791f8) functions.
 
@@ -41,9 +43,8 @@ For more details, see my [LinkedIn](https://www.linkedin.com/in/jnidzwetzki) pro
 
 * Database systems
 * Operating systems
-* Distributed, scalable, and fault-tolerant systems
-* Computer networks
-* Transactions and parallelism
+* Software architecture (especially distributed, scalable, and fault-tolerant systems)
+* Performance optimization, profiling, and benchmarking
 * Economics, financial markets, and algorithmic trading systems
 
 # Selected Publications and Talks

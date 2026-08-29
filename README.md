@@ -19,5 +19,6 @@ git merge template/master
 * PostgreSQL Sandbox
 * PostgreSQL and Custom Nodes - From Path to Plan
 * Scanner
-* MVCC Snapshotts
+* Temporal store
+* Serializibility
 
