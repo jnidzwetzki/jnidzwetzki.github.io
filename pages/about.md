@@ -7,27 +7,33 @@ tags: [Page]
 position: 2
 ---
 
-### Hi there 👋
+# Hi there 👋
 
 I'm Jan, a software developer and computer scientist ([Dr. rer. nat.](https://www.fernuni-hagen.de/universitaet/stimmen/nidzwetzki.shtml)) specialized in (distributed) databases. I am based in Hamburg, Germany, and have over 20 years of industry experience. 
 
-- 👨‍🔧 My background includes roles as a system administrator, network administrator, software developer, and CTO. In recent years, I have focused primarily on (distributed) databases. Currently, I work as a software engineer, developing a tenant-aware, distributed, and storage/compute-decoupled version of PostgreSQL.
+- 👨‍🔧 My background spans system administration, network administration, software development, and a CTO role, before I focused in recent years on (distributed) databases — see my CV below for my current role.
 
 - 💬 I have presented at international conferences ([SSTD](http://sstd2015.org/), [IEEE BigData](http://cse.ucdenver.edu/~BSD2019/), [CIKM](https://www.cikm2018.units.it/), [EDBT](https://edbticdt2021.cs.ucy.ac.cy/), ...) and published several peer-reviewed papers. See my [Demo Paper](https://ieeexplore.ieee.org/document/9005999), which won the IEEE Best Demo and Short Paper Award at [BSD2019](http://cse.ucdenver.edu/~BSD2019/), and my recent EDBT [paper](https://edbt2021proceedings.github.io/docs/p170.pdf), which is available open access.
 
 - 📫 Contact: jnidzwetzki@gmx.de
 
-- ⚡ Fun fact: My first Linux distribution was SuSE 6.1 (Kernel 2.2.6), which I installed in 1999. My first computer contained a 100 MHz Pentium 1 CPU and 16 MB RAM running Windows 95.
+- ⚡ Fun fact: The first Linux distribution I have ever installed was SuSE 6.1 (Kernel 2.2.6), which I installed in 1999. My first computer contained a 100 MHz Pentium 1 CPU and 16 MB RAM running Windows 95.
 
-## Short Curriculum Vitae
+# Short Curriculum Vitae
 
-Since 2024 I have been working at [Nile](https://www.thenile.dev/), building a tenant-aware, distributed, storage/compute‑decoupled version of PostgreSQL. My work focuses on query routing, planner improvements, and storage decoupling.
+- **2026–present — Software Engineer, [PlanetScale](https://planetscale.com/)** — Working on PostgreSQL internals (internal and community work).
 
-From 2022 to 2024 I worked at [Timescale](http://timescale.com/) as a software engineer on database internals, [contributing](https://github.com/timescale/timescaledb/commits?author=jnidzwetzki) to TimescaleDB (a time-series extension for PostgreSQL). My work there included planner improvements, adding distributed join support to the multi-node version, improving continuous aggregates, and implementing the first [SIMD accelerated](https://github.com/timescale/timescaledb/commit/a094f175eb7c98173c78f557880ccd2d89b791f8) functions.
+- **2024–2026 — Founding Engineer, [Nile](https://www.thenile.dev/)** — Helped to build a tenant-aware, distributed, storage/compute-decoupled version of PostgreSQL; focused on query routing, planner improvements, and storage decoupling.
 
-From 2009 to 2022 I studied part-time at FernUniversität in Hagen. I earned a Bachelor of Science in Computer Science in 2012 and a Master of Science in Computer Science in 2014, focusing on operating systems, distributed, and cooperative systems; my master's thesis was [recognized](https://www.springer.com/de/book/9783658124434) as one of the best of the year by Springer. In 2022 I received a [Dr. rer. nat.](https://www.fernuni-hagen.de/universitaet/stimmen/nidzwetzki.shtml) in Computer Science for a [thesis](https://ub-deposit.fernuni-hagen.de/receive/mir_mods_00001836) on distributed databases, which was awarded [best PhD thesis](https://www.fernuni-hagen.de/universitaet/themen/dies-academicus-2022-abstracts.shtml) of the year of the Faculty of Mathematics and Computer Science. During that time I focused on database internals and created [BBoxDB](/portfolio/bboxdb), a distributed key-bounding-box-value store for multi-dimensional data, developed [Distributed SECONDO](/portfolio/distributed-secondo), and contributed to the [SECONDO](/portfolio/secondo) extensible database system.
+- **2022–2024 — Software Engineer, [Timescale](http://timescale.com/)** — Worked on PostgreSQL database internals, [contributing](https://github.com/timescale/timescaledb/commits?author=jnidzwetzki) to TimescaleDB (a time-series extension for PostgreSQL), including planner improvements, distributed join support for the multi-node version, improved continuous aggregates, and the first [SIMD-accelerated](https://github.com/timescale/timescaledb/commit/a094f175eb7c98173c78f557880ccd2d89b791f8) functions.
 
-From 2002 to 2005 I completed an apprenticeship as an IT specialist for system integration. Between 2006 and 2009 I attended a technical computer science course at the DAA Technical College while working full-time, graduating in 2009 as a Staatlich geprüfter Informatiker (State-Certified Computer Scientist).
+- **2014–2022 — Dr. rer. nat. in Computer Science, FernUniversität in Hagen** (part-time) — Received a [Dr. rer. nat.](https://www.fernuni-hagen.de/universitaet/stimmen/nidzwetzki.shtml) for a [thesis](https://ub-deposit.fernuni-hagen.de/receive/mir_mods_00001836) on distributed databases, awarded [best PhD thesis](https://www.fernuni-hagen.de/universitaet/themen/dies-academicus-2022-abstracts.shtml) of the year by the Faculty of Mathematics and Computer Science. During this time, I focused on database internals and created [BBoxDB](/portfolio/bboxdb), developed [Distributed SECONDO](/portfolio/distributed-secondo), and contributed to the [SECONDO](/portfolio/secondo) extensible database system.
+
+- **2009–2014 — B.Sc. & M.Sc. Computer Science, FernUniversität in Hagen** (part-time) — Bachelor of Science (2012) and Master of Science (2014), focusing on operating systems, distributed, and cooperative systems; master's thesis [recognized](https://www.springer.com/de/book/9783658124434) as one of the best of the year by Springer.
+
+- **2006–2009 — Technical Computer Science, DAA Technical College** — Completed while working full-time, graduating as a Staatlich geprüfter Informatiker (State-Certified Computer Scientist).
+
+- **2002–2005 — Apprenticeship, IT Specialist for System Integration**
 
 For more details, see my [LinkedIn](https://www.linkedin.com/in/jnidzwetzki) profile.
 
@@ -42,11 +48,21 @@ For more details, see my [LinkedIn](https://www.linkedin.com/in/jnidzwetzki) pro
 
 # Selected Publications and Talks
 
-* Large Language Models, Agents, and the MCP in Database Development - [Datenbank-Spektrum 2026](https://rdcu.be/fl2Ez)
-* Unfair by design: eBPF-based scheduling of mixed database workloads - [Pre-print on arxiv.org](https://arxiv.org/abs/2605.02377) (co-author)
+### Talks
+
 * Profiling PostgreSQL: perf, Flame Graphs, and eBPF Tools in Practice - [PostgreSQL conference Germany 2026](https://www.postgresql.eu/events/pgconfde2026/schedule/session/7538-profiling-postgresql-perf-flame-graphs-and-ebpf-tools-in-practice/) / [Slides](https://www.postgresql.eu/events/pgconfde2026/sessions/session/7538/slides/858/pg_conf_ger_2026.pdf)
 * Handling Time-Series Data in a Relational DBMS: Challenges and Solution - [Keynote at GvDB 2024](https://ceur-ws.org/Vol-3710/invited2.pdf)
+
+### Theses
+
 * BBoxDB: A Distributed Key-Bounding-Box-Value Store - [My PhD Thesis](https://ub-deposit.fernuni-hagen.de/receive/mir_mods_00001836)
+* Distributed SECONDO - A Distributed DBMS Based on SECONDO and Apache Cassandra - [My Master Thesis](https://www.springer.com/de/book/9783658124434)
+* Operator Cost Models for Progress Estimation and Optimization in Database Systems - My Bachelor Thesis
+
+### Publications
+
+* Large Language Models, Agents, and the MCP in Database Development - [Datenbank-Spektrum 2026](https://rdcu.be/fl2Ez)
+* Unfair by design: eBPF-based scheduling of mixed database workloads - [Pre-print on arxiv.org](https://arxiv.org/abs/2605.02377) (co-author)
 * BBoxDB Streams: Scalable Processing of Multi-Dimensional Data Streams - [Distributed and Parallel Databases 2022](https://doi.org/10.1007/s10619-022-07408-8)
 * BBoxDB Streams: Scalable Processing of Multi-Dimensional Data Streams - [Technical Report 2021](https://ub-deposit.fernuni-hagen.de/receive/mir_mods_00001727)
 * Distributed Arrays: An Algebra for Generic Distributed Query Processing - [Distributed and Parallel Databases 2021](https://link.springer.com/article/10.1007/s10619-021-07325-2) (co-author)
@@ -58,9 +74,7 @@ For more details, see my [LinkedIn](https://www.linkedin.com/in/jnidzwetzki) pro
 * Distributed SECONDO: An Extensible and Scalable Database Management System - [Distributed and Parallel Databases 2017](https://link.springer.com/article/10.1007%2Fs10619-017-7198-9)
 * Distributed SECONDO: An Extensible, Highly Available, and Scalable Database Management System - [Technical Report 2016](https://www.fernuni-hagen.de/imperia/md/content/fakultaetfuermathematikundinformatik/forschung/berichte/bericht_371.pdf)
 * Distributed SECONDO: A Highly Available and Scalable System for Spatial Data Processing - [SSTD 2015](https://link.springer.com/chapter/10.1007%2F978-3-319-22363-6_28) / [Poster](/assets/downloads/sstd2015_poster.pdf)
-* Distributed SECONDO - A Distributed DBMS Based on SECONDO and Apache Cassandra - [My Master Thesis](https://www.springer.com/de/book/9783658124434)
 * Optimierte Speicherzuteilung an Operatoren in Datenbanksystemen (_Optimized Memory Allocation to Operators in Database Systems_) - [Informatiktage 2013](https://dl.gi.de/handle/20.500.12116/4635) / [Poster](/assets/downloads/gi2013_poster.pdf)
-* Operator Cost Models for Progress Estimation and Optimization in Database Systems - My Bachelor Thesis
 
 # GPG Key
 * Jan Nidzwetzki <jnidzwetzki@gmx.de>
