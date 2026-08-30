@@ -2,7 +2,7 @@
 layout: page
 title: Imprint 
 permalink: /imprint/
-feature-img: "assets/img/pexels/travel.jpeg"
+feature-img: "assets/img/header/header5.jpeg"
 tags: [Page]
 position: 3
 ---

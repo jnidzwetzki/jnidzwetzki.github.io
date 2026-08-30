@@ -2,7 +2,7 @@
 layout: page
 title: Privacy policy 
 permalink: /privacypolicy/
-feature-img: "assets/img/pexels/travel.jpeg"
+feature-img: "assets/img/header/header2.jpeg"
 tags: [Page]
 position: 3
 ---
