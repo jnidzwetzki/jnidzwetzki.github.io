@@ -9,50 +9,75 @@ position: 2
 
 # Hi there 👋
 
-I'm Jan, a software developer and computer scientist ([Dr. rer. nat.](https://www.fernuni-hagen.de/universitaet/stimmen/nidzwetzki.shtml)) specialized in (distributed) databases. I am based in Hamburg, Germany, and have over 20 years of industry experience. 
+I'm Jan — a software engineer and computer scientist ([Dr. rer. nat.](https://www.fernuni-hagen.de/universitaet/stimmen/nidzwetzki.shtml)) working on **database internals, mostly PostgreSQL**. I'm based in Hamburg, Germany, and have over 25 years of industry experience.
 
-- 👨‍🔧 My professional background spans system administration, network administration, software development, and a CTO role, before I focused in recent years on (distributed) databases - see my CV below.
-
-- 👨‍🎓 In my academic career, I worked mostly on databases for multi-dimensional data (e.g., spatial and spatio-temporal). I still maintain the [SECONDO](/portfolio/secondo) database kernel, a research prototype of an extensible database system that can handle various data types like relational data or moving objects data. I also developed [BBoxDB](/portfolio/bboxdb), a distributed key-bounding-box-value store. I occasionally supervise bachelor's and master's theses or publish papers (see below).
-
-- 💬 I have presented at international conferences ([SSTD](http://sstd2015.org/), [IEEE BigData](http://cse.ucdenver.edu/~BSD2019/), [CIKM](https://www.cikm2018.units.it/), [EDBT](https://edbticdt2021.cs.ucy.ac.cy/), ...) and published several peer-reviewed papers. See my [Demo Paper](https://ieeexplore.ieee.org/document/9005999), which won the IEEE Best Demo and Short Paper Award at [BSD2019](http://cse.ucdenver.edu/~BSD2019/), and my recent EDBT [paper](https://edbt2021proceedings.github.io/docs/p170.pdf), which is available open access.
+Today I work on PostgreSQL internals at [PlanetScale](https://planetscale.com/). Before that I worked on database internals at [Nile](https://www.thenile.dev/) and [Timescale](https://timescale.com/), and I hold a Dr. rer. nat. for a thesis on distributed databases. On this blog I write about database internals, profiling (perf, flame graphs, eBPF), and query optimization.
 
 - 📫 Contact: jnidzwetzki@gmx.de
+- 🔗 [LinkedIn](https://www.linkedin.com/in/jnidzwetzki) - [GitHub](https://github.com/jnidzwetzki) - [Google Scholar](https://scholar.google.com/citations?hl=en&user=8u8bUJYAAAAJ)
+- ⚡ Fun fact: the first Linux distribution I ever installed was SuSE 6.1 (Kernel 2.2.6), in 1999. My first computer had a 100 MHz Pentium 1 and 16 MB RAM and otherwise ran Windows 95.
 
-- ⚡ Fun fact: The first Linux distribution I have ever installed was SuSE 6.1 (Kernel 2.2.6), which I installed in 1999. My first computer contained a 100 MHz Pentium 1 CPU and 16 MB RAM running Windows 95.
+# Projects
 
-# Short Curriculum Vitae
+Open-source tools I have built or maintain. See the [portfolio](/portfolio/) for the full list and screenshots.
 
-- **2026–present — Software Engineer, [PlanetScale](https://planetscale.com/)** — Working on PostgreSQL internals (internal and community work).
+**PostgreSQL tooling**
 
-- **2024–2026 — Founding Engineer, [Nile](https://www.thenile.dev/)** — Helped to build a tenant-aware, distributed, storage/compute-decoupled version of PostgreSQL; focused on query routing, planner improvements, and compute/storage decoupling using WAL decoding.
+- [pg_lock_tracer](/portfolio/pglocktracer) — A collection of tools to trace PostgreSQL lock internals (heavyweight locks, LWLocks, row-level locks) using eBPF.
+- [pg_plan_alternatives](/portfolio/pgplanalternatives) — Show every alternative plan considered by the PostgreSQL optimizer during planning, using eBPF to instrument the optimizer.
+- [Query Plan Explorer](/portfolio/queryplanexplorer) — Visualize PostgreSQL query plan flips and plan stability across different parameter values.
 
-- **2022–2024 — Software Engineer, [Timescale](http://timescale.com/)** — Worked on PostgreSQL database internals, [contributing](https://github.com/timescale/timescaledb/commits?author=jnidzwetzki) to TimescaleDB (a time-series extension for PostgreSQL), including planner improvements, distributed join support for the multi-node version, improved continuous aggregates, and the first [SIMD-accelerated](https://github.com/timescale/timescaledb/commit/a094f175eb7c98173c78f557880ccd2d89b791f8) functions.
+**Research databases**
 
-- **2014–2022 — Dr. rer. nat. in Computer Science, FernUniversität in Hagen** (part-time) — Received a [Dr. rer. nat.](https://www.fernuni-hagen.de/universitaet/stimmen/nidzwetzki.shtml) for a [thesis](https://ub-deposit.fernuni-hagen.de/receive/mir_mods_00001836) on distributed databases, awarded [best PhD thesis](https://www.fernuni-hagen.de/universitaet/themen/dies-academicus-2022-abstracts.shtml) of the year by the Faculty of Mathematics and Computer Science. During this time, I focused on database internals and created [BBoxDB](/portfolio/bboxdb), developed [Distributed SECONDO](/portfolio/distributed-secondo), and contributed to the [SECONDO](/portfolio/secondo) extensible database system.
+- [SECONDO](/portfolio/secondo) — I maintain the kernel of this extensible DBMS for spatial and spatio-temporal data, developed at the FernUniversität in Hagen.
+- [BBoxDB](/portfolio/bboxdb) — A distributed key-bounding-box-value store for multi-dimensional data, built from scratch as my PhD project.
+- [Distributed SECONDO](/portfolio/distributed-secondo) — a distributed version of SECONDO on top of Apache Cassandra, built for my master's thesis.
 
-- **2009–2014 — B.Sc. & M.Sc. Computer Science, FernUniversität in Hagen** (part-time) — Bachelor of Science (2012) and Master of Science (2014), focusing on operating systems, distributed, and cooperative systems; master's thesis [recognized](https://www.springer.com/de/book/9783658124434) as one of the best of the year by Springer.
+# Curriculum Vitae
 
-- **2006–2009 — Technical Computer Science, DAA Technical College** — Completed while working full-time, graduating as a Staatlich geprüfter Informatiker (State-Certified Computer Scientist).
+- **2026–present — Software Engineer, [PlanetScale](https://planetscale.com/)** — PostgreSQL internals (internal and community work).
 
-- **2002–2005 — Apprenticeship, IT Specialist for System Integration**
+- **2024–2026 — Founding Engineer, [Nile](https://www.thenile.dev/)** — a tenant-aware, storage/compute-decoupled and distributed version of PostgreSQL. My work focused on decoupling compute from storage by streaming and decoding WAL, tenant-aware query routing across compute nodes, and planner changes to keep per-tenant queries efficient on shared tables.
 
-For more details, see my [LinkedIn](https://www.linkedin.com/in/jnidzwetzki) profile.
+- **2022–2024 — Software Engineer, [Timescale](https://timescale.com/)** — a time-series extension for PostgreSQL. My [contributions](https://github.com/timescale/timescaledb/commits?author=jnidzwetzki) focused on planner improvements, custom scan nodes, join pushdown support for the multi-node version, faster continuous aggregates, and the first [SIMD-accelerated](https://github.com/timescale/timescaledb/commit/a094f175eb7c98173c78f557880ccd2d89b791f8) vectorized functions.
 
-# My Interests
+- **2014–2022 — Dr. rer. nat. in Computer Science, FernUniversität in Hagen** (part-time) — [thesis](https://ub-deposit.fernuni-hagen.de/receive/mir_mods_00001836) on distributed databases, awarded [best PhD thesis](https://www.fernuni-hagen.de/universitaet/themen/dies-academicus-2022-abstracts.shtml) of the year by the Faculty of Mathematics and Computer Science. Created [BBoxDB](/portfolio/bboxdb) and [Distributed SECONDO](/portfolio/distributed-secondo), and contributed to the [SECONDO](/portfolio/secondo) extensible database system.
 
-* Database systems
-* Operating systems
-* Software architecture (especially distributed, scalable, and fault-tolerant systems)
+- **2009–2014 — B.Sc. & M.Sc. Computer Science, FernUniversität in Hagen** (part-time) — focus on operating systems and distributed and cooperative systems; master's thesis [recognized](https://www.springer.com/de/book/9783658124434) by Springer as one of the best of the year.
+
+- **Earlier** — Staatlich geprüfter Informatiker (DAA Technical College, 2006–2009, completed while working full-time) and an apprenticeship as IT Specialist for System Integration (2002–2005). Earlier roles spanned system administration, network administration, software development, and a CTO position.
+
+For more detail, see my [LinkedIn](https://www.linkedin.com/in/jnidzwetzki) profile.
+
+# Interests
+
+* Database systems and operating systems
+* Software architecture — especially distributed, scalable, and fault-tolerant systems
 * Performance optimization, profiling, and benchmarking
 * Economics, financial markets, and algorithmic trading systems
 
 # Selected Publications and Talks
 
+A full list is on [Google Scholar](https://scholar.google.com/citations?hl=en&user=8u8bUJYAAAAJ) or [DBLP](https://dblp.org/pid/166/7698.html).
+
 ### Talks
 
-* Profiling PostgreSQL: perf, Flame Graphs, and eBPF Tools in Practice - [PostgreSQL conference Germany 2026](https://www.postgresql.eu/events/pgconfde2026/schedule/session/7538-profiling-postgresql-perf-flame-graphs-and-ebpf-tools-in-practice/) / [Slides](https://www.postgresql.eu/events/pgconfde2026/sessions/session/7538/slides/858/pg_conf_ger_2026.pdf)
-* Handling Time-Series Data in a Relational DBMS: Challenges and Solution - [Keynote at GvDB 2024](https://ceur-ws.org/Vol-3710/invited2.pdf)
+* Profiling PostgreSQL: perf, Flame Graphs, and eBPF Tools in Practice - [PostgreSQL Conference Germany 2026](https://www.postgresql.eu/events/pgconfde2026/schedule/session/7538-profiling-postgresql-perf-flame-graphs-and-ebpf-tools-in-practice/) / [Slides](https://www.postgresql.eu/events/pgconfde2026/sessions/session/7538/slides/858/pg_conf_ger_2026.pdf)
+* Handling Time-Series Data in a Relational DBMS: Challenges and Solutions - [Keynote at GvDB 2024](https://ceur-ws.org/Vol-3710/invited2.pdf)
+
+### Publications
+
+* Large Language Models, Agents, and the MCP in Database Development - [Datenbank-Spektrum 2026](https://rdcu.be/fl2Ez)
+* Unfair by design: eBPF-based scheduling of mixed database workloads - [Pre-print on arxiv.org](https://arxiv.org/abs/2605.02377) (co-author)
+* BBoxDB Streams: Scalable Processing of Multi-Dimensional Data Streams - [Distributed and Parallel Databases 2022](https://doi.org/10.1007/s10619-022-07408-8)
+* Distributed Arrays: An Algebra for Generic Distributed Query Processing - [Distributed and Parallel Databases 2021](https://link.springer.com/article/10.1007/s10619-021-07325-2) (co-author)
+* BBoxDB Streams: Distributed Processing of Real-World Streams of Position Data - [EDBT 2021](https://edbt2021proceedings.github.io/docs/p170.pdf) / [Slides](/assets/downloads/bboxdb_streams_edbt2021_slides.pdf)
+* BBoxDB: A Distributed and Highly Available Key-Bounding-Box-Value Store - [Distributed and Parallel Databases 2020](https://link.springer.com/article/10.1007/s10619-019-07275-w)
+* Demo Paper: Large-Scale Spatial Data Processing With User-Defined Filters in BBoxDB - [IEEE Big Spatial Data 2019](https://ieeexplore.ieee.org/document/9005999) / [Poster](/assets/downloads/bsd2019_poster.pdf) / [Slides](/assets/downloads/bboxdb_udf_slides_ieee_bigdata_2019.pdf) — won the IEEE Best Demo and Short Paper Award
+* BBoxDB - A Scalable Data Store for Multi-Dimensional Big Data - [CIKM 2018](https://dl.acm.org/citation.cfm?id=3269208) / [Poster](/assets/downloads/cikm2018_poster.pdf)
+* Distributed SECONDO: An Extensible and Scalable Database Management System - [Distributed and Parallel Databases 2017](https://link.springer.com/article/10.1007%2Fs10619-017-7198-9)
+* Distributed SECONDO: A Highly Available and Scalable System for Spatial Data Processing - [SSTD 2015](https://link.springer.com/chapter/10.1007%2F978-3-319-22363-6_28) / [Poster](/assets/downloads/sstd2015_poster.pdf)
+* Optimierte Speicherzuteilung an Operatoren in Datenbanksystemen (_Optimized Memory Allocation to Operators in Database Systems_) - [Informatiktage 2013](https://dl.gi.de/handle/20.500.12116/4635) / [Poster](/assets/downloads/gi2013_poster.pdf)
 
 ### Theses
 
@@ -60,26 +85,13 @@ For more details, see my [LinkedIn](https://www.linkedin.com/in/jnidzwetzki) pro
 * Distributed SECONDO - A Distributed DBMS Based on SECONDO and Apache Cassandra - [My Master Thesis](https://www.springer.com/de/book/9783658124434)
 * Operator Cost Models for Progress Estimation and Optimization in Database Systems - My Bachelor Thesis
 
-### Publications
-
-* Large Language Models, Agents, and the MCP in Database Development - [Datenbank-Spektrum 2026](https://rdcu.be/fl2Ez)
-* Unfair by design: eBPF-based scheduling of mixed database workloads - [Pre-print on arxiv.org](https://arxiv.org/abs/2605.02377) (co-author)
-* BBoxDB Streams: Scalable Processing of Multi-Dimensional Data Streams - [Distributed and Parallel Databases 2022](https://doi.org/10.1007/s10619-022-07408-8)
-* BBoxDB Streams: Scalable Processing of Multi-Dimensional Data Streams - [Technical Report 2021](https://ub-deposit.fernuni-hagen.de/receive/mir_mods_00001727)
-* Distributed Arrays: An Algebra for Generic Distributed Query Processing - [Distributed and Parallel Databases 2021](https://link.springer.com/article/10.1007/s10619-021-07325-2) (co-author)
-* BBoxDB Streams: Distributed Processing of Real-World Streams of Position Data - [EDBT 2021](https://edbt2021proceedings.github.io/docs/p170.pdf) / [Slides](/assets/downloads/bboxdb_streams_edbt2021_slides.pdf)
-* BBoxDB: A Distributed and Highly Available Key-Bounding-Box-Value Store - [Distributed and Parallel Databases 2020](https://link.springer.com/article/10.1007/s10619-019-07275-w)
-* Demo Paper: Large-Scale Spatial Data Processing With User-Defined Filters in BBoxDB - [IEEE Big Spatial Data 2019](https://ieeexplore.ieee.org/document/9005999) / [Poster](/assets/downloads/bsd2019_poster.pdf) / [Slides](/assets/downloads/bboxdb_udf_slides_ieee_bigdata_2019.pdf)
-* BBoxDB - A Scalable Data Store for Multi-Dimensional Big Data - [CIKM 2018](https://dl.acm.org/citation.cfm?id=3269208) / [Poster](/assets/downloads/cikm2018_poster.pdf)
-* BBoxDB - A Distributed and Highly Available Key-Bounding-Box-Value Store - [Technical Report 2018](https://ub-deposit.fernuni-hagen.de/receive/mir_mods_00001277)
-* Distributed SECONDO: An Extensible and Scalable Database Management System - [Distributed and Parallel Databases 2017](https://link.springer.com/article/10.1007%2Fs10619-017-7198-9)
-* Distributed SECONDO: An Extensible, Highly Available, and Scalable Database Management System - [Technical Report 2016](https://www.fernuni-hagen.de/imperia/md/content/fakultaetfuermathematikundinformatik/forschung/berichte/bericht_371.pdf)
-* Distributed SECONDO: A Highly Available and Scalable System for Spatial Data Processing - [SSTD 2015](https://link.springer.com/chapter/10.1007%2F978-3-319-22363-6_28) / [Poster](/assets/downloads/sstd2015_poster.pdf)
-* Optimierte Speicherzuteilung an Operatoren in Datenbanksystemen (_Optimized Memory Allocation to Operators in Database Systems_) - [Informatiktage 2013](https://dl.gi.de/handle/20.500.12116/4635) / [Poster](/assets/downloads/gi2013_poster.pdf)
-
 # GPG Key
-* Jan Nidzwetzki <jnidzwetzki@gmx.de>
-* Fingerprint: A8FA E105 7812 65C5 7A53 58C9 918E 92F4 0507 962E
+* Jan Nidzwetzki &lt;jnidzwetzki@gmx.de&gt;
+* Fingerprint: `A8FA E105 7812 65C5 7A53 58C9 918E 92F4 0507 962E`
+* Full key: [keys.openpgp.org](https://keys.openpgp.org/search?q=jnidzwetzki@gmx.de)
+
+<details markdown="1">
+<summary>Public key block</summary>
 
 ```
 -----BEGIN PGP PUBLIC KEY BLOCK-----
@@ -134,6 +146,8 @@ OvI0JdYkpEl3YP4J2+kOElnla7feF3fKhb+fBRh2r1quFXYVK6gz3sgkTqWl/Eg=
 =JqBO
 -----END PGP PUBLIC KEY BLOCK-----
 ```
+
+</details>
 
 ```
                            .-----.
