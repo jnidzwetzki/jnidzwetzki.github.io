@@ -26,6 +26,8 @@ Open-source tools I have built or maintain. See the [portfolio](/portfolio/) for
 - [pg_lock_tracer](/portfolio/pglocktracer) — A collection of tools to trace PostgreSQL lock internals (heavyweight locks, LWLocks, row-level locks) using eBPF.
 - [pg_plan_alternatives](/portfolio/pgplanalternatives) — Show every alternative plan considered by the PostgreSQL optimizer during planning, using eBPF to instrument the optimizer.
 - [Query Plan Explorer](/portfolio/queryplanexplorer) — Visualize PostgreSQL query plan flips and plan stability across different parameter values.
+- [postgresql-sandbox](https://github.com/jnidzwetzki/postgresql-sandbox) — Install and manage many PostgreSQL versions side by side, each with its own build flags (release, debug, sanitizer), for testing.
+- [pg-dev-container](https://github.com/jnidzwetzki/pg-dev-container) — A VS Code dev container that gives you a debug build of PostgreSQL and all the tooling to develop or debug PostgreSQL or extensions — ready to run in seconds.
 
 **Research databases**
 
