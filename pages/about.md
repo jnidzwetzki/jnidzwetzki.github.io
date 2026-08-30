@@ -90,7 +90,6 @@ A full list is on [Google Scholar](https://scholar.google.com/citations?hl=en&us
 # GPG Key
 * Jan Nidzwetzki &lt;jnidzwetzki@gmx.de&gt;
 * Fingerprint: `A8FA E105 7812 65C5 7A53 58C9 918E 92F4 0507 962E`
-* Full key: [keys.openpgp.org](https://keys.openpgp.org/search?q=jnidzwetzki@gmx.de)
 
 <details markdown="1">
 <summary>Public key block</summary>
