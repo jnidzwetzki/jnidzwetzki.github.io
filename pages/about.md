@@ -9,7 +9,7 @@ position: 2
 
 # Hi there 👋
 
-I'm Jan — a software engineer and computer scientist ([Dr. rer. nat.](https://www.fernuni-hagen.de/universitaet/stimmen/nidzwetzki.shtml)) working on **database internals, mostly PostgreSQL**. My research background is in **spatial and spatio-temporal data management** — storing, indexing, and querying spatial and multi-dimensional data at scale. I'm based in Hamburg, Germany, and have over 25 years of industry experience.
+I'm Jan — a software engineer and computer scientist ([Dr. rer. nat.](https://www.fernuni-hagen.de/universitaet/stimmen/nidzwetzki.shtml)) working on **database internals, mostly PostgreSQL**. My research background is in spatial and spatio-temporal data management — storing and querying spatial and multi-dimensional data at scale. I'm based in Hamburg, Germany, and have over 25 years of industry experience.
 
 Today I work on PostgreSQL internals at [PlanetScale](https://planetscale.com/). Before that I worked on database internals at [Nile](https://www.thenile.dev/) and [Timescale](https://timescale.com/), and I hold a Dr. rer. nat. for a thesis on distributed databases. On this blog I write about database internals, profiling (perf, flame graphs, eBPF), and query optimization.
 
@@ -31,7 +31,7 @@ Open-source tools I have built or maintain. See the [portfolio](/portfolio/) for
 
 - [SECONDO](/portfolio/secondo) — I maintain the kernel of this extensible DBMS for spatial and spatio-temporal data, developed at the FernUniversität in Hagen.
 - [BBoxDB](/portfolio/bboxdb) — A distributed key-bounding-box-value store for multi-dimensional data (e.g., spatial and spatio-temporal data), built from scratch as my PhD project. BBoxDB Streams adds continuous range queries and spatial joins over data streams.
-- [Distributed SECONDO](/portfolio/distributed-secondo) — a distributed version of SECONDO on top of Apache Cassandra, built for my master's thesis.
+- [Distributed SECONDO](/portfolio/distributed-secondo) — A distributed version of SECONDO on top of Apache Cassandra, built for my master's thesis.
 
 # Curriculum Vitae
 
