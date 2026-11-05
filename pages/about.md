@@ -64,6 +64,7 @@ A full list is on [Google Scholar](https://scholar.google.com/citations?hl=en&us
 
 ### Talks
 
+* Beyond EXPLAIN - Tracing PostgreSQL Performance Using eBPF - [PG Day San Francisco 2026](https://luma.com/haxfnzo1) / [Slides](https://github.com/jnidzwetzki/pg_slow/blob/main/slides/pg_day_sfo_2026.pdf)
 * Profiling PostgreSQL: perf, Flame Graphs, and eBPF Tools in Practice - [PostgreSQL Conference Germany 2026](https://www.postgresql.eu/events/pgconfde2026/schedule/session/7538-profiling-postgresql-perf-flame-graphs-and-ebpf-tools-in-practice/) / [Slides](https://www.postgresql.eu/events/pgconfde2026/sessions/session/7538/slides/858/pg_conf_ger_2026.pdf)
 * Handling Time-Series Data in a Relational DBMS: Challenges and Solutions - [Keynote at GvDB 2024](https://ceur-ws.org/Vol-3710/invited2.pdf)
 
