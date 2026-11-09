@@ -4,7 +4,7 @@ title: Imprint
 permalink: /imprint/
 feature-img: "assets/img/header/header5.jpeg"
 tags: [Page]
-position: 3
+position: 4
 ---
 
 # Imprint / Impressum

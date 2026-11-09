@@ -4,7 +4,7 @@ title: Privacy policy
 permalink: /privacypolicy/
 feature-img: "assets/img/header/header2.jpeg"
 tags: [Page]
-position: 3
+position: 4
 ---
 
 # Datenschutzerklärung
