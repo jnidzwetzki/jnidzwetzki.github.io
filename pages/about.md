@@ -88,6 +88,9 @@ A full list is on [Google Scholar](https://scholar.google.com/citations?hl=en&us
 * Distributed SECONDO - A Distributed DBMS Based on SECONDO and Apache Cassandra - [My Master Thesis](https://www.springer.com/de/book/9783658124434)
 * Operator Cost Models for Progress Estimation and Optimization in Database Systems - My Bachelor Thesis
 
+### Other Activities
+* Member of the [paper selection committee](https://pgconf.in/paper-committee) of PG Conf India 2027 
+
 # GPG Key
 * Jan Nidzwetzki &lt;jnidzwetzki@gmx.de&gt;
 * Fingerprint: `A8FA E105 7812 65C5 7A53 58C9 918E 92F4 0507 962E`
