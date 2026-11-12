@@ -13,7 +13,12 @@ position: 3
 * Profiling PostgreSQL: perf, Flame Graphs, and eBPF Tools in Practice - [PostgreSQL Conference Germany 2026](https://www.postgresql.eu/events/pgconfde2026/schedule/session/7538-profiling-postgresql-perf-flame-graphs-and-ebpf-tools-in-practice/) / [Slides](https://www.postgresql.eu/events/pgconfde2026/sessions/session/7538/slides/858/pg_conf_ger_2026.pdf)
 * Handling Time-Series Data in a Relational DBMS: Challenges and Solutions - [Keynote at GvDB 2024](https://ceur-ws.org/Vol-3710/invited2.pdf)
 
-# Publications
+# Selected Articles
+* The dangers of Postgres subtransactions - [PlanetScale Blog 2026](https://planetscale.com/blog/the-dangers-of-postgres-subtransactions) (co-author)
+* Every UPDATE Leaves a Ghost: MVCC, Bloat, and VACUUM in PostgreSQL - [PlanetScale Blog 2026](https://planetscale.com/blog/postgresql-mvcc) (co-author)
+* How We Made Real-Time Data Aggregation in Postgres Faster by 50,000% - [TigerData Blog 2024](https://www.tigerdata.com/blog/how-we-made-real-time-data-aggregation-in-postgres-faster-by-50-000) (co-author)
+
+# Scientific Publications
 
 * Large Language Models, Agents, and the MCP in Database Development - [Datenbank-Spektrum 2026](https://rdcu.be/fl2Ez)
 * Unfair by design: eBPF-based scheduling of mixed database workloads - [Pre-print on arxiv.org](https://arxiv.org/abs/2605.02377) (co-author)
