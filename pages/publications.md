@@ -40,6 +40,12 @@ position: 3
 
 A full list is on [Google Scholar](https://scholar.google.com/citations?hl=en&user=8u8bUJYAAAAJ) or [DBLP](https://dblp.org/pid/166/7698.html).
 
+# Awards
+
+* 🏆 Best PhD Thesis of the Faculty of Mathematics and Computer Science, FernUniversität in Hagen - [Dies Academicus 2022](https://www.fernuni-hagen.de/universitaet/themen/dies-academicus-2022-abstracts.shtml)
+* 🏆 Best Demo and Short Paper Award - [IEEE Big Spatial Data 2019](https://ieeexplore.ieee.org/document/9005999)
+* 🏆 Master's thesis selected for the Springer [*BestMasters*](https://link.springer.com/series/13198) series - [Springer 2016](https://link.springer.com/book/10.1007/978-3-658-12444-1)
+
 # Other Activities
 
 * Member of the [paper selection committee](https://pgconf.in/paper-committee) of PG Conf India 2027
